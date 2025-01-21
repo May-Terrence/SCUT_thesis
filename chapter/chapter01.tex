@@ -29,10 +29,105 @@
 
 \subsection{涵道风扇无人机}
 
-目前已知的关于涵道风扇无人机的起源最早可以追溯到二十世纪三十年代，由意大利的Stipa和德国的Kort率先在该领域开展研究\cite{iiiNondimensionalModelingDuctedFan2012}。在二十世纪五十年代，美国宇航局在自研Doak VZ-4和Bell X-22涵道风扇垂直起降飞行器时投入了大量精力后取得一些进展，然而他们也发现了一些意料之外的特性，如从悬停到前飞过度时，会出现机头上仰的趋势\cite{cookSummaryLiftLift1993}。Pereira等人\cite{pereiraHoverWindtunnelTesting2008}已经对涵道风扇早期的研究进行了详尽的回顾。
+目前已知的关于涵道风扇无人机的起源最早可以追溯到二十世纪三十年代，由意大利的Stipa和德国的Kort率先在该领域开展研究\cite{iiiNondimensionalModelingDuctedFan2012}。在二十世纪五十年代，美国宇航局在研究Doak VZ-4和Bell X-22涵道风扇垂直起降飞行器时投入了大量精力后取得一些进展，然而他们也发现了一些意料之外的特性，如从悬停到前飞过渡时，会出现机头上仰的趋势\cite{cookSummaryLiftLift1993}。Pereira等人\cite{pereiraHoverWindtunnelTesting2008}已经对涵道风扇早期的研究进行了详尽的回顾。近年来，随着先进的控制方法的提出和涵道风扇理论的进一步完善，涵道风扇无人机这一领域不仅引起了众多科研机构的广泛关注，还催生出了一系列具有里程碑意义的创新产品。
 
-近年来，
+在二十世纪八十年代末期，美国Sikorsky航空公司试飞了一种名为“Cypher”的小型无人机。该无人机涵道直径1.75m，重量为20kg，采用共轴双桨结构提供动力，环形护罩在提升了拉力效率的同时也提升了其安全性。1992年4月，在初代Cypher的基础上，Cypher II进行了首次飞行。相比初代Cypher，Cypher II涵道直径1.9m，重量为110kg，并且在环形护罩外扩展了固定翼结构，并且尾部还有一个推进式螺旋桨，有效提升了Cypher II的飞行速度以及续航时间\cite{murphy1996air}，最高时速可达230km/h，航程超过185km。
 
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
+		\centering
+		\includegraphics[width=6cm,height=5cm]{Fig/Cypher.jpg}
+		\caption{\label{Cypher}Cypher}
+	\end{minipage}%
+	\begin{minipage}[c]{0.5\textwidth}
+		\centering
+		\includegraphics[width=6cm,height=5cm]{Fig/Cypher II.png}
+		\caption{\label{Cypher II}Cypher II}
+	\end{minipage}
+\end{figure}
+
+2003年，美国极光飞行科技公司根据国防高级研究计划局的“秘密无人机”计划开发了GoldenEye-100无人机，可垂直起降并且能携带11kg的有效载荷。次年7月，由GoldenEye-100衍生出的更小的GoldenEye-50无人机首飞。GoldenEye-50长70cm，翼展1.4m，最大飞行速度可达280km/h\cite{schaeferGoldenEyeClandestineUAV}，并且在2005年4月进行了第一次自主水平飞行转换。GoldenEye-80是GoldenEye系列的第三个版本，长165cm，重达68kg，携带有高分辨率摄像机和激光测距仪等传感设备，设计意图用于满足美国陆军未来作战系统计划的要求。
+
+2003年，Honeywell航空航天公司为美国陆军开发制造了RQ-16 T-Hawk微型无人机，并于2007年部署在了伊拉克战场上\cite{white2010upgrades}。该款无人机采用涵道风扇设计，涵道直径为35.5cm，总机重量为7.7kg，巡航速度可达74km/h，在战场上被广泛应用于可疑目标检查和跟随等任务。在2011年日本地震引发海啸进而导致核泄露后，4架T-Hawk被部署在福岛1号核电站，其机载的高分辨率摄像头拍摄了核电站受损部分的图像用于帮助日本核工程专家快速定位和解决问题。但是后来有两架T-Hawk在核反应堆上空坠毁，Honeywell公司并没有给出具体原因。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
+		\centering
+		\includegraphics[width=6cm,height=5cm]{Fig/GoldenEye.png}
+		\caption{\label{GoldenEye}GoldenEye}
+	\end{minipage}%
+	\begin{minipage}[c]{0.5\textwidth}
+		\centering
+		\includegraphics[width=6cm,height=5cm]{Fig/T-Hawk.png}
+		\caption{\label{T-Hawk}T-Hawk}
+	\end{minipage}
+\end{figure}
+
+2015年12月30日，由以色列Tactical Robotics公司研发的AirMule救护无人机首航。如图所示，AirMule的起飞旋翼设置在了机身内部，由涵道壁包裹，尾部还有两个推进涵道风扇用于控制姿态。这种构型专为直升机不方便起降的情形而设计，如山川、林地等地形复杂的区域。由于AirMule可负载80kg的载重能力和150km/h的最大速度\cite{yuTechnicalAnalysisVTOL2016}，未来还将用于运输货物等任务。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
+		\centering
+		\includegraphics[width=7cm,height=5cm]{Fig/AirMule.jpg}
+		\caption{\label{AirMule}AirMule}
+	\end{minipage}%
+	\begin{minipage}[c]{0.5\textwidth}
+		\centering
+		\includegraphics[width=7cm,height=5cm]{Fig/Airmule内部结构.png}
+		\caption{\label{AirMule2}Airmule内部结构}
+	\end{minipage}
+\end{figure}
+
+在2016年的HWTrek全球智能硬件创新与制造大会上，来自比利时无人机Fleye引发众人关注，如图所示。因其大小与篮球相当，许多媒体也把它称为“球形无人机”。Fleye也属于涵道风扇无人机的一种，摄像头安装在上部，下部为光流传感器，由于其安全小巧的特点，媒体预测其未来将会应用于室内摄影、娱乐等场合。除上述提到的采用涵道构型无人机外，还有由新加坡ST Aerospace研发的FanTail系列\cite{mateosanguinoDesignStabilizationCoanda2024}、Aesir公司的Odin\cite{crivoi2013survey}和美国联合宇航公司的iSTAR\cite{flemingImprovingControlSystem}等。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.33\textwidth} % minipage将页面划分为0.5\textwidth
+		\centering
+		\includegraphics[width=5cm,height=5cm]{Fig/Fleye.png}
+		\caption{\label{Fleye}Fleye}
+	\end{minipage}%
+	\begin{minipage}[c]{0.33\textwidth}
+		\centering
+		\includegraphics[width=5cm,height=5cm]{Fig/FanTail.png}
+		\caption{\label{FanTail}FanTail}
+	\end{minipage}
+    \begin{minipage}[c]{0.33\textwidth}
+		\centering
+		\includegraphics[width=4cm,height=5cm]{Fig/odin.jpg}
+		\caption{\label{odin}Odin}
+	\end{minipage}
+\end{figure}
+
+相较于国外的研究成果，我国涵道无人机研究起步相对较晚，大多处于实验探索阶段。2008年，哈尔滨盛世特种飞行器有限公司与中国航天科工集团第四研究院和哈尔滨工业大学航天学院合作共同研发制造出国内首例单桨环道“飞碟”，直径1.2m，续航40分钟，最大速度可达80km/h，并获得国家发明专利。由南昌航空大学设计的“都市精灵”涵道无人机获得2011年“中航工业杯—国际无人飞行器创新大奖赛”创意奖，其涵道直径1.2m，续航时间1h，最大飞行速度为50km/h。深圳千叶智能科技公司以研发涵道式无人机设计平台为主，目前已推出CDF-270、CDF-390和EDF-254等型号的无人机，可用于航拍、巡航和侦察等领域。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.33\textwidth} % minipage将页面划分为0.5\textwidth
+		\centering
+		\includegraphics[width=5cm,height=5cm]{Fig/飞碟.jpg}
+		\caption{\label{飞碟}飞碟}
+	\end{minipage}%
+	\begin{minipage}[c]{0.33\textwidth}
+		\centering
+		\includegraphics[width=5cm,height=5cm]{Fig/都市精灵.jpg}
+		\caption{\label{都市精灵}都市精灵}
+	\end{minipage}
+    \begin{minipage}[c]{0.33\textwidth}
+		\centering
+		\includegraphics[width=4cm,height=5cm]{Fig/CDF-390.jpg}
+		\caption{\label{CDF-390}CDF-390}
+	\end{minipage}
+\end{figure}
+
+此外，清华大学\cite{chouStudyOverallDesign2021,luoNumericalAnalysisWind2024a}、北京理工大学\cite{manzoorCompoundLearningBasedModel2024}、南京航空航天大学\cite{caiNumericalPredictionUnsteady2022}和华南理工大学\cite{yinDuctedFanUAV2024,1022766347.nh}等高校也对涵道无人机展开了不同程度的研究，极大推动了我国在该领域的发展。
+
+\subsection{飞行控制技术}
+
+涵道风扇无人机的飞行控制技术是涵道风扇无人机研究的重要组成部分。飞行控制技术的研究主要包括控制器设计、轨迹规划和飞行仿真等方面。控制器设计是涵道风扇无人机飞行控制技服的核心，其目的是设计出一种能够使无人机在飞行过程中保持稳定的控制器。轨迹规划是指在给定的环境条件下，设计出一种使无人机能够按照预定的轨迹飞行的方法。飞行仿真是指利用计算机模拟无人机的飞行过程，以验证控制器设计和轨迹规划的有效性。
 
 这里主要是想推荐一种“学术生态”，即利用各种工具展开科研工作，以达到事半功倍的效果。需要用到以下软件：
 \begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
