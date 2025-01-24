@@ -1,7 +1,15 @@
 \chapter{涵道风扇式无人机的系统建模与硬件设计}
 %第二章：涵道风扇式无人机的系统建模与硬件设计。首先定义了DFUAV的坐标系和姿态表示方法，然后采用牛顿-欧拉方法推导出DFUAV的刚体运动学模型和刚体动力学模型，并分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
 
-本章的重点是DFUAV的系统建模，这将是后续进行控制器设计的基础。
+本章的重点是对如图\Ref{DFUAV}所示的DFUAV进行系统建模，这将是后续进行控制器设计的基础。物体的相对运动离不开其所处的参考坐标系，因此本章将先介绍本文所使用的坐标系描述方法以及姿态表示方法。然后采用应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。并分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth} % minipage将页面划分为0.5\textwidth
+		\centering
+		\includegraphics[width=10cm,height=8cm]{Fig/DFUAV.jpg}
+		\caption{\label{DFUAV}本文研究所使用的DFUAV}
+	\end{minipage}%
+\end{figure}
 
 \section{坐标系和姿态表示方法}
 
