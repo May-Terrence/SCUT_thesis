@@ -21,7 +21,7 @@
 	\end{minipage}
 \end{figure}
 
-无人机发展百年，种类繁多，不同的任务需求驱动着创造不同类型的无人机。因此按照无人机的任务能力，可将其分为水平起飞着陆（Horizontal Take-off Landing，HTOL）、垂直起飞着陆（Vertical Take-off Landing，VTOL）、混合模型（倾转翼、倾转旋翼和涵道风扇）、直升机和非常规类型\cite{hassanalianClassificationsApplicationsDesign2017}。其中，涵道风扇无人机（Ducted Fan UAV，DFUAV）是指其螺旋桨被封闭在涵道内部的无人机，这些螺旋桨也被称为“风扇”，同时下方安装有若干控制舵面进行控制。DFUAV既有旋翼无人机般的垂直起降能力，又可以像固定翼无人机那样高速巡航，而且这种特殊的配置结构具有空气动力效率高和操作安全性的优势\cite{johnsonModelingControlFlight2006b,zhangReviewDuctedFans2020b,qianImprovingPerformanceDucted2022}。但不如人意的是，与开放旋翼相比，涵道风扇的罩状旋翼在飞行器周围的流场中会表现出强烈的耦合效应\cite{iiiNondimensionalModelingDuctedFan2012}，并且由于其特殊的气动布局，DFUAV在垂直起降和水平巡航这两种不同的飞行模式下气动特性也完全不同\cite{johnsonModelingControlFlight2006b}，这都对DFUAV的控制器设计提出了挑战。此外，针对DFUAV的轨迹规划的研究相对匮乏，这种研究的不足在一定程度上限制了DFUAV在复杂环境中的高效运作，不利于DFUAV的进一步推广应用。
+无人机发展百年，种类繁多，不同的任务需求驱动着创造不同类型的无人机。因此按照无人机的任务能力，可将其分为水平起飞着陆（Horizontal Take-off Landing，HTOL）、垂直起飞着陆（Vertical Take-off Landing，VTOL）、混合模型（倾转翼、倾转旋翼和涵道风扇）、直升机和非常规类型\cite{hassanalianClassificationsApplicationsDesign2017}。其中，涵道风扇无人机（Ducted Fan UAV，DFUAV）是指其螺旋桨被封闭在涵道内部的无人机，这些螺旋桨也被称为“风扇”，同时风扇滑流中安装有若干控制舵面进行控制。DFUAV既有旋翼无人机般的垂直起降能力，又可以像固定翼无人机那样高速巡航，而且这种特殊的配置结构具有空气动力效率高和操作安全性的优势\cite{johnsonModelingControlFlight2006b,zhangReviewDuctedFans2020b,qianImprovingPerformanceDucted2022,manzoor2022flight}。但不如人意的是，与开放旋翼相比，涵道风扇的罩状旋翼在飞行器周围的流场中会表现出强烈的耦合效应\cite{iiiNondimensionalModelingDuctedFan2012}，并且由于其特殊的气动布局，DFUAV在垂直起降和水平巡航这两种不同的飞行模式下气动特性也完全不同\cite{johnsonModelingControlFlight2006b}，这都对DFUAV的控制器设计提出了挑战。此外，针对DFUAV的轨迹规划的研究相对匮乏，这种研究的不足在一定程度上限制了DFUAV在复杂环境中的高效运作，不利于DFUAV的进一步推广应用。
 
 正因如此，设计出适用于DFUAV的控制策略以及合理的轨迹规划方法，对于DFUAV的进一步发展具有重要意义。
 
@@ -65,7 +65,7 @@
 	\end{minipage}
 \end{figure}
 
-2015年12月30日，由以色列Tactical Robotics公司研发的AirMule救护无人机首航。如图所示，AirMule的起飞旋翼设置在了机身内部，由涵道壁包裹，尾部还有两个推进涵道风扇用于控制姿态。这种构型专为直升机不方便起降的情形而设计，如山川、林地等地形复杂的区域。由于AirMule可负载80kg的载重能力和150km/h的最大速度\cite{yuTechnicalAnalysisVTOL2016}，未来还将用于运输货物等任务。
+2015年12月30日，由以色列Tactical Robotics公司研发的AirMule救护无人机首航。如图\ref{AirMule2}所示，AirMule的起飞旋翼设置在了机身内部，由涵道壁包裹，尾部还有两个推进涵道风扇用于控制姿态。这种构型专为直升机不方便起降的情形而设计，如山川、林地等地形复杂的区域。由于AirMule可负载80kg的载重能力和150km/h的最大速度\cite{yuTechnicalAnalysisVTOL2016}，未来还将用于运输货物等任务。
 
 \begin{figure}[htbp]
 	\centering
@@ -81,7 +81,7 @@
 	\end{minipage}
 \end{figure}
 
-在2016年的HWTrek全球智能硬件创新与制造大会上，来自比利时无人机Fleye引发众人关注，如图所示。因其大小与篮球相当，许多媒体也把它称为“球形无人机”。Fleye也属于涵道风扇无人机的一种，摄像头安装在上部，下部为光流传感器，由于其安全小巧的特点，媒体预测其未来将会应用于室内摄影、娱乐等场合。除上述提到的采用涵道构型无人机外，还有由新加坡ST Aerospace研发的FanTail系列\cite{mateosanguinoDesignStabilizationCoanda2024}、Aesir公司的Odin\cite{crivoi2013survey}和美国联合宇航公司的iSTAR\cite{flemingImprovingControlSystem}等。
+在2016年的HWTrek全球智能硬件创新与制造大会上，来自比利时无人机Fleye引发众人关注，如图所示。因其大小与篮球相当，许多媒体也把它称为“球形无人机”。Fleye也属于DFUAV的一种，摄像头安装在上部，下部为光流传感器，由于其安全小巧的特点，媒体预测其未来将会应用于室内摄影、娱乐等场合。除上述提到的采用涵道构型无人机外，还有由新加坡ST Aerospace研发的FanTail系列\cite{mateosanguinoDesignStabilizationCoanda2024}、Aesir公司的Odin\cite{crivoi2013survey}和美国联合宇航公司的iSTAR\cite{flemingImprovingControlSystem,lipera2001micro}等。
 
 \begin{figure}[htbp]
 	\centering
@@ -102,7 +102,7 @@
 	\end{minipage}
 \end{figure}
 
-相较于国外的研究成果，我国涵道无人机研究起步相对较晚，大多处于实验探索阶段。2008年，哈尔滨盛世特种飞行器有限公司与中国航天科工集团第四研究院和哈尔滨工业大学航天学院合作共同研发制造出国内首例单桨环道“飞碟”，直径1.2m，续航40分钟，最大速度可达80km/h，并获得国家发明专利。由南昌航空大学设计的“都市精灵”涵道无人机获得2011年“中航工业杯—国际无人飞行器创新大奖赛”创意奖，其涵道直径1.2m，续航时间1h，最大飞行速度为50km/h。深圳千叶智能科技公司以研发涵道式无人机设计平台为主，目前已推出CDF-270、CDF-390和EDF-254等型号的无人机，可用于航拍、巡航和侦察等领域。
+相较于国外的研究成果，我国DFUAV研究起步相对较晚，大多处于实验探索阶段。2008年，哈尔滨盛世特种飞行器有限公司与中国航天科工集团第四研究院和哈尔滨工业大学航天学院合作共同研发制造出国内首例单桨环道“飞碟”，直径1.2m，续航40分钟，最大速度可达80km/h，并获得国家发明专利。由南昌航空大学设计的“都市精灵”涵道无人机获得2011年“中航工业杯—国际无人飞行器创新大奖赛”创意奖，其涵道直径1.2m，续航时间1h，最大飞行速度为50km/h。深圳千叶智能科技公司以研发涵道式无人机设计平台为主，目前已推出CDF-270、CDF-390和EDF-254等型号的无人机，可用于航拍、巡航和侦察等领域。
 
 \begin{figure}[htbp]
 	\centering
@@ -123,11 +123,26 @@
 	\end{minipage}
 \end{figure}
 
-此外，清华大学\cite{chouStudyOverallDesign2021,luoNumericalAnalysisWind2024a}、北京理工大学\cite{manzoorCompoundLearningBasedModel2024}、南京航空航天大学\cite{caiNumericalPredictionUnsteady2022}和华南理工大学\cite{yinDuctedFanUAV2024,1022766347.nh}等高校也对涵道无人机展开了不同程度的研究，极大推动了我国在该领域的发展。
+此外，清华大学\cite{chouStudyOverallDesign2021,luoNumericalAnalysisWind2024a}、北京理工大学\cite{manzoorCompoundLearningBasedModel2024}、南京航空航天大学\cite{caiNumericalPredictionUnsteady2022}和华南理工大学\cite{yinDuctedFanUAV2024,1022766347.nh}等高校也对DFUAV展开了不同程度的研究，极大推动了我国在该领域的发展进程。
 
 \subsection{飞行控制技术}
 
-涵道风扇无人机的飞行控制技术是涵道风扇无人机研究的重要组成部分。飞行控制技术的研究主要包括控制器设计、轨迹规划和飞行仿真等方面。控制器设计是涵道风扇无人机飞行控制技服的核心，其目的是设计出一种能够使无人机在飞行过程中保持稳定的控制器。轨迹规划是指在给定的环境条件下，设计出一种使无人机能够按照预定的轨迹飞行的方法。飞行仿真是指利用计算机模拟无人机的飞行过程，以验证控制器设计和轨迹规划的有效性。
+无人机的飞行控制技术是其研究过程中的关键环节，其好坏直接影响了无人机的飞行性能和稳定性。在DFUAV发展的早期，由于对涵道风扇的独特气动特性认识不足以及控制理论体系的相对不成熟，DFUAV的控制器设计主要基于线性控制方法，如PID控制器、LQR控制器和$H_{\infty}$控制等。
+
+上文提到的iSTAR微型DFUAV在2000年11月首次自由飞行时采用的就是PID姿态控制策略\cite{lipera2001micro}。为了实现位置控制，文献\parencite{erikssonPerformanceEstimationDucted2006}将整个控制系统分为外部和内部两个独立的子系统，采用串级PID方法进行控制，并且还实现了用于整个系统的LQ补偿器。Pflimlin等人早期在DFUAV的控制方面进行了深入研究\cite{pflimlinAerodynamicModelingPractical2007,pflimlinModelingAttitudeControl2010a}，通过对悬停飞行条件线性化，简化飞行动力学，采用PID控制方法取得了较好的姿态跟随效果。2005年，他们推广了线性串级PID控制方法，提出了一种自适应反步控制策略着重于解决DFUAV在持续恒风条件下的稳定性问题，最后进行了仿真实验\cite{pflimlinPositionControlDucted2007b}。文献\parencite{whiteStabilityAugmentationFree}将LQR控制器与经典控制器相结合，通过时间响应和奇异值分析来评估控制系统的性能，实际飞行数据验证了该方法的有效性。文献\parencite{muehlebachFlyingPlatformTestbed2017}同样将LQR控制方法应用于DFUAV，该控制器具有级联结构，UAV的角速度由板载陀螺仪测量得到，位置、速度和姿态由外部的动作捕捉系统提供，最终通过实践证明了其可靠性。在$H_{\infty}$控制器的应用相关文献中，文献\parencite{DJKZ201009016}针对DFUAV易受干扰的特性设计了基于$H_{\infty}$理论的鲁棒控制器，通过仿真和实际飞行实验证明了该算法相比传统PID控制抗干扰性更强。文献\parencite{fanModellingAttitudeController2018}采用基于$H_{\infty}$合成的结构化多环反馈姿态控制器，并使用非光滑优化方法直接调节控制器参数到最优，确保了满意的实际控制效果。
+
+虽然线性控制器易于实现，并且计算资源耗费较少，但是其性能往往受到系统的固有特性的限制，仅能够达到相对保守的性能\cite{manzoor2022flight}。当DFUAV由悬停转向高速飞行中应用线性控制器时\cite{saeedSurveyHybridUnmanned2018}，控制性能会下降。作为替代，基于模型的非线性控制方法被广泛使用。如模型预测控制（MPC）、自适应控制和自抗扰控制（ADRC）等。
+
+学者Tayyab Manzoor等人在DFUAV的MPC控制器设计上做了大量研究。在前期的工作中，他提出了一种无偏移的MPC框架来应对DFUAV的轨迹跟踪问题\cite{manzoorTrajectoryTrackingControl2020}，控制策略分为内环和外环，两者都通过无偏移的MPC和卡尔曼滤波（KF）的组合来稳定跟踪。后来，为了飞行过程的鲁棒性能，又提出了一种将MPC与非线性干扰观测器结合的复合飞行控制技术\cite{manzoorMPCBasedCompound2020,manzoorCompositeObserverbasedRobust2023}，并保证了闭环系统的稳定性。近年来，Tayyab Manzoor将ML与MPC相结合，提出基于复合学习的DFUAV的MPC方法\cite{manzoorModelPredictiveControl2023,manzoorCompoundLearningBasedModel2024a}。该方法通过离线获取DFUAV的名义模型，在线使用强化学习优化控制策略，然后通过MPC进行优化和更新，提高计算效率，最后通过仿真证明了可行性。文献\parencite{zhaoModellingAttitudeControl2015}采用基于解耦的强自适应姿态控制方案，非线性的DFUAV在修整点进行了线性化，提升了系统的稳定裕度，仿真和实际飞行实验都表明姿态跟踪误差有效减少。文献\parencite{aiRobustAdaptiveControl2025}提出了一种基于控制增强的模型参考自适应控制架构，通过在线性时不变控制输入的基础上叠加自适应控制输入，以实时补偿不确定性，确保准确跟踪参考系统。实验表明该方法相比基线控制，速度跟踪误差减小了约38\%。文献\parencite{wenResearchVerticalTakeoff2021}介绍了该实验室设计的可变结构的垂直起降飞行器，基于动态模型进行解耦设计，并设计了一种离散的ADRC方法来控制其垂直起降过程。文献\parencite{yinDuctedFanUAV2024}使用ADRC控制器控制共轴双桨涵道无人机的姿态，使用固定于涵道壁的电磁铁来抓取物品，控制器用于抵消抓取过程中由于重量改变而引起的干扰，最终通过实际飞行实验表明无人机在抓取多个物品后依然能稳定姿态。
+
+基于模型的非线性控制方法需要对系统模型有较为清楚的认识。除了基于模型的控制方法外，还可以采用基于传感器的方法：增量式非线性动态逆（Incremental Nonlinear Dynamic Inversion，INDI）。INDI作为一种重新配置的非线性动态逆（Nonlinear Dynamic Inversion，NDI）方法\cite{baconReconfigurableNDIController2001b,DesignFlightTesting}，相比于NDI，对机载模型的依赖较小，并且只需要控制导数。在不确定的干扰情况下，气动变化会导致力与力矩的变化，而这些变化可以使用机载传感器测量得到，通过增量控制帮助系统快速稳定。Smeur等人对INDI控制技术进行了深入研究\cite{smeurAdaptiveIncrementalNonlinear2015,smeurCascadedIncrementalNonlinear2018b,steffensenNonlinearDynamicInversion2023}，并成功在四旋翼无人机上进行应用。在文献\parencite{smeurAdaptiveIncrementalNonlinear2015}中，仅知道非常粗略的飞行器模型的情况下，使用自适应INDI控制器在线估计控制效果，最终在姿态控制方面表现出优异的抗干扰和自适应特性。文献\parencite{smeurCascadedIncrementalNonlinear2018b}中，该团队介绍了微型飞行器姿态控制的INDI和位置控制的INDI的串级结构，使用四旋翼进出10m/s的风洞，相比与PID控制情况下，位置误差显著减小。其他的应用包括垂直起降UAV的飞行过渡控制\cite{chengCorridorbasedFlightMode2023}，轨迹跟踪控制\cite{taherinezhadEnhancedIncrementalNonlinear2023a}等。
+
+此外，DFUAV的控制舵面通常装配冗余，控制输入的数量超过了系统自由度的数量，这导致了UAV的控制分配问题\cite{naldiPrototypeDuctedFanAerial2014b}。为了达到期望的控制效果，目前广泛采用的控制分配方法是伪逆法\cite{peddlePracticalHoverFlight2009a,pflimlinPositionControlDucted2007b,shengNearHoverAdaptiveAttitude2015b}，直接计算从控制舵面角度映射到控制力矩的非方阵的伪逆矩阵。然而，由于实际的舵面角度受到约束，在伪逆操作下无法得到整个可达到的力矩的集合\cite{durhamAircraftControlAllocation2017a}，导致在飞行包络线附近损失了舵面的部分控制能力\cite{HKXB202010026}。
+
+\subsection{轨迹规划技术}
+
+
+% 然而，这种控制方法往往难以满足DFUAV在复杂环境中的高效运作需求。近年来，随着现代控制理论的不断发展和深入，越来越多的研究者开始将现代控制理论应用于DFUAV的控制器设计中，如模型预测控制（Model Predictive Control，MPC）\cite{zhangModelPredictiveControl2024}、自适应控制\cite{zhangAdaptiveControlDucted2024}、鲁棒控制\cite{zhangRobustControlDucted2024}、模糊控制\cite{zhangFuzzyControlDucted2024}、神经网络控制\cite{zhangNeuralNetworkControlDucted2024}等。这些控制方法在DFUAV的控制器设计中取得了一定的成果，为DFUAV的进一步发展提供了有力的技术支持。
 
 这里主要是想推荐一种“学术生态”，即利用各种工具展开科研工作，以达到事半功倍的效果。需要用到以下软件：
 \begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
