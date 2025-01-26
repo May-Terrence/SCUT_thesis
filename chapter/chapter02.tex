@@ -1,17 +1,37 @@
 \chapter{涵道风扇式无人机的系统建模与硬件设计}
 %第二章：涵道风扇式无人机的系统建模与硬件设计。首先定义了DFUAV的坐标系和姿态表示方法，然后采用牛顿-欧拉方法推导出DFUAV的刚体运动学模型和刚体动力学模型，并分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
 
-本章的重点是对如图\Ref{DFUAV}所示的DFUAV进行系统建模，这将是后续进行控制器设计的基础。物体的相对运动离不开其所处的参考坐标系，因此本章将先介绍本文所使用的坐标系描述方法以及姿态表示方法。然后采用应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。并分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
+本章的重点是对如图\Ref{DFUAV}所示的DFUAV进行系统建模，这将是后续进行控制器设计的基础。物体的相对运动离不开其所处的参考坐标系，因此本章将先介绍本文所使用的多坐标系描述方法以及姿态表示方法。然后采用应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。最后分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
+
+DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一栋2019直升机飞行控制}，并为了表示方便，避免混淆，对部分变量的表示作略微修改。
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth} % minipage将页面划分为0.5\textwidth
 		\centering
-		\includegraphics[width=10cm,height=8cm]{Fig/DFUAV.jpg}
+		\includegraphics[scale=1]{Fig/DFUAV.jpg}
 		\caption{\label{DFUAV}本文研究所使用的DFUAV}
 	\end{minipage}%
 \end{figure}
 
 \section{坐标系和姿态表示方法}
+
+在无人机领域，考虑到无人机的位置变化与姿态变化，基于地面坐标系($\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $)和机体坐标系(${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$)的多坐标系表示法被广泛采用。如图\ref{坐标系}所示。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+		\centering
+		\includegraphics[scale=1]{Fig/演示文稿1.pdf}
+		\caption{\label{坐标系}地面坐标系与机体坐标系示意}
+	\end{minipage}%
+\end{figure}
+
+
+
+
+
+
+
 
 
 与很多外文杂志社不同，大部分中文期刊都不提供\LaTeX{}模板给投稿者使用，也很少有学校给学生提供官方的毕业论文模板。目前github上的大部分模板都是由学生发起的非官方模板。在此感谢Shun Xu以及yecfly等人的工作，他们的无私贡献使得华南理工大学硕博士毕业论文也可以使用\LaTeX{}撰写。
