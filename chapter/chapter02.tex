@@ -1,7 +1,7 @@
 \chapter{涵道风扇式无人机的系统建模与硬件设计}
 %第二章：涵道风扇式无人机的系统建模与硬件设计。首先定义了DFUAV的坐标系和姿态表示方法，然后采用牛顿-欧拉方法推导出DFUAV的刚体运动学模型和刚体动力学模型，并分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
 
-本章的重点是对如图\Ref{DFUAV}所示的DFUAV进行系统建模，这将是后续进行控制器设计的基础。物体的相对运动离不开其所处的参考坐标系，因此本章将先介绍本文所使用的多坐标系描述方法以及姿态表示方法。然后采用应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。最后分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
+本章的重点是对如图\Ref{DFUAV}所示的DFUAV进行系统建模，这将是后续进行飞行控制算法设计的基础。在无人机的建模分析中，为简化模型复杂度并且便于控制算法的设计，有必要假设无人机是刚体。物体的相对运动离不开其所处的参考坐标系，因此本章将先介绍本文所使用的多坐标系描述方法以及姿态表示方法。然后采用在刚体上应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。最后分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
 
 DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一栋2019直升机飞行控制}，并为了表示方便，避免混淆，对部分变量的表示作略微修改。
 \begin{figure}[htbp]
@@ -15,28 +15,60 @@ DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一�
 
 \section{坐标系和姿态表示方法}
 
-在无人机领域，考虑到无人机的位置变化与姿态变化，基于地面坐标系($\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $)和机体坐标系(${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$)的多坐标系表示法被广泛采用。如图\ref{坐标系}所示。
+考虑到无人机的位置变化与姿态变化，基于地面坐标系($\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $)和机体坐标系(${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$)的多坐标系表示法被广泛采用。
+
+\begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
+	\item 地面坐标系
+
+    地面坐标系的原点$\boldsymbol{O}_e$可以是地平面上的任意一点，一般定义为无人机的起飞点。三轴方向分别为$\boldsymbol{O}_e-\boldsymbol{X}_e$轴在地平面内指向地理正北方向（N），$\boldsymbol{O}_e-\boldsymbol{Y}_e$轴在地平面内指向地理正东方向（E），$\boldsymbol{O}_e-\boldsymbol{Z}_e$轴按照右手定则，垂直于地面指向地心，方向向下（D）。因此地面坐标系也被称为北东地（NED）坐标系，该坐标系与地球固连。
+
+	\item 机体坐标系
+	
+    机体坐标系与无人机的机体固连，其原点$\boldsymbol{O}_b$定义为无人机的重心位置。三轴方向分别为$\boldsymbol{O}_b-\boldsymbol{X}_b$轴在无人机对称平面内指向人为定义的机头方向，$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴在无人机对称平面内垂直于$\boldsymbol{O}_b-\boldsymbol{X}_b$轴向下为正，$\boldsymbol{O}_b-\boldsymbol{Y}_b$轴按照右手定则与$\boldsymbol{X}_b-\boldsymbol{O}_b-\boldsymbol{Z}_b$平面垂直，沿着机身的右侧方向向右为正。
+\end{enumerate}
+
+地面坐标系和机体坐标系定义如图\ref{坐标系}所示。同一个物理量在不同的坐标系中有不同的大小和方向，为便于区分，在全文中统一使用上标$(.)^{e}$与$(.)^{b}$表示同一个物理量在地面坐标系和机体坐标系下的表示。
+
+在地面坐标系下采用惯性/GPS导航等方式，无人机的位置和速度等运动状态可以方便直观地映射到地理空间中。无人机的重心相对于地面坐标系的位置矢量在地面坐标系下表示为$\boldsymbol{P}^{e}=\begin{bmatrix}{x}^{e}&{y}^{e}&{z}^{e}\end{bmatrix}^{T}$，机体重心沿着地面坐标系的速度矢量在地面坐标系下表示为$\boldsymbol{V}^{e}=\begin{bmatrix}{v}^{e}_{x}&{v}^{e}_{y}&{v}^{e}_{z}\end{bmatrix}^{T}$，机体重心相对于地面坐标系的速度矢量在机体坐标系下表示为$\boldsymbol{V}^{b}=\begin{bmatrix}{u}&{v}&{w}\end{bmatrix}^{T}$。
+
+地面坐标系与机体坐标系的旋转变化关系体现了无人机的姿态变化，无人机常用的姿态描述方法有欧拉角、旋转矩阵和四元数等方式。其中欧拉角表示方法因物理意义明确，表示直观，所以被广泛采用。但因其奇异性问题\cite{全权2018多旋翼飞行器设计与控制}，欧拉角表示法在一些特殊场景的使用下受到制约（如横滚角或者俯仰角为90°的情况）。考虑到本研究在姿态控制中，由于输入姿态指令和输出舵面角度的约束，不会出现上述奇异情况，所以本文采用欧拉角来描述无人机的姿态。根据欧拉定理，地面坐标系按照某个固定点经过三次基本旋转可以得到机体坐标系。由于旋转运动与坐标系原点的位置无关，所以为便于理解，将地面坐标系的原点与机体坐标系原点重合（即$\boldsymbol{O}_e=\boldsymbol{O}_b$），如图\ref{欧拉角}所示。在三次基本旋转中，旋转轴是待转动坐标系的某一轴，旋转的角度即为欧拉角。由于姿态旋转矩阵可以表示为三次基本旋转的乘积，所以与旋转顺序密切相关。由于本研究不会出现奇异问题，所以本文采用常用的‘ZYX’的旋转顺序的欧拉角表示法。
 
 \begin{figure}[htbp]
 	\centering
-	\begin{minipage}[c]{1\textwidth}
+	\begin{minipage}[c]{0.5\textwidth}
 		\centering
 		\includegraphics[scale=1]{Fig/演示文稿1.pdf}
-		\caption{\label{坐标系}地面坐标系与机体坐标系示意}
+		\caption{\label{坐标系}地面坐标系与机体坐标系定义}
+	\end{minipage}%
+    \begin{minipage}[c]{0.5\textwidth}
+		\centering
+		\includegraphics[scale=1]{Fig/演示文稿2.pdf}
+		\caption{\label{欧拉角}‘ZYX’欧拉角的定义}
 	\end{minipage}%
 \end{figure}
 
+在图\ref{欧拉角}中，地面坐标系$\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e$首先围绕$\boldsymbol{Z}_e$轴旋转偏航角$\psi$，向右偏航为正方向。此时$\boldsymbol{X}_e$轴旋转至$\boldsymbol{X}_e^{'}$轴，$\boldsymbol{Y}_e$轴旋转至$\boldsymbol{Y}_e^{'}$轴，$\boldsymbol{Z}_e$轴保持不变；
+然后临时坐标系$\boldsymbol{O}_e-\boldsymbol{X}_e^{'}\boldsymbol{Y}_e^{'}\boldsymbol{Z}_e$围绕$\boldsymbol{Y}_e^{'}$轴旋转俯仰角$\theta$，上仰为正方向。此时$\boldsymbol{X}_e^{'}$轴旋转至$\boldsymbol{X}_b$轴，与机体系保持一致，$\boldsymbol{Z}_e$轴旋转至$\boldsymbol{Z}_e^{'}$轴，$\boldsymbol{Y}_e^{'}$轴保持不变；
+最后临时坐标系$\boldsymbol{O}_e-\boldsymbol{X}_b\boldsymbol{Y}_e^{'}\boldsymbol{Z}_e^{'}$围绕$\boldsymbol{X}_b$轴旋转滚转角$\varphi$，向右滚转为正方向。此时$\boldsymbol{Y}_e^{'}$轴旋转至$\boldsymbol{Y}_b$轴，$\boldsymbol{Z}_e^{'}$轴旋转至$\boldsymbol{Z}_b$轴，均与机体系保持一致。
 
+三次基本旋转的角度分别为$\psi$、$\theta$、$\varphi$，定义其对应的旋转矩阵分别为$\boldsymbol{R}_\psi,\boldsymbol{R}_\theta,\boldsymbol{R}_\varphi\in{SO(3)}$，其中$SO(3)=\{R\in\mathbb{R}^{3\times3}|RR^T=I,|R|=1\}$。
+\begin{equation}
+    \begin{aligned} %表示公式编号上下居中
+\boldsymbol{R}_\psi=\begin{bmatrix}\cos\psi & \sin\psi & 0 \\-\sin\psi & \cos\psi & 0 \\0 & 0 & 1\end{bmatrix},\boldsymbol{R}_\theta=\begin{bmatrix}\cos\theta & 0 & -\sin\theta \\0 & 1 & 0 \\\sin\theta & 0 & \cos\theta\end{bmatrix},\boldsymbol{R}_\varphi=\begin{bmatrix}1 & 0 & 0\\0 & \cos\varphi & \sin\varphi \\0 & -\sin\varphi & \cos\varphi\end{bmatrix}
+    \end{aligned}
+\end{equation}
 
+为表述方便，定义如下单位向量：
+\begin{equation}
+    \begin{aligned}
+\boldsymbol{e}_1=\begin{bmatrix}1 \\0 \\0\end{bmatrix},
+\quad\boldsymbol{e}_2=\begin{bmatrix}0 \\1 \\0\end{bmatrix},
+\quad\boldsymbol{e}_3=\begin{bmatrix}0 \\0 \\1\end{bmatrix}
+    \end{aligned}
+\end{equation}
 
+机体姿态的欧拉角表示为$\boldsymbol{\eta}=\begin{bmatrix}\varphi& \theta & \psi\end{bmatrix}^T$，对应的姿态变化率为$\boldsymbol{\dot{\eta}}=[\dot{\varphi} \quad \dot{\theta} \quad \dot{\psi}]^T$。
 
-
-
-
-
-与很多外文杂志社不同，大部分中文期刊都不提供\LaTeX{}模板给投稿者使用，也很少有学校给学生提供官方的毕业论文模板。目前github上的大部分模板都是由学生发起的非官方模板。在此感谢Shun Xu以及yecfly等人的工作，他们的无私贡献使得华南理工大学硕博士毕业论文也可以使用\LaTeX{}撰写。
-
-本模板是直接修改前人的模板得到的，更详细的介绍可到\parencite{_,_a}下载。本章仅从用户的角度简要介绍模板的使用，而尽量避免涉及\LaTeX{}的模板制作细节（实际上是因为本人也不会）。正如我们使用手机并不需要了解麦克斯韦方程组，使用\LaTeX{}写作也无需了解模板是如何制作的。
 
 \LaTeX{}的源代码保存在后缀名为.tex的文件中。当编写长篇文档时，例如当编写书籍、毕业论文时，单个源文件会使修改、校对变得十分困
 难。将源文件分割成若干个文件，例如将每章内容单独写在一个文件中，会大大简化修改和校对

@@ -3,9 +3,11 @@
 \begin{table}
 	\centering{}%
 	\begin{tabular}{l>{\centering}p{0.5cm}l}
-	 $ \boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $-地面坐标系           &  & ${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$-机体坐标系\tabularnewline
-	 $ \psi $-偏航角								   &  & $\theta$-俯仰角\tabularnewline
-	 $\varphi$-滚转角  							   &  & $\boldsymbol{R}^n_b$、$\boldsymbol{R}$-机体系到NED系的旋转矩阵\tabularnewline
+	 $ \boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $-地面坐标系  &  & ${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$-机体坐标系\tabularnewline
+     $\boldsymbol{P}^{e}=\begin{bmatrix}{x}^{e}&{y}^{e}&{z}^{e}\end{bmatrix}^{T}$-无人机在地面坐标系下的位置 &  & $\boldsymbol{V}^{e}=\begin{bmatrix}{v}^{e}_{x}&{v}^{e}_{y}&{v}^{e}_{z}\end{bmatrix}^{T}$-无人机在地面坐标系下的速度\tabularnewline
+     $\boldsymbol{V}^{b}=\begin{bmatrix}{u}&{v}&{w}\end{bmatrix}^{T}$-无人机在机体坐标系下的速度 && $ \psi $-偏航角\tabularnewline
+	 $\theta$-俯仰角 && $\varphi$-滚转角\tabularnewline
+	 $\boldsymbol{R}^n_b$、$\boldsymbol{R}$-机体系到NED系的旋转矩阵\tabularnewline
 	 $\boldsymbol{G}$-NED系的重力  							  &  &   $\varphi_0 $-气动面安装角\tabularnewline
 	 $ w $-系统的外部扰动								&  &  $T$-系统采样周期\tabularnewline
 	 $\boldsymbol{F}$-机体系的气动力 						    &  &   $\boldsymbol{M}$-机体系的气动力矩\tabularnewline
