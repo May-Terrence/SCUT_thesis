@@ -29,9 +29,9 @@ DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一�
 
 地面坐标系和机体坐标系定义如图\ref{坐标系}所示。同一个物理量在不同的坐标系中有不同的大小和方向，为便于区分，在全文中统一使用上标$(.)^{e}$与$(.)^{b}$表示同一个物理量在地面坐标系和机体坐标系下的表示。
 
-在地面坐标系下采用惯性/GPS导航等方式，无人机的位置和速度等运动状态可以方便直观地映射到地理空间中。无人机的重心相对于地面坐标系的位置矢量在地面坐标系下表示为$\boldsymbol{P}^{e}=\begin{bmatrix}{x}^{e}&{y}^{e}&{z}^{e}\end{bmatrix}^{T}$，机体重心沿着地面坐标系的速度矢量在地面坐标系下表示为$\boldsymbol{V}^{e}=\begin{bmatrix}{v}^{e}_{x}&{v}^{e}_{y}&{v}^{e}_{z}\end{bmatrix}^{T}$，机体重心相对于地面坐标系的速度矢量在机体坐标系下表示为$\boldsymbol{V}^{b}=\begin{bmatrix}{u}&{v}&{w}\end{bmatrix}^{T}$。
+在地面坐标系下采用惯性/GPS导航等方式，无人机的位置和速度等运动状态可以方便直观地映射到地理空间中。无人机的重心相对于地面坐标系的位置矢量在地面坐标系下表示为$\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$，机体重心沿着地面坐标系的速度矢量在地面坐标系下表示为$\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$，机体重心相对于地面坐标系的速度矢量在机体坐标系下表示为$\boldsymbol{V}^{b}=[{u} \quad {v} \quad {w}]^{T}$。
 
-地面坐标系与机体坐标系的旋转变化关系体现了无人机的姿态变化，无人机常用的姿态描述方法有欧拉角、旋转矩阵和四元数等方式。其中欧拉角表示方法因物理意义明确，表示直观，所以被广泛采用。但因其奇异性问题\cite{全权2018多旋翼飞行器设计与控制}，欧拉角表示法在一些特殊场景的使用下受到制约（如横滚角或者俯仰角为90°的情况）。考虑到本研究在姿态控制中，由于输入姿态指令和输出舵面角度的约束，不会出现上述奇异情况，所以本文采用欧拉角来描述无人机的姿态。根据欧拉定理，地面坐标系按照某个固定点经过三次基本旋转可以得到机体坐标系。由于旋转运动与坐标系原点的位置无关，所以为便于理解，将地面坐标系的原点与机体坐标系原点重合（即$\boldsymbol{O}_e=\boldsymbol{O}_b$），如图\ref{欧拉角}所示。在三次基本旋转中，旋转轴是待转动坐标系的某一轴，旋转的角度即为欧拉角。由于姿态旋转矩阵可以表示为三次基本旋转的乘积，所以与旋转顺序密切相关。由于本研究不会出现奇异问题，所以本文采用常用的‘ZYX’的旋转顺序的欧拉角表示法。
+地面坐标系与机体坐标系的旋转变化关系体现了无人机的姿态变化，无人机常用的姿态描述方法有欧拉角、旋转矩阵和四元数等方式。其中欧拉角表示方法因物理意义明确，表示直观，所以被广泛采用。但因其奇异性问题\cite{全权2018多旋翼飞行器设计与控制}，欧拉角表示法在一些特殊场景的使用下受到制约（如横滚角或者俯仰角为$\pm90^{\circ}$的情况）。考虑到本研究在姿态控制中，由于输入姿态指令和输出舵面角度的约束，不会出现上述奇异情况，所以本文采用欧拉角来描述无人机的姿态。根据欧拉定理，地面坐标系按照某个固定点经过三次基本旋转可以得到机体坐标系。由于旋转运动与坐标系原点的位置无关，所以为便于理解，将地面坐标系的原点与机体坐标系原点重合（即$\boldsymbol{O}_e=\boldsymbol{O}_b$），如图\ref{欧拉角}所示。在三次基本旋转中，旋转轴是待转动坐标系的某一轴，旋转的角度即为欧拉角。由于姿态旋转矩阵可以表示为三次基本旋转的乘积，所以与旋转顺序密切相关。由于本研究不会出现奇异问题，所以本文采用常用的‘Z-Y-X’的旋转顺序的欧拉角表示法。
 
 \begin{figure}[htbp]
 	\centering
@@ -43,7 +43,7 @@ DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一�
     \begin{minipage}[c]{0.5\textwidth}
 		\centering
 		\includegraphics[scale=1]{Fig/演示文稿2.pdf}
-		\caption{\label{欧拉角}‘ZYX’欧拉角的定义}
+		\caption{\label{欧拉角}‘Z-Y-X’欧拉角的定义}
 	\end{minipage}%
 \end{figure}
 
@@ -51,10 +51,10 @@ DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一�
 然后临时坐标系$\boldsymbol{O}_e-\boldsymbol{X}_e^{'}\boldsymbol{Y}_e^{'}\boldsymbol{Z}_e$围绕$\boldsymbol{Y}_e^{'}$轴旋转俯仰角$\theta$，上仰为正方向。此时$\boldsymbol{X}_e^{'}$轴旋转至$\boldsymbol{X}_b$轴，与机体系保持一致，$\boldsymbol{Z}_e$轴旋转至$\boldsymbol{Z}_e^{'}$轴，$\boldsymbol{Y}_e^{'}$轴保持不变；
 最后临时坐标系$\boldsymbol{O}_e-\boldsymbol{X}_b\boldsymbol{Y}_e^{'}\boldsymbol{Z}_e^{'}$围绕$\boldsymbol{X}_b$轴旋转滚转角$\varphi$，向右滚转为正方向。此时$\boldsymbol{Y}_e^{'}$轴旋转至$\boldsymbol{Y}_b$轴，$\boldsymbol{Z}_e^{'}$轴旋转至$\boldsymbol{Z}_b$轴，均与机体系保持一致。
 
-三次基本旋转的角度分别为$\psi$、$\theta$、$\varphi$，定义其对应的旋转矩阵分别为$\boldsymbol{R}_\psi,\boldsymbol{R}_\theta,\boldsymbol{R}_\varphi\in{SO(3)}$，其中$SO(3)=\{R\in\mathbb{R}^{3\times3}|RR^T=I,|R|=1\}$。
+三次基本旋转的角度分别为$\psi$、$\theta$、$\varphi$，定义其对应的旋转矩阵分别为$\boldsymbol{R}_\psi,\boldsymbol{R}_\theta,\boldsymbol{R}_\varphi\in{SO(3)}$，其中$SO(3)=\{\boldsymbol{R}\in\mathbb{R}^{3\times3}|\boldsymbol{R}\boldsymbol{R}^T=I,|\boldsymbol{R}|=1\}$。
 \begin{equation}
     \begin{aligned} %表示公式编号上下居中
-\boldsymbol{R}_\psi=\begin{bmatrix}\cos\psi & \sin\psi & 0 \\-\sin\psi & \cos\psi & 0 \\0 & 0 & 1\end{bmatrix},\boldsymbol{R}_\theta=\begin{bmatrix}\cos\theta & 0 & -\sin\theta \\0 & 1 & 0 \\\sin\theta & 0 & \cos\theta\end{bmatrix},\boldsymbol{R}_\varphi=\begin{bmatrix}1 & 0 & 0\\0 & \cos\varphi & \sin\varphi \\0 & -\sin\varphi & \cos\varphi\end{bmatrix}
+\boldsymbol{R}_\psi=\begin{bmatrix}\cos\psi & \sin\psi & 0 \\-\sin\psi & \cos\psi & 0 \\0 & 0 & 1\end{bmatrix},\boldsymbol{R}_\theta=\begin{bmatrix}\cos\theta & 0 & -\sin\theta \\0 & 1 & 0 \\\sin\theta & 0 & \cos\theta\end{bmatrix},\boldsymbol{R}_\varphi=\begin{bmatrix}1 & 0 & 0\\0 & \cos\varphi & \sin\varphi \\0 & -\sin\varphi & \cos\varphi\end{bmatrix}\label{eq_1}
     \end{aligned}
 \end{equation}
 
@@ -63,28 +63,143 @@ DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一�
     \begin{aligned}
 \boldsymbol{e}_1=\begin{bmatrix}1 \\0 \\0\end{bmatrix},
 \quad\boldsymbol{e}_2=\begin{bmatrix}0 \\1 \\0\end{bmatrix},
-\quad\boldsymbol{e}_3=\begin{bmatrix}0 \\0 \\1\end{bmatrix}
+\quad\boldsymbol{e}_3=\begin{bmatrix}0 \\0 \\1\end{bmatrix}\label{eq_2}
     \end{aligned}
 \end{equation}
 
-机体姿态的欧拉角表示为$\boldsymbol{\eta}=\begin{bmatrix}\varphi& \theta & \psi\end{bmatrix}^T$，对应的姿态变化率为$\boldsymbol{\dot{\eta}}=[\dot{\varphi} \quad \dot{\theta} \quad \dot{\psi}]^T$。
+机体姿态的欧拉角表示为$\boldsymbol{\eta}=[\varphi \quad \theta \quad \psi]^T$，对应的姿态变化率为$\boldsymbol{\dot{\eta}}=[\dot{\varphi} \quad \dot{\theta} \quad \dot{\psi}]^T$。定义沿机体轴的旋转角速度为$\boldsymbol{\omega}^b=[p \quad q \quad r]^T$，那么旋转角速度与机体姿态变化率的关系如下\cite{ducard2009fault}：
+\begin{equation}
+    \boldsymbol\omega^{b}=\dot{\psi}\boldsymbol{R}_{\varphi} \boldsymbol{R}_{\theta} \boldsymbol{e}_{3}+\dot{\theta}\boldsymbol{R}_{\varphi}\boldsymbol{e}_{2}+\dot{\varphi}\boldsymbol{e}_{1}\label{eq_3}
+\end{equation}
+结合式\eqref{eq_1}-式\eqref{eq_3}，得到：
+\begin{equation}
+    \begin{gathered}
+    \boldsymbol\omega^{b}=
+    \begin{bmatrix}
+    1 & 0 & -\sin\theta \\
+    0 & \cos\varphi & \sin\varphi\cos\theta \\
+    0 & -\sin\varphi & \cos\varphi\cos\theta
+    \end{bmatrix}
+    \boldsymbol{\dot{\eta}}
+    \\
+    \Leftrightarrow\dot{\boldsymbol{\eta}}=\boldsymbol{Q}\boldsymbol{\omega}^b,\quad\boldsymbol{Q}\triangleq
+    \begin{bmatrix}
+        1 & \sin\varphi\tan\theta & \cos\varphi\tan\theta \\
+        0 & \cos\varphi & -\sin\varphi \\
+        0 & \dfrac{\sin\varphi}{\cos\theta} & \dfrac{\cos\varphi}{\cos\theta}
+        \end{bmatrix}
+    \label{eq_4}
+    \end{gathered}
+\end{equation}
+
+进一步地，在欧拉角‘Z-Y-X’的旋转顺序下，由机体坐标系到地面坐标系的旋转矩阵$\boldsymbol{R}^e_b$可以表示为：
+\begin{equation}
+    \begin{aligned}
+    \boldsymbol{R}_{b}^{e} & =(\boldsymbol{R}_{e}^{b})^T =(\boldsymbol{R}_\varphi\boldsymbol{R}_\theta\boldsymbol{R}_\psi)^T \\
+     & =
+    \begin{bmatrix}
+    \cos{\theta}\cos{\psi} & \sin{\varphi}\sin{\theta}\cos{\psi}-\cos{\varphi}\sin{\psi} & \cos{\varphi}\sin{\theta}\cos{\psi} + \sin{\varphi}\sin{\psi}
+    \\ 
+    \cos{\theta}\sin{\psi} & \sin{\varphi}\sin{\theta}\sin{\psi} + \cos{\varphi}\cos{\psi} & \cos{\varphi}\sin{\theta}\sin{\psi} - \sin{\varphi}\cos{\psi}
+    \\
+    -\sin{\theta} & \sin{\varphi}\cos{\theta} & \cos{\varphi}\cos{\theta}
+    \end{bmatrix}
+    \label{eq_5}
+    \end{aligned}
+\end{equation}
+
+\section{飞行控制刚体模型}
+
+DFUAV的建模过程需要在准确性与实用性之间寻求平衡，确保不会过于复杂而增加控制算法设计的难度和计算资源的开销，同时也不至于过于简单而与实际情况相差甚远。据此，忽略风扇以及控制舵面的转动，假设DFUAV是刚体，并且在飞行过程中其质量和转动惯量保持不变。在这种情况下，DFUAV的刚体运动学和动力学模型可以通过牛顿-欧拉方法推导得到。
+
+\subsection{刚体运动学模型}
+
+运动学模型用于描述无人机在三维空间中的位置和姿态随时间变化的关系，不涉及力与力矩的分析。六自由度DFUAV的刚体运动学模型包括三自由度的位置运动学模型和三自由度的姿态运动学模型。在地面坐标系下，位置运动学模型可以表示为：$\boldsymbol{\dot{P}}^{e} = \boldsymbol{V}^{e}$。三自由度的姿态运动学模型分为欧拉角模型、旋转矩阵模型和四元数模型三种。在机体系下，根据式\eqref{eq_4}，可以得到使用欧拉角模型表示三自由度的姿态运动学为$\dot{\boldsymbol{\eta}}=\boldsymbol{Q}\boldsymbol{\omega}^b$。
+
+因此，六自由度的DFUAV刚体运动学模型可以表示为：
+\begin{equation}
+    \begin{aligned}
+    \boldsymbol{\dot{P}}^{e} &= \boldsymbol{V}^{e} \\
+    \dot{\boldsymbol{\eta}}&=\boldsymbol{Q}\boldsymbol{\omega}^b
+    \end{aligned}
+    \label{eq_6}
+\end{equation}
+
+\subsection{刚体动力学模型}
+
+DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型，动力学模型是描述无人机在三维空间中运动行为的数学模型，该模型主要基于牛顿第二定律和角动量定理推导，用于分析无人机在受力、力矩、环境扰动等因素共同作用下的运动行为。但是该定律仅在惯性系下成立，考虑到DFUAV的在运动时，地球自转对其的影响相对不显著，并且从局部来看，地面近似平坦，因此将地面坐标系假设为惯性系是合理的。
+
+假设DFUAV受到的力包括重力和除重力之外的合外力作用$\boldsymbol{F}^b$，为下文受力分析方便，此处$\boldsymbol{F}^b\in\mathbb{R}^{3\times1}$表示在机体系下受到的除重力之外的合外力。那么根据牛顿第二定律可以得到：
+\begin{equation}
+    \begin{gathered}
+    \boldsymbol{R}_b^e\boldsymbol{F}^b + mg\boldsymbol{e}_3 = m\dfrac{d({\boldsymbol{V}}^e)}{dt}
+    \\
+    \Leftrightarrow\dot{\boldsymbol{V}}^e=\dfrac{1}{m}\boldsymbol{R}_b^e\boldsymbol{F}^b + g\boldsymbol{e}_3 
+    \label{eq_7}
+    \end{gathered}
+\end{equation}
+其中$m$表示DFUAV的总质量，$g$表示当地的重力加速度。
+
+姿态动力学模型由角动量定理描述：
+\begin{equation}
+    \begin{gathered}
+    \boldsymbol{M}^{b}=\dfrac{d\boldsymbol{L}^{b}}{dt} - {\boldsymbol{L}^{b}}\times{\boldsymbol\omega^{b}},\quad \boldsymbol{L}^{b}=\boldsymbol{J}^{b}\boldsymbol\omega^{b}
+    \\
+    \Leftrightarrow\boldsymbol{\dot{\omega}}^b=(\boldsymbol{J}^b)^{-1}(\boldsymbol{M}^b+\boldsymbol{J}^b\boldsymbol{\omega}^b\times\boldsymbol{\omega}^b)
+    \label{eq_8}
+    \end{gathered}
+\end{equation}
+其中$\boldsymbol{M}^{b}\in\mathbb{R}^{3\times1}$表示DFUAV在机体系下受到的合外力矩，$\boldsymbol{L}^{b}\in\mathbb{R}^{3\times1}$表示DFUAV在机体系下总的角动量，‘$\times$’表示向量叉乘运算。$\boldsymbol{J}^{b}\in\mathbb{R}^{3\times3}$表示DFUAV在机体系中的转动惯量矩阵，其在机体系下是一个常量。根据图\Ref{DFUAV}，可以看出本文研究的DFUAV呈现对称的几何结构，故$\boldsymbol{J}^{b}$可以近似为一个对角矩阵，即
+\begin{equation}
+    \boldsymbol{J}^b=\begin{bmatrix}
+        J_{x} & 0 & 0 \\
+        0 & J_{y} & 0 \\
+        0 & 0 & J_{z}
+        \end{bmatrix}
+    \label{eq_9}
+\end{equation}
+
+类似地，在机体系下可以更加直观地表示姿态动力学模型中相关变量，并且便于下文对力矩的分析，其中${\boldsymbol{L}^{b}}\times{\boldsymbol\omega^{b}}$部分表示由惯性系旋转到机体系产生的影响。
+
+综合上述分析，可以得到DFUAV的飞行控制刚体模型：
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        \boldsymbol{\dot{P}}^{e} &= \boldsymbol{V}^{e} \\
+        \dot{\boldsymbol{V}}^e&=\dfrac{1}{m}\boldsymbol{R}_b^e\boldsymbol{F}^b + g\boldsymbol{e}_3 \\
+        \dot{\boldsymbol{\eta}}&=\boldsymbol{Q}\boldsymbol{\omega}^b \\
+        \boldsymbol{\dot{\omega}}^b&=(\boldsymbol{J}^b)^{-1}(\boldsymbol{M}^b+\boldsymbol{J}^b\boldsymbol{\omega}^b\times\boldsymbol{\omega}^b)
+    \end{aligned}
+    \right.
+    \label{eq_10}
+\end{equation}
+
+\section{力与力矩分析}
+
+对作用于DFUAV上的力与力矩进行分析是为了对控制算法的设计提供依据，明确其内在机理可以更好地分析运动特性。根据式\eqref{eq_10}，DFUAV受到的除重力作用的合外力在机体系下表示为$\boldsymbol{F}^b$，受到的合外力矩在机体系下表示为$\boldsymbol{M}^b$。进一步地，$\boldsymbol{F}^b$和$\boldsymbol{M}^b$可以被分解为：
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        \boldsymbol{F}^b&=\boldsymbol{F}_{fan}^b+\boldsymbol{F}_{aero}^b+\boldsymbol{F}_{vane}^b \\
+        \boldsymbol{M}^b&=\boldsymbol{M}_{fan}^b+\boldsymbol{M}_{aero}^b+\boldsymbol{M}_{vane}^b+\boldsymbol{M}_{gyro}^b+\boldsymbol{M}_{af}^b & 
+    \end{aligned}
+\right.
+\label{eq_11}
+\end{equation}
 
 
-\LaTeX{}的源代码保存在后缀名为.tex的文件中。当编写长篇文档时，例如当编写书籍、毕业论文时，单个源文件会使修改、校对变得十分困
-难。将源文件分割成若干个文件，例如将每章内容单独写在一个文件中，会大大简化修改和校对
-的工作。为方便，本文将scutthesis.tex文件称为主文件，而将chapter文件夹的abstract.tex、chapter0x.tex、conclusion.tex等文件称为章节文件。
 
-值得注意的是，要每次编译时都更新参考文献著录，TeXstudio软件的选项->设置中的构建并查看、编译器需要设置成如图\ref{TeXstudio}、\ref{setup}所示。此时只需在任意一个文件中点击构建并查看按钮即可编译文档。每次编译都更新参考文献会使得编译时间很长。
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[scale=0.55]{Fig/TeXstudio.png}
-	\caption{\label{TeXstudio}TeXstudio环境}
-\end{figure}
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[scale=0.55]{Fig/setup.png}
-	\caption{\label{setup}TeXstudio编译选项}
-\end{figure}
+
+
+
+
+
+
+
+
+
+
+
 
 \section{主文件}
 scutthesis.tex文件相当于主函数，调用各章的内容。\LaTeX{}源代码以一个\textbackslash{}documentclass 命令作为开头，它指定了文档使用的文档类。文档类规定了\LaTeX{}源代码所要生成的文档的性质——普通文章、书籍、演示文稿、个人简
