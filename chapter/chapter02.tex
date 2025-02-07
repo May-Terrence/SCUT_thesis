@@ -181,11 +181,72 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
     \left\{
     \begin{aligned}
         \boldsymbol{F}^b&=\boldsymbol{F}_{fan}^b+\boldsymbol{F}_{aero}^b+\boldsymbol{F}_{vane}^b \\
-        \boldsymbol{M}^b&=\boldsymbol{M}_{fan}^b+\boldsymbol{M}_{aero}^b+\boldsymbol{M}_{vane}^b+\boldsymbol{M}_{gyro}^b+\boldsymbol{M}_{af}^b & 
+        \boldsymbol{M}^b&=\boldsymbol{M}_{fan}^b+\boldsymbol{M}_{aero}^b+\boldsymbol{M}_{vane}^b+\boldsymbol{M}_{gyro}^b+\boldsymbol{M}_{flap}^b
     \end{aligned}
 \right.
 \label{eq_11}
 \end{equation}
+其中$\boldsymbol{F}_{fan}^b$和$\boldsymbol{M}_{fan}^b$表示由于涵道风扇旋转而产生的总的气动升力和力矩，$\boldsymbol{F}_{aero}^b$和$\boldsymbol{M}_{aero}^b$表示由于机身空气阻力产生的阻力和力矩，$\boldsymbol{F}_{vane}^b$和$\boldsymbol{M}_{vane}^b$表示由于涵道底部的控制舵面运动与风扇滑流相互作用而产生的力和力矩，$\boldsymbol{M}_{gyro}^b$表示由于涵道风扇的旋转而产生的陀螺力矩，$\boldsymbol{M}_{flap}^b$表示位于涵道底部的固定气动面于风扇滑流相互作用而产生的扭矩。下面将对各力与力矩的作用机理进行逐一分析。
+
+\subsection{涵道风扇动力学}
+
+涵道风扇是安装在圆形涵道内的螺旋桨，旋翼模型的研究主要基于基本动量理论和叶素理论。由于涵道入口边缘的吸力效应和出口处较高的静压的共同作用，相比于开放式的螺旋桨，在相同的功率下，涵道风扇具有更出色的静态性能。
+
+可以使用动量理论进行悬停情况下的分析，在相同的功率条件下，推力增益可以描述为扩张比的函数：
+\begin{equation}
+    \dfrac{T_{fan}}{T_{prop}}={\sqrt[3]{2\Lambda}}
+    \label{eq_12}
+\end{equation}
+其中$T_{fan}$是由于涵道风扇旋转以及气流与涵道相互作用产生的总拉力，$T_{prop}$表示传统开放式螺旋桨产生的拉力，$\Lambda$是扩张比。由式\eqref{eq_12}可以看出，扩张比大于0.5时，涵道风扇的推力增益大于1，即涵道风扇比开放式旋翼的推力效率更高。更详尽的分析可以在\parencite{pereiraHoverWindtunnelTesting2008}中找到。
+
+% $T_{fan}$可以分为两部分：涵道风扇旋转产生的拉力$T_{p}$和气流与涵道体相互作用产生的侧向拉力$T_{d}$。据此定义涵道拉力分配系数：
+% \begin{equation}
+%     \lambda=\dfrac{T_{p}}{T_{fan}}=\dfrac{T_{p}}{T_{p}+T_{d}}
+%     \label{eq_13}
+% \end{equation}
+
+% 由于涵道的遮挡作用，涵道出口的气流基本保持轴向流动，沿着轴线方向喷射出去，如图所示。假设空气密度为$\rho$，气流在未受到涵道风扇影响前的速度和压强分别为$V_0$和$p_0$，气流在逼近涵道风扇上表面时的速度增加为$V_1$同时压强减小为$p_1$。忽略风扇的厚度，气流通过风扇到下表面即将进入滑流区时，由于气流速度连续不可突变，所以认为气流速度保持$V_2=V_1$，但压强增加为$p_1+\Delta p$。气流进入滑流区后，速度进一步增大为$V_e$，压强恢复到来流状态$p_0$。在涵道风扇的上下表面分别应用伯努利方程：
+
+% \noindent 上表面
+% \begin{equation}
+%         p_0+\frac{1}{2}\rho V_0^2=p_1+\frac{1}{2}\rho V_1^2
+%     \label{eq_14}
+% \end{equation}
+% 下表面
+% \begin{equation}
+%     p_1+\Delta p+\frac{1}{2}\rho V_2^2=p_0+\frac{1}{2}\rho V_e^2
+%     \label{eq_15}
+% \end{equation}
+% 所以涵道风扇上下表面的压强差为：
+% \begin{equation}
+%     \Delta p=\frac{1}{2}\rho(V_e^2-V_0^2)
+%     \label{eq_16}
+% \end{equation}
+
+由于涵道的遮挡作用，涵道出口的气流基本保持轴向流动，沿着轴线方向喷射出去，如图所示。气流在未受到涵道风扇影响前的速度为$V_0$，在逼近涵道风扇上表面时的速度增加为$V_1$。忽略风扇的厚度，气流通过风扇到下表面即将进入滑流区时，由于气流速度连续不可突变，所以认为气流速度保持$V_2=V_1$。气流进入滑流区后，速度进一步增大为$V_e$并从涵道下方出口排出。
+
+假设风扇旋转时的桨盘面积为$S$，涵道扩压比为$\sigma_d$，$\sigma_d$表示涵道下方出口横截面面积与桨盘面积$S$之比。那么根据质量守恒有：
+\begin{equation}
+    \sigma_dSV_e=SV_2=SV_1
+    \label{eq_17}
+\end{equation}
+
+设空气密度为$\rho$，单位时间内通过涵道风扇的气流总质量为$\dot{m}_{air}$。一方面，根据动量定理可知，涵道风扇对气流施加的总作用力等于单位时间内气流通过风扇的动量变化率：
+\begin{equation}
+    T_{fan}=\dot{m}_{air}(V_e-V_0)=\rho S V_1(V_e-V_0)
+    \label{eq_18}
+\end{equation}
+另一方面，气体动能的变化量等同于涵道风扇输送给气体的功率:
+\begin{equation}
+    \frac{1}{2}\dot{m}_{air}V_e^2-\frac{1}{2}\dot{m}_{air}V_0^2=T_{fan}V_1
+    \label{eq_19}
+\end{equation}
+结合\eqref{eq_17}、\eqref{eq_18}和\eqref{eq_19}，可以得到\cite{pereiraHoverWindtunnelTesting2008}：
+\begin{equation}
+    V_e=\frac{V_0}{2}+\sqrt{\left(\frac{V_0}{2}\right)^2+\frac{T_{fan}}{\sigma_d\rho S}}    \label{eq_20}
+\end{equation}
+涵道出口处的气流速度$V_e$将在后续的空气动力学分析中发挥重要作用，包括控制舵面上的力与力矩的计算以及固定气动面扭矩的计算。
+
 
 
 
