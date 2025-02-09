@@ -180,13 +180,13 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \begin{equation}
     \left\{
     \begin{aligned}
-        \boldsymbol{F}^b&=\boldsymbol{F}_{fan}^b+\boldsymbol{F}_{aero}^b+\boldsymbol{F}_{vane}^b \\
-        \boldsymbol{M}^b&=\boldsymbol{M}_{fan}^b+\boldsymbol{M}_{aero}^b+\boldsymbol{M}_{vane}^b+\boldsymbol{M}_{gyro}^b+\boldsymbol{M}_{flap}^b
+        \boldsymbol{F}^b&=\boldsymbol{F}_{fan}^b+\boldsymbol{F}_{aero}^b+\boldsymbol{F}_{duct}^b+\boldsymbol{F}_{vane}^b \\
+        \boldsymbol{M}^b&=\boldsymbol{M}_{fan}^b+\boldsymbol{M}_{aero}^b+\boldsymbol{M}_{duct}^b+\boldsymbol{M}_{vane}^b+\boldsymbol{M}_{gyro}^b+\boldsymbol{M}_{flap}^b
     \end{aligned}
 \right.
 \label{eq_11}
 \end{equation}
-其中$\boldsymbol{F}_{fan}^b$和$\boldsymbol{M}_{fan}^b$表示由于涵道风扇旋转而产生的总的气动升力和力矩，$\boldsymbol{F}_{aero}^b$和$\boldsymbol{M}_{aero}^b$表示由于机身空气阻力产生的阻力和力矩，$\boldsymbol{F}_{vane}^b$和$\boldsymbol{M}_{vane}^b$表示由于涵道底部的控制舵面运动与风扇滑流相互作用而产生的力和力矩，$\boldsymbol{M}_{gyro}^b$表示由于涵道风扇的旋转而产生的陀螺力矩，$\boldsymbol{M}_{flap}^b$表示位于涵道底部的固定气动面于风扇滑流相互作用而产生的扭矩。下面将对各力与力矩的作用机理进行逐一分析。
+其中$\boldsymbol{F}_{fan}^b$和$\boldsymbol{M}_{fan}^b$表示由于涵道风扇旋转而产生的总的拉力和扭矩，$\boldsymbol{F}_{aero}^b$和$\boldsymbol{M}_{aero}^b$表示由于机身空气阻力产生的气动力和力矩，$\boldsymbol{F}_{duct}^b$和$\boldsymbol{M}_{duct}^b$表示作用于涵道环翼上的气动力与力矩，$\boldsymbol{F}_{vane}^b$和$\boldsymbol{M}_{vane}^b$表示由于涵道底部的控制舵面运动与风扇滑流相互作用而产生的力和力矩，$\boldsymbol{M}_{gyro}^b$表示由于涵道风扇的旋转而产生的陀螺力矩，$\boldsymbol{M}_{flap}^b$表示位于涵道底部的固定气动面于风扇滑流相互作用而产生的扭矩。下面将对各力与力矩的作用机理进行逐一分析。
 
 \subsection{涵道风扇动力学}
 
@@ -194,14 +194,14 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 可以使用动量理论进行悬停情况下的分析，在相同的功率条件下，推力增益可以描述为扩张比的函数：
 \begin{equation}
-    \dfrac{T_{fan}}{T_{prop}}={\sqrt[3]{2\Lambda}}
+    \dfrac{\boldsymbol{F}_{fan}^b}{\boldsymbol{F}_{prop}}={\sqrt[3]{2\Lambda}}
     \label{eq_12}
 \end{equation}
-其中$T_{fan}$是由于涵道风扇旋转以及气流与涵道相互作用产生的总拉力，$T_{prop}$表示传统开放式螺旋桨产生的拉力，$\Lambda$是扩张比。由式\eqref{eq_12}可以看出，扩张比大于0.5时，涵道风扇的推力增益大于1，即涵道风扇比开放式旋翼的推力效率更高。更详尽的分析可以在\parencite{pereiraHoverWindtunnelTesting2008}中找到。
+其中$\boldsymbol{F}_{fan}^b$是由于涵道风扇旋转产生的总拉力，$\boldsymbol{F}_{fan}^b$可以分为两部分：涵道风扇旋转产生的拉力$T_{fan}$和侧风与涵道风扇抽吸作用产生的侧向拉力$T_{l}$。$\boldsymbol{F}_{prop}$表示传统开放式螺旋桨产生的拉力，$\Lambda$是扩张比。由式\eqref{eq_12}可以看出，扩张比大于0.5时，涵道风扇的推力增益大于1，即涵道风扇比开放式旋翼的推力效率更高。更详尽的分析可以在\parencite{pereiraHoverWindtunnelTesting2008}中找到。
 
-% $T_{fan}$可以分为两部分：涵道风扇旋转产生的拉力$T_{p}$和气流与涵道体相互作用产生的侧向拉力$T_{d}$。据此定义涵道拉力分配系数：
+% 据此定义涵道拉力分配系数：
 % \begin{equation}
-%     \lambda=\dfrac{T_{p}}{T_{fan}}=\dfrac{T_{p}}{T_{p}+T_{d}}
+%     \lambda=\dfrac{T_{p}}{T_{fan}}=\dfrac{T_{p}}{T_{p}+T_{l}}
 %     \label{eq_13}
 % \end{equation}
 
@@ -223,7 +223,16 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 %     \label{eq_16}
 % \end{equation}
 
-由于涵道的遮挡作用，涵道出口的气流基本保持轴向流动，沿着轴线方向喷射出去，如图所示。气流在未受到涵道风扇影响前的速度为$V_0$，在逼近涵道风扇上表面时的速度增加为$V_1$。忽略风扇的厚度，气流通过风扇到下表面即将进入滑流区时，由于气流速度连续不可突变，所以认为气流速度保持$V_2=V_1$。气流进入滑流区后，速度进一步增大为$V_e$并从涵道下方出口排出。
+由于涵道的遮挡作用，涵道出口的气流基本保持轴向流动，沿着轴线方向喷射出去，如图\ref{轴流管道模型}所示。假设气流在未受到涵道风扇影响前的速度为$V_0$，在逼近涵道风扇上表面时的速度增加为$V_1$。忽略风扇的厚度，气流通过风扇到下表面即将进入滑流区时，由于气流速度连续不可突变，所以认为气流速度保持$V_2=V_1$。气流进入滑流区后，速度进一步增大为$V_e$并从涵道下方出口排出。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+		\centering
+		\includegraphics[scale=1]{Fig/轴流管道模型.pdf}
+		\caption{\label{轴流管道模型}轴流状态的空气动力学}
+	\end{minipage}%
+\end{figure}
 
 假设风扇旋转时的桨盘面积为$S$，涵道扩压比为$\sigma_d$，$\sigma_d$表示涵道下方出口横截面面积与桨盘面积$S$之比。那么根据质量守恒有：
 \begin{equation}
@@ -247,14 +256,108 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \end{equation}
 涵道出口处的气流速度$V_e$将在后续的空气动力学分析中发挥重要作用，包括控制舵面上的力与力矩的计算以及固定气动面扭矩的计算。
 
+关于涵道风扇产生的拉力$T_{fan}$、侧向拉力$T_{l}$和扭矩$\boldsymbol{M}_{fan}^b$的计算，可由下式给出\cite{luoNumericalAnalysisWind2024a}：
+\begin{equation}
+    \begin{aligned}
+        T_{fan}&=\rho S \Omega^2R^2 C_{fan}\\
+        T_{l}&=\rho S \Omega^2R^2 C_{l}\\
+        \boldsymbol{M}_{fan}^b&=\rho S \Omega^2 R^3C_{q}
+    \end{aligned}
+    \label{eq_21}
+\end{equation}
+其中$\Omega$是涵道风扇的旋转角速度，$R$是涵道风扇的旋转半径，$C_{fan}$、$C_{l}$和$C_{q}$分别是涵道风扇的拉力系数、侧向推力系数和扭矩系数。这三个系数与环境风速、飞机姿态等因素有关，难以用简单的解析式来表示。大部分文献都采用数值分析方法来测定\cite{iiiNondimensionalModelingDuctedFan2012,choiStaticAnalysisSmall2012,luoNumericalAnalysisWind2024a}。
+
+由于$\rho$、$S$、$R$均为常数，涵道风扇产生的总的拉力和扭矩$\boldsymbol{F}_{fan}^b$和$\boldsymbol{M}_{fan}^b$仅在机体系下的${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴产生效果，所以可以近似简化为以下形式\cite{choiStaticAnalysisSmall2012}：
+\begin{equation}
+    \begin{aligned}
+            \boldsymbol{F}_{fan}^b=\begin{bmatrix}0 \\ 0 \\
+                -k_{fan}\Omega^2
+            \end{bmatrix},\quad
+            \boldsymbol{M}_{fan}^b=\begin{bmatrix}0 \\ 0 \\
+            k_{q}\Omega^2
+            \end{bmatrix}
+    \end{aligned}
+    \label{eq_22}
+\end{equation}
+其中$k_{fan}$和$k_{q}$均为常系数，可采用数值分析方法近似测定。
+
+\subsection{机身动力学}
+
+涵道机身的气动阻力和力矩源于机身与气流的复杂相互作用，与飞机的速度和沿机体轴方向的横截面积等因素有关，可表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
+\begin{equation}
+    \begin{gathered}
+    \boldsymbol{F}_{aero}=-\frac{1}{2}\rho
+    \begin{bmatrix}
+    C_{D,x}S_xu|u| \\
+    C_{D,y}S_yv|v| \\
+    C_{D,z}S_zw|w|
+    \end{bmatrix},\quad
+    \boldsymbol{M}_{aero}=\frac{1}{2}\rho
+    \begin{bmatrix}
+    C_{D,y}S_yv|v| \\
+    -C_{D,x}S_xu|u| \\
+    0
+    \end{bmatrix}l_{a}
+    \label{eq_23}
+    \end{gathered}
+\end{equation}
+其中$C_{D,x}$、$C_{D,y}$和$C_{D,z}$分别是机身沿机体系三个轴方向的气动阻力系数，$S_x$、$S_y$和$S_z$分别是机身沿机体系三个轴方向的横截面积，$l_{a}$表示DFUAV的空气动力中心和其重心之间的距离。由$\boldsymbol{M}_{aero}$的表达式可以看出，机身气动力矩不会影响机体系下的${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴，暗含DFUAV的空气动力中心和其重心之间的距离在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}$轴上的分量为零，这是由于DFUAV的几何对称特性所导致的。
+
+\subsection{涵道动力学}
+
+类似直升机旋翼的经典建模方法，本小节基于不可压缩的定常流动假设建立升力L-阻力D模型来估算施加在涵道环翼上的气动力与力矩\cite{johnsonModelingControlFlight2006b}，如图所示。
+
+假设$\gamma$代表在机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的角度度量，$\boldsymbol{i}$和$\boldsymbol{j}$分别表示沿着机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}轴$的单位向量。那么在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的单位向量和速度向量可以表示为：
+\begin{align}
+    \boldsymbol{e}_{r}&=\cos\gamma\boldsymbol{i}+\sin\gamma\boldsymbol{j} \label{eq_24}\\
+    \boldsymbol{V}_{xy}&=-u\boldsymbol{i}-v\boldsymbol{j} \label{eq_25}
+\end{align}
+式\eqref{eq_25}中的速度表示机体相对于气流的速度，为表示气流相对于机体的速度需要加负号。为方便表示，假设在涵道周围沿${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴方向的速度分量是恒定的。那么径向速度$\boldsymbol{V}_{r}(\gamma)$作为$\gamma$的函数可以写为：
+\begin{equation}
+    V_r(\gamma)=\boldsymbol{V}_{xy}\cdot{\boldsymbol{e}}_r=-u\cos\gamma-v\sin\gamma    \label{eq_26}
+\end{equation}
+
+定义气流通过风扇时的诱导速度$V^{\prime}=V_1-V_0$，那么气流速度在${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴方向的速度分量$V_z(\gamma)$可以表示为：
+\begin{equation}
+    V_z(\gamma)=V^{\prime}-w   \label{eq_27}
+\end{equation}
+
+现在，涵道周围的动态压力$q_d(\gamma)$和迎角$\alpha_d(\gamma)$可以如下计算：
+\begin{equation}
+        q_d(\gamma)=\frac{1}{2}\rho\left(V_r^2+V_z^2\right) ,\quad
+        \alpha_d(\gamma)=\tan^{-1}\left(\frac{V_r}{V_z}\right)
+    \label{eq_28}
+\end{equation}
+根据式\eqref{eq_28}进一步可以表示出涵道周围单位展长的升力$l(\gamma)$和阻力$d(\gamma)$及其在每个机体轴的分量：
+\begin{equation}
+        l(\gamma)=C_{l,d}(\alpha_d)c_dq_d, \quad
+        d(\gamma)=C_{d,d}(\alpha_d)c_dq_d
+    \label{eq_29}
+\end{equation}
+\begin{equation}
+        \begin{aligned}
+            \Rightarrow
+        l_{x}(\gamma)&=l(\gamma)\cos\alpha_d\cos\gamma,\quad d_x(\gamma)=d(\gamma)\sin\alpha_d\cos\gamma \\
+        l_{y}(\gamma)&=l(\gamma)\cos\alpha_d\sin\gamma,\quad d_y(\gamma)=d(\gamma)\sin\alpha_d\sin\gamma \\
+        l_{z}(\gamma)&=-l(\gamma)\sin\alpha_d,\quad d_z(\gamma)=d(\gamma)\cos\alpha_d
+        \label{eq_30}
+    \end{aligned}
+\end{equation}
+式\eqref{eq_29}中$C_{l,d}$、$C_{d,d}$分别是涵道翼型的升力曲线和阻力曲线，均与迎角$\alpha_d(\gamma)$有关。$c_d$是涵道翼型的弦长。将式\eqref{eq_30}中的各轴向分量沿该轴方向积分便可得到每个轴的气动升力和阻力，如$x$轴方向：
+\begin{equation}
+    L_x=R\int_0^{2\pi}l_x(\gamma)d\gamma, \quad
+    D_x=R\int_0^{2\pi}d_x(\gamma)d\gamma
+    \label{eq_31}
+\end{equation}
+
+除气动升力和阻力外，DFUAV前飞时在涵道上还会产生附加的阻力（即动量阻力$\boldsymbol{F}_{mdrag}$\cite{choiStaticAnalysisSmall2012}）。该阻力可以通过进入涵道的空气质量流量和飞行速度来表示：
 
 
 
 
+\subsection{控制舵面动力学}
 
-
-
-
+涵道底部的控制舵面是DFUAV的主要控制机构，控制舵面的运动会产生气动力和力矩，这些力和力矩会影响DFUAV的运动特性。控制舵面的气动力和力矩可以表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
 
 
 
