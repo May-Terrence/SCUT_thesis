@@ -16,7 +16,7 @@
 	\end{minipage}%
 	\begin{minipage}[c]{0.5\textwidth}
 		\centering
-		\includegraphics[width=6cm,height=5cm]{Fig/P150PRO.png}
+		\includegraphics[width=7cm,height=5cm]{Fig/P150PRO.png}
 		\caption{\label{P150PRO}极飞P150PRO农业无人机}
 	\end{minipage}
 \end{figure}
@@ -65,20 +65,31 @@
 	\end{minipage}
 \end{figure}
 
-2015年12月30日，由以色列Tactical Robotics公司研发的AirMule救护无人机首航。如图\ref{AirMule2}所示，AirMule的起飞旋翼设置在了机身内部，由涵道壁包裹，尾部还有两个推进涵道风扇用于控制姿态。这种构型专为直升机不方便起降的情形而设计，如山川、林地等地形复杂的区域。由于AirMule可负载80kg的载重能力和150km/h的最大速度\cite{yuTechnicalAnalysisVTOL2016}，未来还将用于运输货物等任务。
+2015年12月30日，由以色列Tactical Robotics公司研发的AirMule救护无人机首航。如图\ref{AirMule}所示，AirMule的起飞旋翼设置在了机身内部，由涵道壁包裹，尾部还有两个推进涵道风扇用于控制姿态。这种构型专为直升机不方便起降的情形而设计，如山川、林地等地形复杂的区域。由于AirMule可负载80kg的载重能力和150km/h的最大速度\cite{yuTechnicalAnalysisVTOL2016}，未来还将用于运输货物等任务。
+
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
+% 		\centering
+% 		\includegraphics[width=7cm,height=5cm]{Fig/AirMule.jpg}
+% 		\caption{\label{AirMule}AirMule}
+% 	\end{minipage}%
+% 	\begin{minipage}[c]{0.5\textwidth}
+% 		\centering
+% 		\includegraphics[width=7cm,height=5cm]{Fig/Airmule内部结构.png}
+% 		\caption{\label{AirMule2}Airmule内部结构}
+% 	\end{minipage}
+% \end{figure}
 
 \begin{figure}[htbp]
 	\centering
-	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
-		\centering
-		\includegraphics[width=7cm,height=5cm]{Fig/AirMule.jpg}
-		\caption{\label{AirMule}AirMule}
-	\end{minipage}%
-	\begin{minipage}[c]{0.5\textwidth}
-		\centering
+    \subfloat[AirMule无人机]
+		{\includegraphics[width=7cm,height=5cm]{Fig/AirMule.jpg}
+		\label{AirMule1}}
+        \subfloat[AirMule内部结构]{
 		\includegraphics[width=7cm,height=5cm]{Fig/Airmule内部结构.png}
-		\caption{\label{AirMule2}Airmule内部结构}
-	\end{minipage}
+		\label{AirMule2}}
+        \caption{AirMule无人机及内部结构}\label{AirMule}
 \end{figure}
 
 在2016年的HWTrek全球智能硬件创新与制造大会上，来自比利时无人机Fleye引发众人关注，如图所示。因其大小与篮球相当，许多媒体也把它称为“球形无人机”。Fleye也属于DFUAV的一种，摄像头安装在上部，下部为光流传感器，由于其安全小巧的特点，媒体预测其未来将会应用于室内摄影、娱乐等场合。除上述提到的采用涵道构型无人机外，还有由新加坡ST Aerospace研发的FanTail系列\cite{mateosanguinoDesignStabilizationCoanda2024}、Aesir公司的Odin\cite{crivoi2013survey}和美国联合宇航公司的iSTAR\cite{flemingImprovingControlSystem,lipera2001micro}等。

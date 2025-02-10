@@ -1,16 +1,35 @@
-\chapter{涵道风扇式无人机的系统建模与硬件设计}
-%第二章：涵道风扇式无人机的系统建模与硬件设计。首先定义了DFUAV的坐标系和姿态表示方法，然后采用牛顿-欧拉方法推导出DFUAV的刚体运动学模型和刚体动力学模型，并分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
+\chapter{涵道风扇式无人机系统构成及建模}
 
-本章的重点是对如图\Ref{DFUAV}所示的DFUAV进行系统建模，这将是后续进行飞行控制算法设计的基础。在无人机的建模分析中，为简化模型复杂度并且便于控制算法的设计，有必要假设无人机是刚体。物体的相对运动离不开其所处的参考坐标系，因此本章将先介绍本文所使用的多坐标系描述方法以及姿态表示方法。然后采用在刚体上应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。最后分析了作用在涵道上的力与力矩。%最后介绍了DFUAV的硬件设计，包括传感器、执行器等。
+为方便检验本文的研究成果，自主搭建了一架DFUAV试验样机。本章首先简要介绍试验样机的系统组成和样机上搭载的航电系统，接下来重点是对DFUAV进行系统建模，这将是后续进行飞行控制算法设计的基础。物体的相对运动离不开其所处的参考坐标系，因此在建模之前将先介绍本文所使用的多坐标系描述方法以及DFUAV的姿态表示方法。在无人机的建模分析中，为简化模型复杂度便于控制算法的设计，有必要假设无人机是刚体。然后采用在刚体上应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。最后分析了作用在涵道上的力与力矩并作出总结。
+% DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一栋2019直升机飞行控制}，并为了表示方便，避免混淆，对部分变量的表示作略微修改。
 
-DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一栋2019直升机飞行控制}，并为了表示方便，避免混淆，对部分变量的表示作略微修改。
+\section{试验样机的系统组成}
+
+\subsection{主要结构介绍}
+
+自主搭建的DFUAV试验样机的实物及结构如图\ref{DFUAV}所示。DFUAV的主要结构包括机翼、机身、尾翼、涵道风扇、电机、电调、电池、飞控等部分。其中，机翼是DFUAV的承载结构，机身是DFUAV的主要载荷结构，尾翼是DFUAV的稳定结构，涵道风扇是DFUAV的动力来源，电机是涵道风扇的驱动部件，电调是电机的控制部件，电池是DFUAV的能量来源，飞控是DFUAV的智能控制部件。
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
+% 		\centering
+% 		\includegraphics[scale=0.85]{Fig/DFUAV.jpg}
+% 		\caption{\label{DFUAV}本文研究所使用的DFUAV}
+% 	\end{minipage}%
+%     \begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
+% 		\centering
+% 		\includegraphics[scale=1]{Fig/涵道结构.pdf}
+% 		\caption{\label{DFUAV1}本文研究所使用的DFUAV}
+% 	\end{minipage}%
+% \end{figure}
 \begin{figure}[htbp]
 	\centering
-	\begin{minipage}[c]{1\textwidth} % minipage将页面划分为0.5\textwidth
-		\centering
-		\includegraphics[scale=1]{Fig/DFUAV.jpg}
-		\caption{\label{DFUAV}本文研究所使用的DFUAV}
-	\end{minipage}%
+    \subfloat[试验样机]
+		{\includegraphics[scale=0.85]{Fig/DFUAV.jpg}
+		\label{试验样机}}
+        \subfloat[结构组成示意]{
+		\includegraphics[scale=1]{Fig/涵道结构.pdf}
+		\label{结构组成示意}}
+        \caption{试验样机及结构组成}\label{DFUAV}
 \end{figure}
 
 \section{坐标系和姿态表示方法}
@@ -71,7 +90,7 @@ DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一�
 \begin{equation}
     \boldsymbol\omega^{b}=\dot{\psi}\boldsymbol{R}_{\varphi} \boldsymbol{R}_{\theta} \boldsymbol{e}_{3}+\dot{\theta}\boldsymbol{R}_{\varphi}\boldsymbol{e}_{2}+\dot{\varphi}\boldsymbol{e}_{1}\label{eq_3}
 \end{equation}
-结合式\eqref{eq_1}-式\eqref{eq_3}，得到：
+结合式\eqref{eq_1}、式\eqref{eq_2}和式\eqref{eq_3}，得到：
 \begin{equation}
     \begin{gathered}
     \boldsymbol\omega^{b}=
@@ -250,11 +269,19 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
     \frac{1}{2}\dot{m}_{air}V_e^2-\frac{1}{2}\dot{m}_{air}V_0^2=T_{fan}V_1
     \label{eq_19}
 \end{equation}
-结合\eqref{eq_17}、\eqref{eq_18}和\eqref{eq_19}，可以得到\cite{pereiraHoverWindtunnelTesting2008}：
+结合\eqref{eq_17}、\eqref{eq_18}和\eqref{eq_19}，可以得到涵道出口风速$V_e$\cite{pereiraHoverWindtunnelTesting2008}：
 \begin{equation}
     V_e=\frac{V_0}{2}+\sqrt{\left(\frac{V_0}{2}\right)^2+\frac{T_{fan}}{\sigma_d\rho S}}    \label{eq_20}
 \end{equation}
-涵道出口处的气流速度$V_e$将在后续的空气动力学分析中发挥重要作用，包括控制舵面上的力与力矩的计算以及固定气动面扭矩的计算。
+定义涵道风扇的诱导速度为$V^{\prime}=V_1-V_0$，那么结合\eqref{eq_17}和\eqref{eq_20}可以得到：
+\begin{equation}
+    \begin{aligned}
+    V^{\prime}&=\sigma_dV_e-V_0 \\
+    &=\left(\frac{\sigma_d}{2}-1\right)V_0+\sqrt{\left(\frac{V_0\sigma_d}{2}\right)^2+\frac{T_{fan}\sigma_d}{\rho S}}
+    \label{induced velocity}
+    \end{aligned}
+\end{equation}
+涵道出口处的气流速度$V_e$和涵道风扇的诱导速度$V^{\prime}$将在后续的空气动力学分析中发挥重要作用，包括涵道翼型上产生的附加阻力的计算、控制舵面上的力与力矩的计算以及固定气动面扭矩的计算等。
 
 关于涵道风扇产生的拉力$T_{fan}$、侧向拉力$T_{l}$和扭矩$\boldsymbol{M}_{fan}^b$的计算，可由下式给出\cite{luoNumericalAnalysisWind2024a}：
 \begin{equation}
@@ -267,66 +294,73 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \end{equation}
 其中$\Omega$是涵道风扇的旋转角速度，$R$是涵道风扇的旋转半径，$C_{fan}$、$C_{l}$和$C_{q}$分别是涵道风扇的拉力系数、侧向推力系数和扭矩系数。这三个系数与环境风速、飞机姿态等因素有关，难以用简单的解析式来表示。大部分文献都采用数值分析方法来测定\cite{iiiNondimensionalModelingDuctedFan2012,choiStaticAnalysisSmall2012,luoNumericalAnalysisWind2024a}。
 
-由于$\rho$、$S$、$R$均为常数，涵道风扇产生的总的拉力和扭矩$\boldsymbol{F}_{fan}^b$和$\boldsymbol{M}_{fan}^b$仅在机体系下的${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴产生效果，所以可以近似简化为以下形式\cite{choiStaticAnalysisSmall2012}：
-\begin{equation}
-    \begin{aligned}
+由于$\rho$、$S$、$R$均为常数，涵道风扇产生的总的拉力和扭矩$\boldsymbol{F}_{fan}^b$和$\boldsymbol{M}_{fan}^b$仅在机体系下的${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴产生效果，所以可以近似简化为以下形式\cite{choiStaticAnalysisSmall2012,manzoorCompositeObserverbasedRobust2023}：
+\begin{align}
             \boldsymbol{F}_{fan}^b=\begin{bmatrix}0 \\ 0 \\
                 -k_{fan}\Omega^2
-            \end{bmatrix},\quad
+            \end{bmatrix}    \label{eq_21.5}\\
             \boldsymbol{M}_{fan}^b=\begin{bmatrix}0 \\ 0 \\
             k_{q}\Omega^2
-            \end{bmatrix}
-    \end{aligned}
-    \label{eq_22}
-\end{equation}
+            \end{bmatrix}    \label{eq_22}
+\end{align}
 其中$k_{fan}$和$k_{q}$均为常系数，可采用数值分析方法近似测定。
-
 \subsection{机身动力学}
 
 涵道机身的气动阻力和力矩源于机身与气流的复杂相互作用，与飞机的速度和沿机体轴方向的横截面积等因素有关，可表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
-\begin{equation}
-    \begin{gathered}
-    \boldsymbol{F}_{aero}=-\frac{1}{2}\rho
+\begin{gather}
+    \boldsymbol{F}_{aero}^b=-\frac{1}{2}\rho
     \begin{bmatrix}
     C_{D,x}S_xu|u| \\
     C_{D,y}S_yv|v| \\
     C_{D,z}S_zw|w|
-    \end{bmatrix},\quad
-    \boldsymbol{M}_{aero}=\frac{1}{2}\rho
+    \end{bmatrix}\label{eq_22.5}\\
+    \boldsymbol{M}_{aero}^b=\frac{1}{2}\rho
     \begin{bmatrix}
     C_{D,y}S_yv|v| \\
     -C_{D,x}S_xu|u| \\
     0
     \end{bmatrix}l_{a}
     \label{eq_23}
-    \end{gathered}
-\end{equation}
-其中$C_{D,x}$、$C_{D,y}$和$C_{D,z}$分别是机身沿机体系三个轴方向的气动阻力系数，$S_x$、$S_y$和$S_z$分别是机身沿机体系三个轴方向的横截面积，$l_{a}$表示DFUAV的空气动力中心和其重心之间的距离。由$\boldsymbol{M}_{aero}$的表达式可以看出，机身气动力矩不会影响机体系下的${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴，暗含DFUAV的空气动力中心和其重心之间的距离在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}$轴上的分量为零，这是由于DFUAV的几何对称特性所导致的。
+\end{gather}
+其中$C_{D,x}$、$C_{D,y}$和$C_{D,z}$分别是机身沿机体系三个轴方向的气动阻力系数，$S_x$、$S_y$和$S_z$分别是机身沿机体系三个轴方向的横截面积，$l_{a}$表示DFUAV的机身空气动力中心和其重心之间的距离。
+
+由$\boldsymbol{M}_{aero}^b$的表达式可以看出，机身气动力矩不会影响机体系下的${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴，暗含DFUAV的空气动力中心和其重心之间的距离在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}$轴上的分量为零，这是由于DFUAV的几何对称特性所导致的。
 
 \subsection{涵道动力学}
 
-类似直升机旋翼的经典建模方法，本小节基于不可压缩的定常流动假设建立升力L-阻力D模型来估算施加在涵道环翼上的气动力与力矩\cite{johnsonModelingControlFlight2006b}，如图所示。
+类似直升机旋翼的经典建模方法，本小节基于不可压缩的定常流动假设建立升力L-阻力D模型来估算空速施加在涵道环翼上的气动力与力矩\cite{johnsonModelingControlFlight2006b}，如图\ref{非轴流状态}所示。
 
-假设$\gamma$代表在机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的角度度量，$\boldsymbol{i}$和$\boldsymbol{j}$分别表示沿着机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}轴$的单位向量。那么在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的单位向量和速度向量可以表示为：
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+		\centering
+		\includegraphics[scale=1]{Fig/非轴流状态.pdf}
+		\caption{\label{非轴流状态}非轴流状态（前飞时）的空气动力学}
+	\end{minipage}%
+\end{figure}
+
+定义空速向量$\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$为机体相对于气流的速度在机体系的投影，标量表示为$V_a$，空速与环境风速有关。当环境风速为零时，$\boldsymbol{V}_a^b=\boldsymbol{V}^b$。假设$\gamma$代表在机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的角度度量，$\boldsymbol{i}$和$\boldsymbol{j}$分别表示沿着机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}轴$的单位向量。那么在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的单位向量和速度向量可以表示为：
 \begin{align}
     \boldsymbol{e}_{r}&=\cos\gamma\boldsymbol{i}+\sin\gamma\boldsymbol{j} \label{eq_24}\\
-    \boldsymbol{V}_{xy}&=-u\boldsymbol{i}-v\boldsymbol{j} \label{eq_25}
+    \boldsymbol{V}_{xy}&=-u_r\boldsymbol{i}-v_r\boldsymbol{j} \label{eq_25}
 \end{align}
-式\eqref{eq_25}中的速度表示机体相对于气流的速度，为表示气流相对于机体的速度需要加负号。为方便表示，假设在涵道周围沿${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴方向的速度分量是恒定的。那么径向速度$\boldsymbol{V}_{r}(\gamma)$作为$\gamma$的函数可以写为：
+由于式\eqref{eq_25}中的速度表示机体相对于气流的速度，为表示气流相对于机体的速度需要加负号。为方便表示，假设在涵道周围沿${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴方向的速度分量是恒定的。那么径向速度${V}_{r}(\gamma)$作为$\gamma$的函数可以写为：
 \begin{equation}
-    V_r(\gamma)=\boldsymbol{V}_{xy}\cdot{\boldsymbol{e}}_r=-u\cos\gamma-v\sin\gamma    \label{eq_26}
+    V_r(\gamma)=\boldsymbol{V}_{xy}\cdot{\boldsymbol{e}}_r=-u_r\cos\gamma-v_r\sin\gamma    \label{eq_26}
 \end{equation}
-
-定义气流通过风扇时的诱导速度$V^{\prime}=V_1-V_0$，那么气流速度在${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴方向的速度分量$V_z(\gamma)$可以表示为：
+气流速度在${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴方向相对于机体的速度分量$V_z(\gamma)$可以表示为：
 \begin{equation}
-    V_z(\gamma)=V^{\prime}-w   \label{eq_27}
+    V_z(\gamma)=-w_r   \label{eq_27}
 \end{equation}
+其中诱导速度$V^{\prime}$于式\eqref{induced velocity}中定义。
 
 现在，涵道周围的动态压力$q_d(\gamma)$和迎角$\alpha_d(\gamma)$可以如下计算：
 \begin{equation}
-        q_d(\gamma)=\frac{1}{2}\rho\left(V_r^2+V_z^2\right) ,\quad
-        \alpha_d(\gamma)=\tan^{-1}\left(\frac{V_r}{V_z}\right)
+    \begin{aligned}
+        q_d(\gamma)&=\frac{1}{2}\rho\left(V_r^2+V_z^2\right)\\
+        \alpha_d(\gamma)&=\tan^{-1}\left(\frac{V_r}{V_z}\right)
     \label{eq_28}
+    \end{aligned}
 \end{equation}
 根据式\eqref{eq_28}进一步可以表示出涵道周围单位展长的升力$l(\gamma)$和阻力$d(\gamma)$及其在每个机体轴的分量：
 \begin{equation}
@@ -350,14 +384,168 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
     \label{eq_31}
 \end{equation}
 
-除气动升力和阻力外，DFUAV前飞时在涵道上还会产生附加的阻力（即动量阻力$\boldsymbol{F}_{mdrag}$\cite{choiStaticAnalysisSmall2012}）。该阻力可以通过进入涵道的空气质量流量和飞行速度来表示：
+除气动升力和阻力外，DFUAV前飞时（非轴流状态）在涵道上还会产生附加的阻力（即动量阻力$\boldsymbol{F}_{mdrag}$\cite{choiStaticAnalysisSmall2012}）。如图\ref{非轴流状态}所示，由于涵道体的遮挡，气流的径向速度$V_r$分量在进入涵道体后迅速衰减为$V_r^\prime$，因此导致径向气体动量的变化，从而产生附加的阻力。该阻力可以通过进入涵道的空气质量流量和飞行速度来表示：
+\begin{equation}
+    \boldsymbol{F}_{mdrag}=-V^\prime\rho{S}
+    \begin{bmatrix}u_r \\v_r \\0
+    \end{bmatrix}
+    \label{eq_32}
+\end{equation}
 
+侧风作用于涵道结构形成的的非对称升力分布同样会产生力矩，假定该力矩与侧风引起的动态压力为近似线性关系，那么可量化为：
+\begin{equation}
+    \boldsymbol{M}_{lip}=C_{duct}\rho{R}
+    \begin{bmatrix}v_r|v_r| \\-u_r|u_r| \\0\end{bmatrix}
+    \label{eq_33}
+\end{equation}
+其中，$C_{duct}$是常系数。该系数最初可根据iSTAR\cite{flemingImprovingControlSystem}的实验数据估算，随后需要结合实际情况调整。
 
-
+综合\eqref{eq_31}、\eqref{eq_32}、\eqref{eq_33}，在涵道翼型上产生的力与力矩可以表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
+\begin{align}
+    \boldsymbol{F}_{duct}^b=
+    \begin{bmatrix}
+    L_x+D_x \\
+    L_y+D_y \\
+    L_z+D_z
+    \end{bmatrix}+\boldsymbol{F} _{mdrag}\label{eq_33.5}\\
+    \boldsymbol{M}_{duct}^b=
+    \begin{bmatrix}
+    L_xl_d \\
+    L_yl_d \\
+    0
+    \end{bmatrix}+\boldsymbol{M}_{lip}
+    \label{eq_34}
+\end{align}
+其中$l_d$表示DFUAV的重心与涵道空气动力中心之间的距离。
 
 \subsection{控制舵面动力学}
 
-涵道底部的控制舵面是DFUAV的主要控制机构，控制舵面的运动会产生气动力和力矩，这些力和力矩会影响DFUAV的运动特性。控制舵面的气动力和力矩可以表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
+涵道底部的控制舵面是DFUAV的主要控制机构，在飞行过程中控制舵面的运动会产生气动力和力矩，这些力矩是造成DFUAV进行滚转、俯仰、偏航姿态变化的主要原因。如图所示，本文研究的DFUAV配置有四片交叉排列的控制舵面，定义机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴正方向下方位置对应的控制舵面为1号舵，从上往下按照顺时针方向依次编号为2、3、4号舵。1、3号舵的同向运动用于产生滚转力矩，2、4号舵的同向运动用于产生俯仰力矩，4个舵的共同差动用于产生偏航力矩。定义控制舵面的偏转角度为$\delta_i$，其中$i=1,2,3,4$分别对应4个控制舵面，向右偏转为正方向，零位点保持与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴平行。
+
+在涵道风扇滑流中，由于控制舵面的偏转而产生的升力与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴垂直，且与转角$\delta_i$的平方成正比\cite{pflimlinModelingAttitudeControl2010a}：
+\begin{equation}
+    F_i=k_\delta{V_e}^2\delta_i \quad i=1,2,3,4
+    \label{eq_35}
+\end{equation}
+其中$k_\delta$是正的常数，表示控制舵面升力系数。${V_e}$为涵道出口风速，由式\eqref{eq_20}给出。
+
+因此，由控制舵面产生的合力与合力矩可以表示为\cite{pflimlinModelingAttitudeControl2010a,manzoorCompositeObserverbasedRobust2023}：
+    \begin{gather}
+    \boldsymbol{F}_{vane}^b=\begin{bmatrix}
+    F_4-F_2 \\ F_1-F_3 \\ 0 
+    \end{bmatrix}     \label{eq_35.5}\\
+    \boldsymbol{M}_{vane}^b=\begin{bmatrix}
+        -l_1(F_1-F_3) \\ l_1(F_4-F_2) \\ l_2(F_1+F_2+F_3+F_4) 
+    \end{bmatrix}
+    \label{eq_36}
+    \end{gather}
+式\eqref{eq_36}中的$l_1$和$l_2$分别为涵道的力臂，如图所示。事实上，控制舵面的偏转角仅在DFUAV的失速迎角的范围内才有效果\cite{9787121348440000}，超出该范围后，姿态将难以控制。因此需要对偏转角度进行限幅处理：
+\begin{equation}
+    -\delta_m\leq\delta_{i}\leq\delta_m,\quad i=1,2,3,4
+    \label{eq_37}
+\end{equation}
+对于本文研究的DFUAV，限幅值$\delta_m$取$40^\circ$。
+
+\subsection{陀螺力矩与固定气动面反扭矩}
+
+涵道风扇在高速旋转时，DFUAV本身类似于一个陀螺。当风扇的旋转轴在外力的作用下偏离原旋转方向时，由于陀螺效应会使涵道风扇产生一个垂直于旋转轴方向的反作用力矩，以此来保持角动量的守恒。此力矩即为陀螺力矩，其大小与风扇的转动惯量和旋转的角速度有关：
+\begin{equation}
+    \boldsymbol{M}_{gyro}^b=J_{fan}\Omega
+    \begin{bmatrix}
+    -q \\ p \\ 0
+    \end{bmatrix}
+    \label{eq_38}
+\end{equation}
+其中$J_{fan}$为涵道风扇的转动惯量。
+
+固定气动面是指位于涵道内部，涵道风扇下方的固定装置。其特殊的外形结构用于在涵道风扇滑流中产生反扭矩来抵消DFUAV单一风扇产生的风扇扭矩$\boldsymbol{M}_{fan}^b$，固定气动面的反扭距效应可以近似表示为\cite{1020333010.nh}：
+\begin{equation}
+    \boldsymbol{M}_{flap}^b=V_e^2\varphi_0
+    \begin{bmatrix}
+    0 \\0 \\d_{af}
+    \end{bmatrix}
+    +V_e\Omega
+    \begin{bmatrix}
+    0 \\0 \\d_{ds}
+    \end{bmatrix}
+    \label{eq_39}
+\end{equation}
+其中$\varphi_0$是固定气动面的安装角，$d_{af}$和$d_{ds}$均为常数。
+
+经过恰当的设计，固定气动面产生的反扭距$\boldsymbol{M}_{flap}^b$可以抵消大部分的风扇扭矩$\boldsymbol{M}_{gyro}^b$。在实践过程中很难达到理想情况，即$\boldsymbol{M}_{flap}^b + \boldsymbol{M}_{gyro}^b = \boldsymbol{0}$，所以剩余的力矩部分将由控制舵面的固定偏置产生偏航力矩来进行补偿。
+
+\section{系统建模总结}
+
+DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的偏转角$\delta_i$，作为动力核心的涵道风扇通过转速调节产生主推力，四片分布式气动舵面通过独立偏转生成三维控制力矩。系统的输出为状态变量，其中包括DFUAV在地面坐标系下的位置$\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$、地面坐标系下的速度$\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$、姿态角$\boldsymbol{\eta}=[\varphi \quad \theta \quad \psi]^T$以及机体坐标系下的角速度$\boldsymbol{\omega}^b=[p \quad q \quad r]^T$。结合DFUAV的飞行控制刚体模型和力与力矩的分析，可以推导出DFUAV的非线性动态方程，如下所示：
+
+位置动态方程：
+\begin{equation}
+    \begin{aligned}
+        \dot{x}^{e}&=v_x^e\\
+        \dot{y}^{e}&=v_y^e\\
+        \dot{z}^{e}&=v_z^e
+    \end{aligned}
+    \label{eq_40}
+\end{equation}
+
+速度动态方程：
+\begin{equation}
+    \begin{aligned}
+        \dot{v}_{x}^{e} & =\frac{1}{m}\Bigg\{ (\cos{\theta}\cos{\psi}) 
+        \cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu|u|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
+        & \quad+ (\sin{\varphi}\sin{\theta}\cos{\psi}-\cos{\varphi}\sin{\psi}) \\
+        & \quad\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv|v|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
+        & \quad+ (\cos{\varphi}\sin{\theta}\cos{\psi}+\sin{\varphi}\sin{\psi}) \\
+        & \quad\cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw|w|+L_z+D_z\right]
+        \Bigg\}
+        \\
+        \dot{v}_{y}^{e} & =\frac{1}{m}\Bigg\{ (\cos{\theta}\sin{\psi}) \cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu|u|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
+        & \quad+ (\sin{\varphi}\sin{\theta}\sin{\psi}+\cos{\varphi}\cos{\psi}) \\
+        & \quad\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv|v|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
+        & \quad+ (\cos{\varphi}\sin{\theta}\sin{\psi}-\sin{\varphi}\cos{\psi}) \\
+        & \quad\cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw|w|+L_z+D_z\right]
+        \Bigg\}
+        \\
+        \dot{v}_{y}^{e} & =\frac{1}{m}\Bigg\{ -\sin{\theta}\cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu|u|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
+        & \quad+ (\sin{\varphi}\cos{\theta})\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv|v|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
+        & \quad+ (\cos{\varphi}\cos{\theta}) \cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw|w|+L_z+D_z\right]
+        \Bigg\}+g
+    \end{aligned}
+    \label{eq_41}
+\end{equation}
+
+姿态动态方程：
+\begin{equation}
+    \begin{aligned}
+        \dot{\varphi}&=p+\sin{\varphi}\tan{\theta}q+\cos{\varphi}\tan{\theta}r\\
+        \dot{\theta}&=\cos{\varphi}q-\sin{\varphi}r\\
+        \dot{\psi}&=\frac{\sin{\varphi}}{\cos{\theta}}q+\frac{\cos{\varphi}}{\cos{\theta}}r
+    \end{aligned}
+    \label{eq_42}
+\end{equation}
+
+角速度动态方程：
+\begin{equation}
+    \begin{aligned}
+        \dot{p}  &=\frac{1}{J_x}\Bigg\{ (J_y-J_z)qr+
+        \left[\frac{1}{2}\rho{l_a} C_{D,y}S_yv|v|+L_xl_d+C_{duct}\rho{R}
+        v_r|v_r| \right.\\
+        & \quad\left.- l_1k_\delta V_e^2(\delta_1 - \delta_3)-J_fan\Omega{q}\right] \\
+        \dot{q}  &=\frac{1}{J_y}\Bigg\{ (J_z-J_x)pr+
+        \left[-\frac{1}{2}\rho{l_a} C_{D,x}S_xu|u|+L_yl_d+C_{duct}\rho{R}
+        u_r|u_r| \right.\\
+        & \quad\left.+ l_1k_\delta V_e^2(\delta_4 - \delta_2)+J_fan\Omega{p}\right] \\
+        \dot{r}  &=\frac{1}{J_z}\Bigg\{ (J_x-J_y)pq+
+        \left[k_q\Omega^2 +l_2k_\delta V_e^2(\delta_1 + \delta_2 + \delta_3 + \delta_4)\right.\\
+        & \quad\left.+V_e^2\varphi_0d_{af}+V_e\Omega{d_{ds}}\right]
+        \Bigg\}
+    \end{aligned}
+    \label{eq_43}
+\end{equation}
+
+由DFUAV的非线性动态方程可知，DFUAV的飞行动态呈现为一个高度非线性的多变量耦合系统，系统内各状态变量之间存在着复杂且紧密的相互作用。若要将所有相关变量纳入考量，控制算法的设计工作将尤为棘手。因此在具体实践过程中，可以根据实际情况合力简化模型，有针对性地忽略部分影响较小的因素，保留决定系统宏观特性的主干动力学。然而，模型简化意味着信息缺失，对于未被建模的动态特性（如突然的阵风扰动、机械结构磨损等）以及因简化模型而产生的误差，则可通过鲁棒性的飞行控制算法来进行补偿。
+
+\section{本章小结}
 
 
 
@@ -365,14 +553,8 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 
 
-\section{主文件}
-scutthesis.tex文件相当于主函数，调用各章的内容。\LaTeX{}源代码以一个\textbackslash{}documentclass 命令作为开头，它指定了文档使用的文档类。文档类规定了\LaTeX{}源代码所要生成的文档的性质——普通文章、书籍、演示文稿、个人简
-历等等。
-\begin{lstlisting}
-\documentclass[<options>]{<class-name>}
-\end{lstlisting}
-其中class-name为文档类的名称，如\LaTeX{}提供的article, book, report，可在其基础上派
-生的一些文档类或者有其它功能的一些文档类。\LaTeX{}提供的基础文档类见文献\parencite{_c}。还可以自定义文档类，如华南理工大学硕博士论文文档类scutthesis，其实现保存在后缀名为.cls的文件中。可选参数options 为文档类指定选项。
+
+
 
 
 document环境当中的内容是文档正文：

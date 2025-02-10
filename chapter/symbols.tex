@@ -7,27 +7,24 @@
      $\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$-无人机在地面坐标系下的位置 &  & $\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$-无人机在地面坐标系下的速度\tabularnewline
      $\boldsymbol{V}^{b}=[{u} \quad {v} \quad {w}]^{T}$-无人机在机体坐标系下的速度 && $ \psi $-偏航角\tabularnewline
 	 $\theta$-俯仰角                                                    && $\varphi$-滚转角\tabularnewline
-	 $\boldsymbol{R}^n_b$、$\boldsymbol{R}$-机体系到NED系的旋转矩阵\tabularnewline
-	 $\boldsymbol{G}$-NED系的重力  							  &  &   $\varphi_0 $-气动面安装角\tabularnewline
-	 $ w $-系统的外部扰动								&  &  $T$-系统采样周期\tabularnewline
-	 $\boldsymbol{F}$-机体系的气动力 						    &  &   $\boldsymbol{M}$-机体系的气动力矩\tabularnewline
-	 $\rho$-空气密度 								  &  &  $C_{D,x} $、$ C_{D,y} $、$ C_{D,z} $-沿机体轴阻力系数\tabularnewline
-	 $A_x $、$ A_y $、$ A_z $-沿机体轴的截面面积 		 &  &  $v$-机身相对于空气的速度分量\tabularnewline 
-	 $l_{a}$-机身气动阻力作用点与重心的距离   			  &  &  $V_c$-气体在无穷远处的速度\tabularnewline
-	 $T_d$-涵道体升力  								 &  &  $T_p$-风扇升力\tabularnewline
-	 $T_a$-总升力 								      &  &  $q_a$-涵道升力分配系数\tabularnewline
-	 $ p_U $-桨盘上表面压强 						   &  &  $p_L$-桨盘下表面压强\tabularnewline
-	 $V_c+V_i$-桨盘上下表面气体速度 					 &  &  $S$-桨盘面积\tabularnewline
-	 $ V_i $-桨盘处气流诱导速度 						  &  &  $ V_{cr} $-理想自转下降速率\tabularnewline
-	 $ Q $-风扇扭矩 								 &  &  $ \varpi $-风扇转速\tabularnewline
-	 $\mu$-环绕涵道角度变量 						  &  &  $\hat{\boldsymbol{i}}$-沿机体系$x$轴方向的单位矢量\tabularnewline 
-	 $\hat{\boldsymbol{j}}$-沿机体系$y$轴方向的单位矢量  	   &  &  $C_{l, d}(\alpha_d)$-涵道翼型升力曲线\tabularnewline 
-	 $C_{d, d}(\alpha_d)$涵道翼型阻力曲线  		      &  &  $c_d$-涵道翼型弦长\tabularnewline 
-	 $C_{l_{\alpha}}$-风管翼型升力曲线斜率  			 &  &  $C_{l, \min }$、$ C_{l, \max } $-升力系数极限\tabularnewline 
-	 $C_{d, o }$、$C_{d, g }$-拟合阻力曲线经验常数 	&  &  $R$-风扇半径\tabularnewline 
-	 $C_{d u c t}$ - 常值比例系数  					&  &  $l_{d}$-重心与涵道气动力作用点的距离\tabularnewline
-	 $k_{\delta}$-操纵面气动升力系数 				 &  &  $\alpha_d$-攻角\tabularnewline
-	 $ I_{b}$-风扇转动惯量  						   &  &  $ d_{af} $ 、$ d_{ds} $-风扇扭矩常系数\tabularnewline
-	 $\boldsymbol{L}_{{r}}$-风扇角动量  						&  & \tabularnewline 					
+     $\boldsymbol{\omega}^b=[p \quad q \quad r]^T$-无人机在机体坐标系下的角速度 && $\boldsymbol{R}_e^b$-机体坐标系到地面坐标系的旋转矩阵\tabularnewline
+	 $\boldsymbol{F}^b$-无人机在机体坐标系下受到的除重力外的合力  							  &  &   $m $-无人机总质量\tabularnewline
+	 $ g $-当地的重力加速度								&  &  $\boldsymbol{M}^b$-无人机在机体坐标系下受到的合外力矩\tabularnewline
+	 $\boldsymbol{J}^b$-无人机在机体坐标系下的转动惯量 		    &  &   $S$-桨盘面积\tabularnewline
+	 $ \sigma_d $-涵道扩压比 	&  &  $\rho$-空气密度\tabularnewline
+	  $V_e$	-涵道出口风速							  &  &  $V^{\prime}$	-涵道风扇诱导速度\tabularnewline
+      $T_{fan}$-风扇升力  						 &  &  $T_l$-涵道体升力\tabularnewline
+	 $\Omega$-风扇转速 							 &  &  $R$-风扇半径\tabularnewline
+	 $k_{fan}$-风扇拉力常系数 							 &  &  $k_{q}$-风扇扭矩常系数\tabularnewline
+     $C_{D,x}$、$C_{D,y}$和$C_{D,z}$-沿机体坐标系轴的气动阻力系数  &  &  $S_x $、$ S_y $、$ S_z $-沿机体轴的截面面积\tabularnewline
+	 $l_{a}$-机身空气动力中心与机身重心的距离   			  &  &  $\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$-机体相对于气流的速度在机体系的投影\tabularnewline
+     $\gamma$-环绕涵道角度变量 						  &  &  ${{V}_r}$-气流相对于机体的径向速度\tabularnewline 
+    ${{V}_z}$-气流相对于机体的轴向速度   &  &  ${{q}_d}$-涵道周围的动态压力\tabularnewline
+     $ \alpha_d $-迎角 							 &  &  $C_{l, d}$-涵道翼型升力曲线\tabularnewline
+	 $C_{d, d}$涵道翼型阻力曲线  		      &  &  $c_d$-涵道翼型弦长\tabularnewline 
+     $C_{d u c t}$ - 常值比例系数  					&  &  $l_{d}$-重心与涵道空气动力中心之间的距离\tabularnewline
+	 $k_{\delta}$-控制舵面升力系数 				 &  &  $\delta_i$-控制舵面偏转角\tabularnewline
+	 $ J_{fan}$-涵道风扇转动惯量  						   &  &  $ d_{af} $ 、$ d_{ds} $-风扇扭矩常系数\tabularnewline
+	 ${\varphi}_{0}$-固定气动面安装角  						&  & \tabularnewline 					
 	\end{tabular}
 \end{table}
