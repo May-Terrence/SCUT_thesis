@@ -1,26 +1,14 @@
 \chapter{涵道风扇式无人机系统构成及建模}
 
-为方便检验本文的研究成果，自主搭建了一架DFUAV试验样机。本章首先简要介绍试验样机的系统组成和样机上搭载的航电系统，接下来重点是对DFUAV进行系统建模，这将是后续进行飞行控制算法设计的基础。物体的相对运动离不开其所处的参考坐标系，因此在建模之前将先介绍本文所使用的多坐标系描述方法以及DFUAV的姿态表示方法。在无人机的建模分析中，为简化模型复杂度便于控制算法的设计，有必要假设无人机是刚体。然后采用在刚体上应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。最后分析了作用在涵道上的力与力矩并作出总结。
+为方便检验本文的研究成果，自主搭建了一架DFUAV试验样机。本章首先简要介绍试验样机的结构组成和机载航电系统，然后重点是对DFUAV进行系统建模，这将是后续进行飞行控制算法设计的基础。物体的相对运动离不开其所处的参考坐标系，因此在建模之前将先介绍本文所使用的坐标系描述方法以及DFUAV的姿态表示方法。在建模分析中，为简化模型复杂度便于控制算法的设计，有必要假设无人机是刚体。然后采用在刚体上应用广泛的牛顿-欧拉方法推导出DFUAV的刚体运动学模型和动力学模型，得到飞行控制的刚体模型。最后分析了作用在涵道上的力与力矩并作出总结。
 % DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一栋2019直升机飞行控制}，并为了表示方便，避免混淆，对部分变量的表示作略微修改。
 
 \section{试验样机的系统组成}
 
 \subsection{主要结构介绍}
 
-自主搭建的DFUAV试验样机的实物及结构如图\ref{DFUAV}所示。DFUAV的主要结构包括机翼、机身、尾翼、涵道风扇、电机、电调、电池、飞控等部分。其中，机翼是DFUAV的承载结构，机身是DFUAV的主要载荷结构，尾翼是DFUAV的稳定结构，涵道风扇是DFUAV的动力来源，电机是涵道风扇的驱动部件，电调是电机的控制部件，电池是DFUAV的能量来源，飞控是DFUAV的智能控制部件。
-% \begin{figure}[htbp]
-% 	\centering
-% 	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
-% 		\centering
-% 		\includegraphics[scale=0.85]{Fig/DFUAV.jpg}
-% 		\caption{\label{DFUAV}本文研究所使用的DFUAV}
-% 	\end{minipage}%
-%     \begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
-% 		\centering
-% 		\includegraphics[scale=1]{Fig/涵道结构.pdf}
-% 		\caption{\label{DFUAV1}本文研究所使用的DFUAV}
-% 	\end{minipage}%
-% \end{figure}
+自主搭建的DFUAV试验样机的实物及主要结构如图\ref{DFUAV}所示。类似大部分无人机，DFUAV也有电子仓、电池、电调、电机和螺旋桨等组成部件。电子仓中放置了飞行控制系统的硬件，电池是DFUAV的能量来源，电调、电机和螺旋桨共同组成了DFUAV的动力系统。不同于常规旋翼无人机，DFUAV的螺旋桨由涵道体包裹，用于提升拉力效率和安全性。在螺旋桨下方的滑流区安装有固定气动面用于提供反扭距，最下方安装了四个控制舵面用于提供DFUAV的三维力矩。
+
 \begin{figure}[htbp]
 	\centering
     \subfloat[试验样机]
@@ -28,9 +16,27 @@
 		\label{试验样机}}
         \subfloat[结构组成示意]{
 		\includegraphics[scale=1]{Fig/涵道结构.pdf}
-		\label{结构组成示意}}
+		\label{主要结构组成}}
         \caption{试验样机及结构组成}\label{DFUAV}
 \end{figure}
+
+\subsection{机载航电系统}
+
+图\ref{主要结构组成}中的上部电子仓和下部电子仓共同构成了DFUAV的机载航电系统，系统内部主要包括微控制器、各种传感器、通信链路等部分。下面对这些部分进行简要介绍：
+
+\begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
+	\item 微控制器（MCU）
+
+    作为DFUAV飞行控制系统的核心处理器，MCU承担着多传感器数据融合与实时决策的关键任务。本文选用意法半导体公司生产的基于ARM架构的STM32F767系列MCU，其工作频率高达216MHz，通信接口丰富（包括UART/USART、SPI、I2C、CAN等）以及2MB的Flash存储器和512KB的SRAM。其高性能低功耗的特点十分适用于DFUAV的控制。
+
+    \item 惯性测量单元（IMU）
+
+    IMU用于测量无人机的加速度和角速度，其输出的数据被用于实时解算无人机的姿态。本文选用了InvenSense公司的ICM-20602六轴IMU，内部集成了三轴陀螺仪和三轴加速度计。ICM-20602具有高量程（$\pm16g$）、大缓冲区（1KB的FIFO）和高精度（误差$\pm1\%$）等特点，并且可以以10MHz的SPI接口或者400kHz的I2C接口输出数据。
+
+    \item 气压计
+
+    \item 磁力计
+\end{enumerate}
 
 \section{坐标系和姿态表示方法}
 
@@ -56,12 +62,12 @@
 	\centering
 	\begin{minipage}[c]{0.5\textwidth}
 		\centering
-		\includegraphics[scale=1]{Fig/演示文稿1.pdf}
+		\includegraphics[scale=1]{Fig/坐标系.pdf}
 		\caption{\label{坐标系}地面坐标系与机体坐标系定义}
 	\end{minipage}%
     \begin{minipage}[c]{0.5\textwidth}
 		\centering
-		\includegraphics[scale=1]{Fig/演示文稿2.pdf}
+		\includegraphics[scale=1]{Fig/欧拉角.pdf}
 		\caption{\label{欧拉角}‘Z-Y-X’欧拉角的定义}
 	\end{minipage}%
 \end{figure}
@@ -420,7 +426,20 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 \subsection{控制舵面动力学}
 
-涵道底部的控制舵面是DFUAV的主要控制机构，在飞行过程中控制舵面的运动会产生气动力和力矩，这些力矩是造成DFUAV进行滚转、俯仰、偏航姿态变化的主要原因。如图所示，本文研究的DFUAV配置有四片交叉排列的控制舵面，定义机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴正方向下方位置对应的控制舵面为1号舵，从上往下按照顺时针方向依次编号为2、3、4号舵。1、3号舵的同向运动用于产生滚转力矩，2、4号舵的同向运动用于产生俯仰力矩，4个舵的共同差动用于产生偏航力矩。定义控制舵面的偏转角度为$\delta_i$，其中$i=1,2,3,4$分别对应4个控制舵面，向右偏转为正方向，零位点保持与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴平行。
+涵道底部的控制舵面是DFUAV的主要控制机构，在飞行过程中控制舵面的运动会产生气动力和力矩，这些力矩是造成DFUAV进行滚转、俯仰、偏航姿态变化的主要原因。如图\ref{控制舵面}所示，本文研究的DFUAV配置有四片交叉排列的控制舵面，定义机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴正方向下方位置对应的控制舵面为1号舵，从上往下按照顺时针方向依次编号为2、3、4号舵。1、3号舵的同向运动用于产生滚转力矩，2、4号舵的同向运动用于产生俯仰力矩，4个舵的共同差动用于产生偏航力矩。定义控制舵面的偏转角度为$\delta_i$，其中$i=1,2,3,4$分别对应4个控制舵面，向右偏转为正方向，零位点保持与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴平行。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{0.5\textwidth} % minipage将页面划分为0.5\textwidth
+		\centering
+		\includegraphics[scale=1]{Fig/控制舵面.pdf}
+	\end{minipage}%
+	\begin{minipage}[c]{0.5\textwidth}
+		\centering
+		\includegraphics[scale=1]{Fig/力臂.pdf}
+	\end{minipage}
+    \caption{\label{控制舵面}控制舵面及力臂示意图}
+\end{figure}
 
 在涵道风扇滑流中，由于控制舵面的偏转而产生的升力与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴垂直，且与转角$\delta_i$的平方成正比\cite{pflimlinModelingAttitudeControl2010a}：
 \begin{equation}
@@ -439,7 +458,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
     \end{bmatrix}
     \label{eq_36}
     \end{gather}
-式\eqref{eq_36}中的$l_1$和$l_2$分别为涵道的力臂，如图所示。事实上，控制舵面的偏转角仅在DFUAV的失速迎角的范围内才有效果\cite{9787121348440000}，超出该范围后，姿态将难以控制。因此需要对偏转角度进行限幅处理：
+式\eqref{eq_36}中的$l_1$和$l_2$分别为涵道的力臂，如图\ref{控制舵面}所示。事实上，控制舵面的偏转角仅在DFUAV的失速迎角的范围内才有效果\cite{9787121348440000}，超出该范围后，姿态将难以控制。因此需要对偏转角度进行限幅处理：
 \begin{equation}
     -\delta_m\leq\delta_{i}\leq\delta_m,\quad i=1,2,3,4
     \label{eq_37}
@@ -458,7 +477,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \end{equation}
 其中$J_{fan}$为涵道风扇的转动惯量。
 
-固定气动面是指位于涵道内部，涵道风扇下方的固定装置。其特殊的外形结构用于在涵道风扇滑流中产生反扭矩来抵消DFUAV单一风扇产生的风扇扭矩$\boldsymbol{M}_{fan}^b$，固定气动面的反扭距效应可以近似表示为\cite{1020333010.nh}：
+固定气动面是指位于涵道内部，涵道风扇下方的固定装置。其特殊的外形结构用于在涵道风扇滑流中产生反扭矩来抵消DFUAV单一风扇产生的风扇扭矩$\boldsymbol{M}_{fan}^b$，涵道内部流场示意图如图\ref{固定气动面}所示。固定气动面的反扭距效应可以近似表示为\cite{1020333010.nh}：
 \begin{equation}
     \boldsymbol{M}_{flap}^b=V_e^2\varphi_0
     \begin{bmatrix}
@@ -472,7 +491,16 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \end{equation}
 其中$\varphi_0$是固定气动面的安装角，$d_{af}$和$d_{ds}$均为常数。
 
-经过恰当的设计，固定气动面产生的反扭距$\boldsymbol{M}_{flap}^b$可以抵消大部分的风扇扭矩$\boldsymbol{M}_{gyro}^b$。在实践过程中很难达到理想情况，即$\boldsymbol{M}_{flap}^b + \boldsymbol{M}_{gyro}^b = \boldsymbol{0}$，所以剩余的力矩部分将由控制舵面的固定偏置产生偏航力矩来进行补偿。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth} 
+		\centering
+		\includegraphics[scale=1]{Fig/固定气动面.pdf}
+	\end{minipage}%
+    \caption{\label{固定气动面}涵道内部流场示意图}
+\end{figure}
+
+经过恰当的设计，固定气动面产生的反扭距$\boldsymbol{M}_{flap}^b$可以抵消大部分的风扇扭矩$\boldsymbol{M}_{fan}^b$。在实践过程中很难达到理想情况，即$\boldsymbol{M}_{flap}^b + \boldsymbol{M}_{fan}^b = \boldsymbol{0}$，所以剩余的力矩部分将由控制舵面的固定偏置产生偏航力矩来进行补偿。
 
 \section{系统建模总结}
 
