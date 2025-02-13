@@ -4,20 +4,20 @@
 	\centering{}%
 	\begin{tabular}{l>{\centering}p{0.5cm}l}
 	 $ \boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $-地面坐标系  &  & ${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$-机体坐标系\tabularnewline
-     $\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$-无人机在地面坐标系下的位置 &  & $\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$-无人机在地面坐标系下的速度\tabularnewline
-     $\boldsymbol{V}^{b}=[{u} \quad {v} \quad {w}]^{T}$-无人机在机体坐标系下的速度 && $ \psi $-偏航角\tabularnewline
+     $\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$-地面系下的位置 &  & $\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$-地面系下的速度\tabularnewline
+     $\boldsymbol{V}^{b}=[{u} \quad {v} \quad {w}]^{T}$-机体系下的速度 && $ \psi $-偏航角\tabularnewline
 	 $\theta$-俯仰角                                                    && $\varphi$-滚转角\tabularnewline
-     $\boldsymbol{\omega}^b=[p \quad q \quad r]^T$-无人机在机体坐标系下的角速度 && $\boldsymbol{R}_e^b$-机体坐标系到地面坐标系的旋转矩阵\tabularnewline
-	 $\boldsymbol{F}^b$-无人机在机体坐标系下受到的除重力外的合力  							  &  &   $m $-无人机总质量\tabularnewline
-	 $ g $-当地的重力加速度								&  &  $\boldsymbol{M}^b$-无人机在机体坐标系下受到的合外力矩\tabularnewline
-	 $\boldsymbol{J}^b$-无人机在机体坐标系下的转动惯量 		    &  &   $S$-桨盘面积\tabularnewline
+     $\boldsymbol{\omega}^b=[p \quad q \quad r]^T$-机体系下的角速度 && $\boldsymbol{R}_e^b$-机体系到地面系的旋转矩阵\tabularnewline
+	 $\boldsymbol{F}^b$-机体系下受到的除重力外的合力  							  &  &   $m $-无人机总质量\tabularnewline
+	 $ g $-当地的重力加速度								&  &  $\boldsymbol{M}^b$-机体系下受到的合外力矩\tabularnewline
+	 $\boldsymbol{J}^b$-机体系下的转动惯量 		    &  &   $S$-桨盘面积\tabularnewline
 	 $ \sigma_d $-涵道扩压比 	&  &  $\rho$-空气密度\tabularnewline
 	  $V_e$	-涵道出口风速							  &  &  $V^{\prime}$	-涵道风扇诱导速度\tabularnewline
       $T_{fan}$-风扇升力  						 &  &  $T_l$-涵道体升力\tabularnewline
 	 $\Omega$-风扇转速 							 &  &  $R$-风扇半径\tabularnewline
 	 $k_{fan}$-风扇拉力常系数 							 &  &  $k_{q}$-风扇扭矩常系数\tabularnewline
-     $C_{D,x}$、$C_{D,y}$和$C_{D,z}$-沿机体坐标系轴的气动阻力系数  &  &  $S_x $、$ S_y $、$ S_z $-沿机体轴的截面面积\tabularnewline
-	 $l_{a}$-机身空气动力中心与机身重心的距离   			  &  &  $\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$-机体相对于气流的速度在机体系的投影\tabularnewline
+     $C_{D,x}$、$C_{D,y}$、$C_{D,z}$-沿机体轴的阻力系数  &  &  $S_x $、$ S_y $、$ S_z $-沿机体轴的截面面积\tabularnewline
+	 $l_{a}$-机身空气动力中心与机身重心的距离   			  &  &  $\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$-空速\tabularnewline
      $\gamma$-环绕涵道角度变量 						  &  &  ${{V}_r}$-气流相对于机体的径向速度\tabularnewline 
     ${{V}_z}$-气流相对于机体的轴向速度   &  &  ${{q}_d}$-涵道周围的动态压力\tabularnewline
      $ \alpha_d $-迎角 							 &  &  $C_{l, d}$-涵道翼型升力曲线\tabularnewline

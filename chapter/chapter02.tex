@@ -22,39 +22,54 @@
 
 \subsection{机载航电系统}
 
-图\ref{主要结构组成}中的上部电子仓和下部电子仓共同构成了DFUAV的机载航电系统，系统内部主要包括微控制器、各种传感器、通信链路等部分。下面对这些部分进行简要介绍：
+图\ref{主要结构组成}中的上部电子仓和下部电子仓共同构成了DFUAV的机载航电系统，掌控着飞行的各个环节，系统内部主要包括微控制器、各种传感器、通信链路等部分。下面对这些部分进行简要介绍：
 
-\begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
-	\item 微控制器（MCU）
+(1)微控制器（MCU）
 
-    作为DFUAV飞行控制系统的核心处理器，MCU承担着多传感器数据融合与实时决策的关键任务。本文选用意法半导体公司生产的基于ARM架构的STM32F767系列MCU，其工作频率高达216MHz，通信接口丰富（包括UART/USART、SPI、I2C、CAN等）以及2MB的Flash存储器和512KB的SRAM。其高性能低功耗的特点十分适用于DFUAV的控制。
+    作为DFUAV飞行控制系统的核心处理器，MCU承担着多传感器数据融合与实时决策的关键任务。本系统选用意法半导体公司生产的基于ARM架构的STM32F767系列MCU，其工作频率高达216MHz，通信接口丰富（包括UART/USART、SPI、I2C、CAN等）以及2MB的闪存和512KB的静态随机存储器。其高性能低功耗的特点十分适用于DFUAV的控制。
 
-    \item 惯性测量单元（IMU）
+(2)惯性测量单元（IMU）
 
-    IMU用于测量无人机的加速度和角速度，其输出的数据被用于实时解算无人机的姿态。本文选用了InvenSense公司的ICM-20602六轴IMU，内部集成了三轴陀螺仪和三轴加速度计。ICM-20602具有高量程（$\pm16g$）、大缓冲区（1KB的FIFO）和高精度（误差$\pm1\%$）等特点，并且可以以10MHz的SPI接口或者400kHz的I2C接口输出数据。
+    IMU用于测量无人机的加速度和角速度，其输出的数据被用于实时解算无人机的姿态。本系统选用了InvenSense公司的ICM-20602六轴IMU，内部集成了三轴陀螺仪和三轴加速度计。ICM-20602具有高量程（$\pm16g$）、大缓冲区（1KB的FIFO）和高精度（误差$\pm1\%$）等特点，并且可以以10MHz的SPI接口或者400kHz的I2C接口输出数据。
 
-    \item 气压计
+(3)磁力计
 
-    \item 磁力计
-\end{enumerate}
+    磁力计固连在机体上用于测量当前位置的地磁感应强度，其输出的数据结合IMU数据被用于实时解算无人机的航向。本系统选用意法半导体公司的LSM303D系列磁力计，由于测量的数据易受到外界磁场干扰，尤其是电池放电过程中产生的磁场，所以磁力计被安装在远离电池的下部电子仓内。
+
+(4)卫星定位模块
+
+    卫星定位模块用于接收多颗卫星信号来获取无人机的位置和速度等信息。本系统选用了瑞士u-blox公司的ZED-F9P-04B的高精度GPS卫星定位模块，该模块收敛时间快并且方便集成实时动态载波相位差分技术（RTK）实现厘米级的定位精度。
+    
+(5)气压计
+
+    气压计用于测量当前位置的大气压强并进一步解算出海拔高度。本系统选用的英飞凌公司的DPS368压力传感器，该产品自带防风外壳，基于电容式传感原理在温度变化时依然能保持高精度（$\pm0.02m$），可以在恶劣环境中使用。
+
+(6)无线数据传输模块
+
+    无线数据传输模块用于地面站与飞机之间的无线通信，包括由地面站发送给飞机的控制指令和飞机发送到地面站的状态信息等，本方案选用Microhard的hp840无线调制解调器，支持840-845MHz的跳频或定频工作以及理想情况下160公里的传输距离。
+
+在飞行控制周期内，MCU首先首先完成多个传感器设备的协同启动与自检流程，然后通过外设接口读取IMU、磁力计、GPS、气压计等传感器的数据。接下来通过滤波方法对数据进行平滑去噪等处理，并且通过导航算法融合数据解算出无人机的位置、速度、姿态和角速度等状态信息。借助多频段无线数传模块构建的低延迟通信链路，无人机不仅以50Hz刷新率向地面站传输飞行状态遥测数据包，同时实时接收包含航点指令、模式切换、紧急制动等要素的上行控制帧。控制指令与实时飞行状态参数共同输入至飞行控制决策层，经过飞行控制算法处理后，计算出给到执行机构（电机和舵机）的指令，从而实现对飞行器六自由度运动的闭环控制。
+
 
 \section{坐标系和姿态表示方法}
 
-考虑到无人机的位置变化与姿态变化，基于地面坐标系($\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $)和机体坐标系(${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$)的多坐标系表示法被广泛采用。
+考虑到无人机的位置变化与姿态变化，基于地面坐标系($\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $)和机体坐标系(${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$)的多坐标系表示法被广泛应用于无人机的运动分析与控制系统设计中。
 
-\begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
-	\item 地面坐标系
+% \begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
+% \item 地面坐标系
+(1)地面坐标系
 
-    地面坐标系的原点$\boldsymbol{O}_e$可以是地平面上的任意一点，一般定义为无人机的起飞点。三轴方向分别为$\boldsymbol{O}_e-\boldsymbol{X}_e$轴在地平面内指向地理正北方向（N），$\boldsymbol{O}_e-\boldsymbol{Y}_e$轴在地平面内指向地理正东方向（E），$\boldsymbol{O}_e-\boldsymbol{Z}_e$轴按照右手定则，垂直于地面指向地心，方向向下（D）。因此地面坐标系也被称为北东地（NED）坐标系，该坐标系与地球固连。
+地面坐标系的原点$\boldsymbol{O}_e$可以是地平面上的任意一点，一般定义为无人机的起飞点。三轴方向分别为$\boldsymbol{O}_e-\boldsymbol{X}_e$轴在地平面内指向地理正北方向（N），$\boldsymbol{O}_e-\boldsymbol{Y}_e$轴在地平面内指向地理正东方向（E），$\boldsymbol{O}_e-\boldsymbol{Z}_e$轴按照右手定则，垂直于地面指向地心，方向向下（D）。因此地面坐标系也被称为北东地（NED）坐标系，该坐标系与地球固连。
 
-	\item 机体坐标系
-	
-    机体坐标系与无人机的机体固连，其原点$\boldsymbol{O}_b$定义为无人机的重心位置。三轴方向分别为$\boldsymbol{O}_b-\boldsymbol{X}_b$轴在无人机对称平面内指向人为定义的机头方向，$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴在无人机对称平面内垂直于$\boldsymbol{O}_b-\boldsymbol{X}_b$轴向下为正，$\boldsymbol{O}_b-\boldsymbol{Y}_b$轴按照右手定则与$\boldsymbol{X}_b-\boldsymbol{O}_b-\boldsymbol{Z}_b$平面垂直，沿着机身的右侧方向向右为正。
-\end{enumerate}
+% \item 机体坐标系
+(2)机体坐标系
 
-地面坐标系和机体坐标系定义如图\ref{坐标系}所示。同一个物理量在不同的坐标系中有不同的大小和方向，为便于区分，在全文中统一使用上标$(.)^{e}$与$(.)^{b}$表示同一个物理量在地面坐标系和机体坐标系下的表示。
+机体坐标系与无人机的机体固连，其原点$\boldsymbol{O}_b$定义为无人机的重心位置。三轴方向分别为$\boldsymbol{O}_b-\boldsymbol{X}_b$轴在无人机对称平面内指向人为定义的机头方向，$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴在无人机对称平面内垂直于$\boldsymbol{O}_b-\boldsymbol{X}_b$轴向下为正，$\boldsymbol{O}_b-\boldsymbol{Y}_b$轴按照右手定则与$\boldsymbol{X}_b-\boldsymbol{O}_b-\boldsymbol{Z}_b$平面垂直，沿着机身的右侧方向向右为正。
+% \end{enumerate}
 
-在地面坐标系下采用惯性/GPS导航等方式，无人机的位置和速度等运动状态可以方便直观地映射到地理空间中。无人机的重心相对于地面坐标系的位置矢量在地面坐标系下表示为$\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$，机体重心沿着地面坐标系的速度矢量在地面坐标系下表示为$\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$，机体重心相对于地面坐标系的速度矢量在机体坐标系下表示为$\boldsymbol{V}^{b}=[{u} \quad {v} \quad {w}]^{T}$。
+地面坐标系和机体坐标系定义如图\ref{坐标系}所示。同一个物理量在不同的坐标系中有不同的大小和方向，为便于区分，在全文中统一使用上标$(.)^{e}$与$(.)^{b}$表示同一个物理量分别在地面坐标系和机体坐标系下的表示。
+
+在地面坐标系下采用惯性导航系统、GPS导航等方式，无人机的位置和速度等运动状态可以方便直观地映射到地理空间中。这种方式使得无人机的飞行轨迹与实际地理位置紧密相关，以便进行飞行路线规划和轨迹优化。无人机的重心相对于地面坐标系的位置矢量在地面坐标系下表示为$\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$，机体重心沿着地面坐标系的速度矢量在地面坐标系下表示为$\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$，机体重心相对于地面坐标系的速度矢量在机体坐标系下表示为$\boldsymbol{V}^{b}=[{u} \quad {v} \quad {w}]^{T}$。
 
 地面坐标系与机体坐标系的旋转变化关系体现了无人机的姿态变化，无人机常用的姿态描述方法有欧拉角、旋转矩阵和四元数等方式。其中欧拉角表示方法因物理意义明确，表示直观，所以被广泛采用。但因其奇异性问题\cite{全权2018多旋翼飞行器设计与控制}，欧拉角表示法在一些特殊场景的使用下受到制约（如横滚角或者俯仰角为$\pm90^{\circ}$的情况）。考虑到本研究在姿态控制中，由于输入姿态指令和输出舵面角度的约束，不会出现上述奇异情况，所以本文采用欧拉角来描述无人机的姿态。根据欧拉定理，地面坐标系按照某个固定点经过三次基本旋转可以得到机体坐标系。由于旋转运动与坐标系原点的位置无关，所以为便于理解，将地面坐标系的原点与机体坐标系原点重合（即$\boldsymbol{O}_e=\boldsymbol{O}_b$），如图\ref{欧拉角}所示。在三次基本旋转中，旋转轴是待转动坐标系的某一轴，旋转的角度即为欧拉角。由于姿态旋转矩阵可以表示为三次基本旋转的乘积，所以与旋转顺序密切相关。由于本研究不会出现奇异问题，所以本文采用常用的‘Z-Y-X’的旋转顺序的欧拉角表示法。
 
@@ -135,7 +150,7 @@
 
 \section{飞行控制刚体模型}
 
-DFUAV的建模过程需要在准确性与实用性之间寻求平衡，确保不会过于复杂而增加控制算法设计的难度和计算资源的开销，同时也不至于过于简单而与实际情况相差甚远。据此，忽略风扇以及控制舵面的转动，假设DFUAV是刚体，并且在飞行过程中其质量和转动惯量保持不变。在这种情况下，DFUAV的刚体运动学和动力学模型可以通过牛顿-欧拉方法推导得到。
+DFUAV的建模过程需要在准确性与实用性之间找到合适的平衡，确保不会过于复杂而增加控制算法设计的难度和计算资源的开销，同时也不至于过于简单而与实际情况相差甚远。因此，在建模过程中假设DFUAV是刚体，并且假设DFUAV在飞行过程中其质量和转动惯量（机体坐标系下）保持不变。基于这种假设，DFUAV的刚体运动学和动力学模型可以通过牛顿-欧拉方法推导得到。
 
 \subsection{刚体运动学模型}
 
@@ -174,7 +189,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
     \label{eq_8}
     \end{gathered}
 \end{equation}
-其中$\boldsymbol{M}^{b}\in\mathbb{R}^{3\times1}$表示DFUAV在机体系下受到的合外力矩，$\boldsymbol{L}^{b}\in\mathbb{R}^{3\times1}$表示DFUAV在机体系下总的角动量，‘$\times$’表示向量叉乘运算。$\boldsymbol{J}^{b}\in\mathbb{R}^{3\times3}$表示DFUAV在机体系中的转动惯量矩阵，其在机体系下是一个常量。根据图\Ref{DFUAV}，可以看出本文研究的DFUAV呈现对称的几何结构，故$\boldsymbol{J}^{b}$可以近似为一个对角矩阵，即
+其中$\boldsymbol{M}^{b}\in\mathbb{R}^{3\times1}$表示DFUAV在机体系下受到的合外力矩，$\boldsymbol{L}^{b}\in\mathbb{R}^{3\times1}$表示DFUAV在机体系下总的角动量，‘$\times$’表示向量叉乘运算。$\boldsymbol{J}^{b}\in\mathbb{R}^{3\times3}$表示DFUAV在机体系中的转动惯量矩阵，其在机体系下是一个常量。根据图\Ref{DFUAV}，可以看出本文研究的DFUAV呈现对称的几何结构，故本文建模过程中认为$\boldsymbol{J}^{b}$近似为一个对角矩阵，即
 \begin{equation}
     \boldsymbol{J}^b=\begin{bmatrix}
         J_{x} & 0 & 0 \\
@@ -184,7 +199,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
     \label{eq_9}
 \end{equation}
 
-类似地，在机体系下可以更加直观地表示姿态动力学模型中相关变量，并且便于下文对力矩的分析，其中${\boldsymbol{L}^{b}}\times{\boldsymbol\omega^{b}}$部分表示由惯性系旋转到机体系产生的影响。
+类似地，在机体系下可以更加直观地表示姿态动力学模型中相关变量，并且便于下文对力矩的分析，其中${\boldsymbol{L}^{b}}\times{\boldsymbol\omega^{b}}$部分分量表示由惯性系旋转到机体系产生的影响。
 
 综合上述分析，可以得到DFUAV的飞行控制刚体模型：
 \begin{equation}
@@ -289,7 +304,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \end{equation}
 涵道出口处的气流速度$V_e$和涵道风扇的诱导速度$V^{\prime}$将在后续的空气动力学分析中发挥重要作用，包括涵道翼型上产生的附加阻力的计算、控制舵面上的力与力矩的计算以及固定气动面扭矩的计算等。
 
-关于涵道风扇产生的拉力$T_{fan}$、侧向拉力$T_{l}$和扭矩$\boldsymbol{M}_{fan}^b$的计算，可由下式给出\cite{luoNumericalAnalysisWind2024a}：
+关于涵道风扇产生的拉力$T_{fan}$、侧向拉力$T_{l}$和扭矩$\boldsymbol{M}_{fan}^b$的计算，由下式给出\cite{luoNumericalAnalysisWind2024a}：
 \begin{equation}
     \begin{aligned}
         T_{fan}&=\rho S \Omega^2R^2 C_{fan}\\
@@ -304,7 +319,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \begin{align}
             \boldsymbol{F}_{fan}^b=\begin{bmatrix}0 \\ 0 \\
                 -k_{fan}\Omega^2
-            \end{bmatrix}    \label{eq_21.5}\\
+            \end{bmatrix},\quad    
             \boldsymbol{M}_{fan}^b=\begin{bmatrix}0 \\ 0 \\
             k_{q}\Omega^2
             \end{bmatrix}    \label{eq_22}
@@ -312,18 +327,20 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 其中$k_{fan}$和$k_{q}$均为常系数，可采用数值分析方法近似测定。
 \subsection{机身动力学}
 
-涵道机身的气动阻力和力矩源于机身与气流的复杂相互作用，与飞机的速度和沿机体轴方向的横截面积等因素有关，可表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
+涵道机身的气动阻力和力矩源于机身与气流错综复杂的相互作用。当无人机在空中飞行时，周围的气流会以一定的速度与涵道机身表面接触。这种相互碰撞、摩擦，形成了阻碍飞机前进的气动阻力。同时，由于气流在机身不同部位的速度和压强分布不均匀，会对机身产生一个使它绕某一轴转动的趋势，这便是气动力矩。根据空气动力学原理，气动阻力与飞机与气流相对速度的平方大致成正比关系。而且速度的变化还会影响气流在机身周围的流动形态，使得气动力矩也发生相应变化。另外，沿机体轴方向的横截面积同样是影响气动阻力和力矩的重要因素。较大的横截面积意味着气流与机身的接触面积更大，气流在流经机身时受到的阻碍也会增加。由于DFUAV的外部由涵道体包裹，因此横截面积较大，更会加剧这一过程。
+
+定义空速向量$\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$为机体相对于气流的速度在机体系的投影，标量表示为$V_a$，空速与环境风速有关。当环境风速为零时，$\boldsymbol{V}_a^b=\boldsymbol{V}^b$。在机身产生的力与力矩可表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
 \begin{gather}
     \boldsymbol{F}_{aero}^b=-\frac{1}{2}\rho
     \begin{bmatrix}
-    C_{D,x}S_xu|u| \\
-    C_{D,y}S_yv|v| \\
-    C_{D,z}S_zw|w|
+    C_{D,x}S_xu_r|u_r| \\
+    C_{D,y}S_yv_r|v_r| \\
+    C_{D,z}S_zw_r|w_r|
     \end{bmatrix}\label{eq_22.5}\\
     \boldsymbol{M}_{aero}^b=\frac{1}{2}\rho
     \begin{bmatrix}
-    C_{D,y}S_yv|v| \\
-    -C_{D,x}S_xu|u| \\
+    C_{D,y}S_yv_r|v_r| \\
+    -C_{D,x}S_xu_r|u_r| \\
     0
     \end{bmatrix}l_{a}
     \label{eq_23}
@@ -345,7 +362,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 	\end{minipage}%
 \end{figure}
 
-定义空速向量$\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$为机体相对于气流的速度在机体系的投影，标量表示为$V_a$，空速与环境风速有关。当环境风速为零时，$\boldsymbol{V}_a^b=\boldsymbol{V}^b$。假设$\gamma$代表在机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的角度度量，$\boldsymbol{i}$和$\boldsymbol{j}$分别表示沿着机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}轴$的单位向量。那么在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的单位向量和速度向量可以表示为：
+假设$\gamma$代表在机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的角度度量，$\boldsymbol{i}$和$\boldsymbol{j}$分别表示沿着机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴和${\boldsymbol{O}_b}-{\boldsymbol{Y}_b}轴$的单位向量。那么在${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}$平面内的单位向量和速度向量可以表示为：
 \begin{align}
     \boldsymbol{e}_{r}&=\cos\gamma\boldsymbol{i}+\sin\gamma\boldsymbol{j} \label{eq_24}\\
     \boldsymbol{V}_{xy}&=-u_r\boldsymbol{i}-v_r\boldsymbol{j} \label{eq_25}
@@ -467,7 +484,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 \subsection{陀螺力矩与固定气动面反扭矩}
 
-涵道风扇在高速旋转时，DFUAV本身类似于一个陀螺。当风扇的旋转轴在外力的作用下偏离原旋转方向时，由于陀螺效应会使涵道风扇产生一个垂直于旋转轴方向的反作用力矩，以此来保持角动量的守恒。此力矩即为陀螺力矩，其大小与风扇的转动惯量和旋转的角速度有关：
+涵道风扇在高速旋转时，DFUAV整体会呈现出类似陀螺的特性。根据角动量守恒定律，当涵道风扇的旋转轴在外力影响下发生偏移时，为了维持整个系统角动量的守恒，涵道风扇会产生一个特殊的反作用力矩。该力矩垂直于旋转轴的偏移方向，试图将旋转轴拉回到原来的方向，从而抵抗外力对旋转状态的干扰。这种作用力矩即为陀螺力矩，其大小与风扇的转动惯量和旋转的角速度有关。转动惯量体现了涵道风扇抵抗转动状态改变的能力，它取决于风扇的质量分布以及形状等因素。角速度反映了风扇旋转的快慢程度。当风扇以较高的角速度旋转时，角动量也较大，为了维持角动量而产生的陀螺力矩也越大。所以有：
 \begin{equation}
     \boldsymbol{M}_{gyro}^b=J_{fan}\Omega
     \begin{bmatrix}
@@ -477,7 +494,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \end{equation}
 其中$J_{fan}$为涵道风扇的转动惯量。
 
-固定气动面是指位于涵道内部，涵道风扇下方的固定装置。其特殊的外形结构用于在涵道风扇滑流中产生反扭矩来抵消DFUAV单一风扇产生的风扇扭矩$\boldsymbol{M}_{fan}^b$，涵道内部流场示意图如图\ref{固定气动面}所示。固定气动面的反扭距效应可以近似表示为\cite{1020333010.nh}：
+固定气动面是指位于涵道内部，涵道风扇下方的固定装置。其特殊的外形结构用于在涵道风扇滑流中产生反扭矩来抵消DFUAV单一风扇产生的风扇扭矩$\boldsymbol{M}_{fan}^b$，涵道内部流场示意图如图\ref{固定气动面}所示。经过涵道风扇加速后的气流在经过固定气动面时会发生偏转，进而在气动面上产生作用力和力矩。固定气动面的反扭距效应可以近似表示为\cite{1020333010.nh}：
 \begin{equation}
     \boldsymbol{M}_{flap}^b=V_e^2\varphi_0
     \begin{bmatrix}
@@ -506,6 +523,14 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的偏转角$\delta_i$，作为动力核心的涵道风扇通过转速调节产生主推力，四片分布式气动舵面通过独立偏转生成三维控制力矩。系统的输出为状态变量，其中包括DFUAV在地面坐标系下的位置$\boldsymbol{P}^{e}=[{x}^{e} \quad {y}^{e} \quad {z}^{e}]^{T}$、地面坐标系下的速度$\boldsymbol{V}^{e}=[{v}^{e}_{x} \quad {v}^{e}_{y} \quad {v}^{e}_{z}]^{T}$、姿态角$\boldsymbol{\eta}=[\varphi \quad \theta \quad \psi]^T$以及机体坐标系下的角速度$\boldsymbol{\omega}^b=[p \quad q \quad r]^T$。结合DFUAV的飞行控制刚体模型和力与力矩的分析，可以推导出DFUAV的非线性动态方程，如下所示：
 
+% 1
+
+% 1
+
+% 1
+
+% 1
+
 位置动态方程：
 \begin{equation}
     \begin{aligned}
@@ -520,23 +545,23 @@ DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的�
 \begin{equation}
     \begin{aligned}
         \dot{v}_{x}^{e} & =\frac{1}{m}\Bigg\{ (\cos{\theta}\cos{\psi}) 
-        \cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu|u|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
+        \cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu_r|u_r|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
         & \quad+ (\sin{\varphi}\sin{\theta}\cos{\psi}-\cos{\varphi}\sin{\psi}) \\
-        & \quad\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv|v|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
+        & \quad\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv_r|v_r|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
         & \quad+ (\cos{\varphi}\sin{\theta}\cos{\psi}+\sin{\varphi}\sin{\psi}) \\
-        & \quad\cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw|w|+L_z+D_z\right]
+        & \quad\cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw_r|w_r|+L_z+D_z\right]
         \Bigg\}
         \\
-        \dot{v}_{y}^{e} & =\frac{1}{m}\Bigg\{ (\cos{\theta}\sin{\psi}) \cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu|u|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
+        \dot{v}_{y}^{e} & =\frac{1}{m}\Bigg\{ (\cos{\theta}\sin{\psi}) \cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu_r|u_r|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
         & \quad+ (\sin{\varphi}\sin{\theta}\sin{\psi}+\cos{\varphi}\cos{\psi}) \\
-        & \quad\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv|v|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
+        & \quad\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv_r|v_r|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
         & \quad+ (\cos{\varphi}\sin{\theta}\sin{\psi}-\sin{\varphi}\cos{\psi}) \\
-        & \quad\cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw|w|+L_z+D_z\right]
+        & \quad\cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw_r|w_r|+L_z+D_z\right]
         \Bigg\}
         \\
-        \dot{v}_{y}^{e} & =\frac{1}{m}\Bigg\{ -\sin{\theta}\cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu|u|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
-        & \quad+ (\sin{\varphi}\cos{\theta})\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv|v|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
-        & \quad+ (\cos{\varphi}\cos{\theta}) \cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw|w|+L_z+D_z\right]
+        \dot{v}_{y}^{e} & =\frac{1}{m}\Bigg\{ -\sin{\theta}\cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu_r|u_r|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
+        & \quad+ (\sin{\varphi}\cos{\theta})\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv_r|v_r|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
+        & \quad+ (\cos{\varphi}\cos{\theta}) \cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw_r|w_r|+L_z+D_z\right]
         \Bigg\}+g
     \end{aligned}
     \label{eq_41}
@@ -556,11 +581,11 @@ DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的�
 \begin{equation}
     \begin{aligned}
         \dot{p}  &=\frac{1}{J_x}\Bigg\{ (J_y-J_z)qr+
-        \left[\frac{1}{2}\rho{l_a} C_{D,y}S_yv|v|+L_xl_d+C_{duct}\rho{R}
+        \left[\frac{1}{2}\rho{l_a} C_{D,y}S_yv_r|v_r|+L_xl_d+C_{duct}\rho{R}
         v_r|v_r| \right.\\
         & \quad\left.- l_1k_\delta V_e^2(\delta_1 - \delta_3)-J_fan\Omega{q}\right] \\
         \dot{q}  &=\frac{1}{J_y}\Bigg\{ (J_z-J_x)pr+
-        \left[-\frac{1}{2}\rho{l_a} C_{D,x}S_xu|u|+L_yl_d+C_{duct}\rho{R}
+        \left[-\frac{1}{2}\rho{l_a} C_{D,x}S_xu_r|u_r|+L_yl_d+C_{duct}\rho{R}
         u_r|u_r| \right.\\
         & \quad\left.+ l_1k_\delta V_e^2(\delta_4 - \delta_2)+J_fan\Omega{p}\right] \\
         \dot{r}  &=\frac{1}{J_z}\Bigg\{ (J_x-J_y)pq+
@@ -575,68 +600,14 @@ DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的�
 
 \section{本章小结}
 
+本章主要介绍了试验样机的系统组成并围绕DFUAV的系统建模展开系统性研究。
 
+首先介绍了所使用的试验样机的整体系统组成，明确了各个部分的功能和相互关系，为后续建模及飞行实验奠定物理基础。
 
+接着介绍了坐标系和姿态表示方法，建立了地面坐标系与机体坐标系的转换关系，并根据实际约束采用了‘Z-Y-X’旋转顺序的欧拉角姿态表示方法为飞行控制系统的建模提供了必要的数学分析工具。
 
+在DFUAV的飞行控制刚体模型构建中，结合牛顿-欧拉方程推导出六自由度非线性动力学方程，完整表征平动与转动状态的关系。
 
+并从涵道风扇、机身、涵道翼型、控制舵面和固定气动面等多个方面分析了施加在上面的力与力矩，揭示了各类作用力和控制力矩对飞行器姿态和运动的动态影响。
 
-
-
-
-
-
-document环境当中的内容是文档正文：
-\begin{lstlisting}
-\begin{document}
-正文内容
-\end{document}
-\end{lstlisting}
-正文中包含各章节内容：
-\begin{lstlisting}
-\include{abstract} % 中英文摘要
-\tableofcontents	% 目录
-\listoftables	% 表格目录（可选）
-\listoffigures	% 插图目录（可选）
-\include{symbols}	% 符号对照表(可选)
-\include{abbreviation} 	% 缩略词	
-...
-\include{chapter01}	% 第一章
-\include{chapter02} % 第二章
-\include{chapter03} % 第三章
-% 自行根据需要添加章节。
-...
-\include{conclusion} % 结论
-...
-\printbibliography	% 参考文献著录
-\include{appendix} % 附录
-\include{pub} % 成果
-\include{ack} % 致谢
-\end{lstlisting}
-其中$\%$之后的内容为注释，...表示省略其他代码，仅保留论文内容主体部分。\textbackslash{}include\{xxx\}指令用于包含xxx.tex文件的内容，各章节的内容主要在xxx.tex中保存。在\textbackslash{}documentclass 和\textbackslash{}begin\{document\} 之间的位置称为导言区。在导言区中一般会使用\textbackslash{}usepackage 调用宏包，以及会进行对文档的全局设置。本模板的导言区除调用所需的宏包外，还进行了页眉页脚的设置。有的模板会把所有调用宏包的指令放到一个.sty宏包文件中，页面的设置放在文档类文件.cls文件中。因本人时间有限，就不做整理，欢迎有志之士加入完善。使用本模板并不需要了解导言区的指令，在需要时额外添加即可（要注意宏包冲突）。特别地，\textbackslash{}includeonly\{xxx\}指令用于使文档仅编译xxx.tex文件的内容，这就是分章节包含（include）的好处，可大大减少编译时间。
-
-将封面打印保存为 thesis\_cover.pdf 文件，硕士使用master\_cover.docx ，博士使用 doctor\_cover.doc 。如果有更新版本的封面，可自行替换。文档类默认是博士论文，下面指令将控制添加封面与否：
-\begin{lstlisting}
-\documentclass[unicode,master,pdfcover]{scutthesis}	% 使用pdf文件封面的 硕士模板
-\documentclass[unicode,master]{scutthesis}	% 不使用pdf文件封面的 硕士模板
-\documentclass[unicode,pdfcover]{scutthesis}	% 使用pdf文件封面的博士模板
-\documentclass[unicode]{scutthesis}	% 不使用pdf文件封面的博士模板
-\end{lstlisting}
-不使用thesis\_cover.pdf 文件指定的封面时，将使用草稿封面。草稿封面也可以减少编译时间，因此可以在最终提交论文时再使用论文封面。草稿封面用以下指令设置：
-\begin{lstlisting}
-%%%%%%%%%%%%%草稿封面设置%%%%%%%%%%%%%	
-\title{LaTeX模板}	
-\author{作者姓名}	
-\supervisor{指导教师：xxx\ 教授}	
-\institute{华南理工大学}	
-\date{2020年5月20日}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\end{lstlisting}
-\section{章节文件}
-chapter文件夹的章节文件如chapter0x.tex等，其内容由\textbackslash{}chapter\{章名\}开头。新建一章可新建一个文件并由\textbackslash{}chapter\{新建章名\}开头填写内容即可。节及小节分别用\textbackslash{}section\{新建节名\}、\textbackslash{}subsection\{新建小节名\}命令。
-
-正文的的书写和txt文本文件的书写类似。\LaTeX{} 源代码中，空格键和Tab键输入的空白字符视为“空格”。连续的若干个空白字符视为一个空格。一行开头的空格忽略不计。行末的回车视为一个空格；但连续两个回车，也就是空行，会将文字分段。多个空行被视为一个空行。也可以在行末使用\textbackslash{}par 命令分段。在本模板中，英文之间的空格被保留，中文之间的空格被忽略。特别地，摘要，附录，结论等两个字的大纲级别为章的章名，中间使用空格隔开。对此论文撰写规范并没有明文要求，只是为了美观。也可以全部不加空格。一般情况下，在文本文字中添加空格使用\textbackslash{}quad命令，但由于文献\parencite{_d}所述原因，直接使用\textbackslash{}quad命令会报警，因而使用\textbackslash{}texorpdfstring\{\textbackslash{}quad\}\{\}，其中最后一个\{\}里面可以加一个空格，不影响使用。目录二字之间添加空格在scutthesis.cls文件317行设置。
-
-正文本环境中使用公式，即行内公式，需要用两个\$包围，如源码：\$a+b=c\$ 显示为$a+b=c$。使用其他字符可自行百度或阅读参考文献。再次提醒，使用\LaTeX{}撰写论文不需要研究其原理，在达到某种效果（图文显示、公式显示效果）时百度或查书寻找其代码即可。
-
-综上，论文撰写只需要将自己的文本（包含行内公式）放到相应的章节处，并添加行间公式、图表环境并填写图表即可。行间公式、图表将在下一章介绍。
-
+最后建立了DFUAV的完整的非线性动态方程，本章建立的参数化模型为后续控制算法设计、仿真验证及飞行试验提供了理论框架与数值分析基础。
