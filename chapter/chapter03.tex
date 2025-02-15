@@ -2,11 +2,110 @@
 
 基于第二章建立的DFUAV非线性系统动态方程分析，其多源力与力矩耦合叠加效应导致姿态动态模型尤为复杂。如横滚角的变化会在俯仰通道和偏航通道上都产生或者间接产生力矩影响，并且三维力矩都与环境风速呈现强相关性。最常用的姿态控制方法基于反馈线性化，比如不考虑系统的数学模型的PID控制算法，虽然该方法面对非线性系统有一定的鲁棒性，但仅通过比例-积分-微分的线性组合应对内外因素产生的力矩影响难免会使系统状态出现超调和滞后等问题。此外，可以使用基于系统模型的方法考虑内外因素对系统状态的影响，但在系统模型参数过多并且不精确的情况下也将为控制算法的设计和系统调试带来很大工作量。基于上述分析，姿态控制算法设计的核心在于如何对难以测得的力矩进行在线补偿。
 
-本章安排如下：将首先对DFUAV的姿态模型进行简化处理，方便下文姿态控制算法的设计。然后简要概述INDI和控制分配的理论以及二者的结合，继而给出了基于INDI和优先级控制分配的DFUAV的姿态控制方案设计。为验证方案有效性，最后进行了仿真实验和飞行实验验证。
+本章安排如下：将首先对DFUAV的姿态模型进行简化处理，方便下文姿态控制算法的设计。然后简要概述增量控制和控制分配的理论以及二者的结合，继而给出了基于INDI和优先级控制分配的DFUAV的姿态控制方案设计。为验证方案有效性，最后进行了仿真实验和飞行实验验证。
+
+\section{增量非线性动态逆控制与控制分配理论}
+
+NDI（非线性动态逆）是一种基于模型的非线性控制方法，其核心在于在掌握系统模型的情况下，将非线性系统在工作点处进行反馈线性化，然后通过求逆运算来消除系统中的非线性项。当系统模型参数不精确或者对系统机理认识模糊的情况下，NDI方法的控制效果将表现不佳。而INDI（增量式非线性动态逆）相比于NDI采用了增量式的控制策略，仅要求对系统的输入通道建模。INDI在未能充分掌握系统模型的情况下，通过增量式的求逆策略来实时补偿未知扰动与建模误差，得到线性化的系统动力学，进而可以通过常规的线性系统的控制方法来控制\cite{wangStabilityAnalysisIncremental2019b}。因此INDI方法对系统模型的依赖程度较小，是一种基于传感器的方法。此外，INDI方法在设计控制律时主要关注系统的输入输出特性，无需考虑应如何将控制律计算出的控制量分配到各个执行机构上。而后者所描述的任务将由控制分配算法来实现，实现过程中也无需考虑系统内部的复杂非线性因素与动态干扰。因此，采用INDI控制方法有助于将姿态控制算法设计与控制分配算法分离开，实现分层控制。
+
+本节首先将从一般性的系统推导INDI是如何实现增量控制的，然后介绍控制分配理论以及二者的结合。
+
+\subsection{增量非线性动态逆}
+
+考虑如下普通的非线性动力系统：
+\begin{align}
+    \dot{\boldsymbol{x}}&=\boldsymbol{f}(\boldsymbol{x})+\boldsymbol{g}(\boldsymbol{x},\boldsymbol{u}) \label{3-1}
+    \\
+    \boldsymbol{y}&=\boldsymbol{h}(\boldsymbol{x})\label{3-2}
+\end{align}
+上式中$\boldsymbol{x}\in\mathbb{R}^{n}$为n维系统状态变量，$\boldsymbol{u}\in\boldsymbol{U}\in\mathbb{R}^{p}$为p维系统输入变量，其中$\boldsymbol{U}$是容许控制集合，表示对输入变量的约束，$\boldsymbol{y}\in\mathbb{R}^{m}$为m维系统输出变量。映射关系$\boldsymbol{f}:\mathbb{R}^n\rightarrow\mathbb{R}^n$，$\boldsymbol{g}:\mathbb{R}^n\times\mathbb{R}^p\rightarrow\mathbb{R}^n$，$\boldsymbol{h}:\mathbb{R}^n\rightarrow\mathbb{R}^m$。
+
+式\eqref{3-1}中系统状态的一阶泰勒展开式为：
+\begin{equation}
+    \dot{\boldsymbol{x}}=\dot{\boldsymbol{x}}_0+f^{\prime}(\boldsymbol{x})(\boldsymbol{x}-\boldsymbol{x}_0)+\left.\frac{\partial \boldsymbol{g}}{\partial \boldsymbol{x}}\right|_{\boldsymbol{x}=\boldsymbol{x}_0}(\boldsymbol{x}-\boldsymbol{x}_0)+\left.\frac{\partial \boldsymbol{g}}{\partial \boldsymbol{u}}\right|_{\boldsymbol{u}=\boldsymbol{u}_0}(\boldsymbol{u}-\boldsymbol{u}_0)
+    \label{3-3}
+\end{equation}
+然后对式\eqref{3-2}中的输出表达式求一次导数，结合复合函数求导的链式法则与式\eqref{3-3}，可得到动力系统输入与输出之间的关系：
+\begin{equation}
+    \begin{aligned}
+    \dot{\boldsymbol{y}} = \underbrace{\left.\frac{\partial\boldsymbol{h}}{\partial\boldsymbol{x}}\right|_{\boldsymbol{x}=\boldsymbol{x}_0}\dot{\boldsymbol{x}}_0}_{\dot{\boldsymbol{y}}_0} + \left.\frac{\partial \boldsymbol{h}}{\partial \boldsymbol{x}}\right|_{\boldsymbol{x}=\boldsymbol{x}_0}\begin{bmatrix}f^{\prime}(\boldsymbol{x})(\boldsymbol{x}-\boldsymbol{x}_0)+\left.\dfrac{\partial \boldsymbol{g}}{\partial \boldsymbol{x}}\right|_{\boldsymbol{x}=\boldsymbol{x}_0}(\boldsymbol{x}-\boldsymbol{x}_0)+\left.\dfrac{\partial \boldsymbol{g}}{\partial \boldsymbol{u}}\right|_{\boldsymbol{u}=\boldsymbol{u}_0}(\boldsymbol{u}-\boldsymbol{u}_0)\end{bmatrix}
+    \end{aligned}
+    \label{3-4}
+\end{equation}
+
+INDI理论的一个核心假设是时间尺度分离法则\cite{inproceedings}，该法则基于系统动力学的时间尺度特性，指出系统内部状态变量的动态响应速率要明显慢于外部输入信号的时变特性。基于这一动力学特性差异，相比于外部输入信号的导数项，系统状态变量的导数项可以视为高阶小量并忽略不计，从而有效地简化系统的动态方程。
+
+基于上述核心假设，可以将式\eqref{3-4}中系统状态的导数项$(\boldsymbol{x}-\boldsymbol{x}_0)$忽略，得到：
+\begin{equation}
+    \begin{aligned}
+    \dot{\boldsymbol{y}} &= \dot{\boldsymbol{y}}_0 +  \left.\frac{\partial \boldsymbol{h}}{\partial \boldsymbol{x}}\right|_{\boldsymbol{x}=\boldsymbol{x}_0}\left.\dfrac{\partial \boldsymbol{g}}{\partial \boldsymbol{u}}\right|_{\boldsymbol{u}=\boldsymbol{u}_0}(\boldsymbol{u}-\boldsymbol{u}_0)\\
+        &= \dot{\boldsymbol{y}}_0 + \boldsymbol{G}(\boldsymbol{u}-\boldsymbol{u}_0)
+    \end{aligned}
+    \label{3-5}
+\end{equation}
+其中$\dot{\boldsymbol{y}}_0$为系统当前时刻输出的导数，$\boldsymbol{G}\in\mathbb{R}^{m\times p}$，$\boldsymbol{u}_0$为系统当前时刻的控制输入。
+使用下标$(.)_{d}$表示该变量的期望值，那么根据公式\eqref{3-5}，可以得到期望的输入变量$\boldsymbol{u}_{d}$表示为：
+\begin{equation}
+    \begin{aligned}
+    \boldsymbol{u}_{d}&=\boldsymbol{u}_{0}+\Delta u\\
+    &=\boldsymbol{u}_{0}+\boldsymbol{G}^{-1}(\dot{\boldsymbol{y}_d}-\dot{\boldsymbol{y}})
+    \label{3-6}
+    \end{aligned}
+\end{equation}
+新的控制输入是在当前时刻的控制输入基础上加上一个控制增量$\Delta u$得到。通过对控制效率矩阵求逆，并且找到期望的输出导数与当前时刻的输出导数的误差，可以得到控制增量。
+
+\subsection{控制分配理论}
+
+继续考虑3.1.1小节中引入的非线性动力系统。对于一个过驱动系统，其系统输入的维度大于系统输出的维度，即$p>m$。将$\boldsymbol{g}(\boldsymbol{x},\boldsymbol{u})$做矩阵分解得到：
+\begin{equation}
+    \boldsymbol{g}(\boldsymbol{x},\boldsymbol{u})=\boldsymbol{D}\boldsymbol{K}(\boldsymbol{x},\boldsymbol{u})
+    \label{3-7}
+\end{equation}
+其中$\boldsymbol{D}\in\mathbb{R}^{n\times m}$，映射关系$\boldsymbol{K}:\mathbb{R}^n\times\mathbb{R}^p\rightarrow\mathbb{R}^m$。
+
+引入$m$维虚拟控制输入$\boldsymbol{\nu}$：
+\begin{equation}
+    \boldsymbol{\nu}=\boldsymbol{K}(\boldsymbol{x},\boldsymbol{u})
+    \label{3-8}
+\end{equation}
+由于实际控制输入的约束$\boldsymbol{U}$存在，将实际控制输入变换为虚拟控制输入后有$\boldsymbol{\nu}\in\boldsymbol{\Phi}\in\mathbb{R}^{m}$。容许控制集合通过映射$\boldsymbol{K}$从$\mathbb{R}^{p}$空间映射到$\mathbb{R}^{m}$空间得到可达控制集合，如果$\boldsymbol{\nu}\in\boldsymbol{\Phi}$，则称虚拟控制输入为可达，否则为不可达。
+
+对$\boldsymbol{\nu}$做一阶泰勒展开并且同样忽略关于系统状态的导数项，得到：
+\begin{equation}
+    \begin{aligned}
+    \boldsymbol{\nu} &= \boldsymbol{\nu}_0 +  \left.\dfrac{\partial \boldsymbol{K}}{\partial \boldsymbol{u}}\right|_{\boldsymbol{u}=\boldsymbol{u}_0}(\boldsymbol{u}-\boldsymbol{u}_0)\\
+        &= \boldsymbol{\nu}_0 + \boldsymbol{B}(\boldsymbol{u}-\boldsymbol{u}_0)
+    \end{aligned}
+    \label{3-9}
+\end{equation}
+其中$\boldsymbol{\nu}_0$表示系统当前时刻的虚拟控制输入，$\boldsymbol{B}\in\mathbb{R}^{m\times p}$。将$(\boldsymbol{u}-\boldsymbol{u}_0)$代入公式\eqref{3-5}，得到：
+\begin{equation}
+    \dot{\boldsymbol{y}}=\dot{\boldsymbol{y}}_0+\boldsymbol{G}\boldsymbol{B}^\dagger(\boldsymbol{\nu}-\boldsymbol{\nu}_0)
+    \label{3-10}
+\end{equation}
+其中$\boldsymbol{B}^\dagger$表示矩阵$\boldsymbol{B}$的伪逆矩阵，有以下关系：
+\begin{gather}
+    \boldsymbol{u}=\boldsymbol{B}^\dagger\boldsymbol{\nu}    \label{3-11}
+    \\ 
+    \boldsymbol{B}^\dagger=\boldsymbol{B}^T\left(\boldsymbol{B}\boldsymbol{B}^T\right)^{-1}    \label{3-12}
+\end{gather}
+
+公式\eqref{3-11}中直接表示表示虚拟控制输入$\boldsymbol{\nu}$与实际控制输入$\boldsymbol{u}$之间映射关系的方法就是伪逆法。需特别指出的是，尽管可以设计出渐进稳定的控制算法，但是受矩阵$\boldsymbol{B}$奇异特性及执行机构物理约束的影响，所推导的期望虚拟控制输入$\boldsymbol{\nu}_d$可能属于不可达集。这一现象在本质上源于伪逆法在控制分配问题中的固有局限性：当控制指令超出执行机构可达包络时，将导致控制分配问题退化为无可行解的数学约束条件，因此下文在控制分配算法的设计中将参考文献\parencite{HKXB202010026}，采用优先级控制分配方法。该方法旨在通过优先级排序的方式，优先满足高优先级的控制输入分量以达到更大范围的容许控制。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+		\centering
+		\includegraphics[scale=1]{Fig/INDI.pdf}
+		\caption{\label{坐}地面坐标系与机体坐标系定义}
+	\end{minipage}%
+\end{figure}
+
+
+
 
 \section{姿态模型简化}
 
-本节将从两个方面简化姿态模型：一是简化非主要气动力矩的表示，区分可控力矩与不可控力矩。二是使用虚拟控制输入来表示姿态子系统的控制输入和控制分配算法的期望力矩。
+本节将从两个方面简化姿态模型：一是简化非主要气动力矩的表示，区分可控力矩与不可控力矩。二是使用虚拟控制输入来分解姿态子系统，分别考虑姿态跟踪问题和控制分配问题。
 
 \subsection{气动力矩模型简化}
 
@@ -56,12 +155,22 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
     \boldsymbol{M}^b=\boldsymbol{M}_{vane}^b+\boldsymbol{M}_{gyro}^b+\boldsymbol{M}_{a}^b
     \label{eq_3-7}
 \end{equation}
-控制舵面合力矩$\boldsymbol{M}_{vane}^b$作为可控力矩由下文设计的姿态控制算法来计算期望力矩（即期望的控制舵面偏转角度），陀螺力矩$\boldsymbol{M}_{gyro}^b$同样作为可控力矩会对DFUAV的姿态造成负面影响，将由下文设计的陀螺力矩补偿算法来加以补偿。而$\boldsymbol{M}_{a}^b$作为不可控力矩将通过姿态控制算法在在线补偿。
+控制舵面合力矩$\boldsymbol{M}_{vane}^b$作为可控力矩由下文设计的姿态控制算法来计算期望力矩（即期望的控制舵面偏转角度）。陀螺力矩$\boldsymbol{M}_{gyro}^b$同样作为可控力矩，但该力矩会对DFUAV的姿态造成负面影响，将由下文设计的陀螺力矩补偿算法来加以补偿。而$\boldsymbol{M}_{a}^b$作为不可控力矩将通过姿态控制算法在在线补偿。
 
 \subsection{虚拟控制输入}
 
-
-
+如前文所述，DFUAV姿态子系统的控制输入为控制舵面的偏转角$\delta_i$，由四片控制舵面产生三维控制力矩，因此带来了过驱动的问题。因此引入虚拟控制输入$\boldsymbol{\nu}$将姿态子系统分为两部分，$\boldsymbol{\nu}$既作为姿态子系统的控制输入也作为控制分配算法的期望力矩。可表示为：
+\begin{equation}
+    \boldsymbol{\nu}=
+    \begin{bmatrix}
+    {\nu}_x \\ {\nu}_y \\ {\nu}_z
+    \end{bmatrix}=\boldsymbol{B}
+    \begin{bmatrix}
+    \delta_1 \\ \delta_2 \\ \delta_3 \\ \delta_4
+    \end{bmatrix}
+    \label{eq_3-8}
+\end{equation}
+其中矩阵$\boldsymbol{B}$为四片控制舵面偏转角到三维虚拟控制输入的转换矩阵，有$\boldsymbol{B}\in\mathbb{R}^{3\times4}$。
 
 
 

@@ -443,7 +443,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 \subsection{控制舵面动力学}
 
-涵道底部的控制舵面是DFUAV的主要控制机构，在飞行过程中控制舵面的运动会产生气动力和力矩，这些力矩是造成DFUAV进行滚转、俯仰、偏航姿态变化的主要原因。如图\ref{控制舵面}所示，本文研究的DFUAV配置有四片交叉排列的控制舵面，定义机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴正方向下方位置对应的控制舵面为1号舵，从上往下按照顺时针方向依次编号为2、3、4号舵。1、3号舵的同向运动用于产生滚转力矩，2、4号舵的同向运动用于产生俯仰力矩，4个舵的共同差动用于产生偏航力矩。定义控制舵面的偏转角度为$\delta_i$，其中$i=1,2,3,4$分别对应4个控制舵面，向右偏转为正方向，零位点保持与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴平行。
+涵道底部的控制舵面是DFUAV的主要控制机构，在飞行过程中控制舵面的运动会产生气动力和力矩，这些力矩是造成DFUAV进行滚转、俯仰、偏航姿态变化的主要原因。如图\ref{控制舵面}所示，本文研究的DFUAV配置有四片交叉排列的控制舵面，定义机体系${\boldsymbol{O}_b}-{\boldsymbol{X}_b}$轴正方向下方位置对应的控制舵面为1号舵，从上往下按照顺时针方向依次编号为2、3、4号舵。1、3号舵的同向运动用于产生滚转力矩，2、4号舵的同向运动用于产生俯仰力矩，4个舵的共同差动用于产生偏航力矩。定义控制舵面的偏转角度为$\boldsymbol{\delta}=[\delta_1\quad\delta_2\quad\delta_3\quad\delta_4]^T$，分别对应4个控制舵面。规定向右偏转为正方向，零位点保持与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴平行。
 
 \begin{figure}[htbp]
 	\centering
@@ -458,7 +458,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
     \caption{\label{控制舵面}控制舵面及力臂示意图}
 \end{figure}
 
-在涵道风扇滑流中，由于控制舵面的偏转而产生的升力与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴垂直，且与转角$\delta_i$的平方成正比\cite{pflimlinModelingAttitudeControl2010a}：
+在涵道风扇滑流中，控制舵面的偏转而产生的升力与机体系${\boldsymbol{O}_b}-{\boldsymbol{Z}_b}$轴垂直，且与转角$\delta_i$的平方成正比\cite{pflimlinModelingAttitudeControl2010a}：
 \begin{equation}
     F_i=k_\delta{V_e}^2\delta_i \quad i=1,2,3,4
     \label{eq_35}
