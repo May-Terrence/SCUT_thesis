@@ -351,7 +351,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 \subsection{涵道动力学}
 
-类似直升机旋翼的经典建模方法，本小节基于不可压缩的定常流动假设建立升力L-阻力D模型来估算空速施加在涵道环翼上的气动力与力矩\cite{johnsonModelingControlFlight2006b}，如图\ref{非轴流状态}所示。
+类似直升机旋翼的经典建模方法，本小节基于不可压缩的定常流动假设建立升力$L$-阻力$D$模型来估算空速施加在涵道环翼上的气动力与力矩\cite{johnsonModelingControlFlight2006b}，如图\ref{非轴流状态}所示。
 
 \begin{figure}[htbp]
 	\centering
@@ -551,7 +551,7 @@ DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的�
         & \quad\cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw_r|w_r|+L_z+D_z\right]
         \Bigg\}
         \\
-        \dot{v}_{y}^{e} & =\frac{1}{m}\Bigg\{ -\sin{\theta}\cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu_r|u_r|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
+        \dot{v}_{z}^{e} & =\frac{1}{m}\Bigg\{ -\sin{\theta}\cdot\left[-\frac{1}{2}\rho C_{D,x}S_xu_r|u_r|+L_x+D_x - V'\rho S u_r + k_\delta V_e^2(\delta_4 - \delta_2)\right] \\
         & \quad+ (\sin{\varphi}\cos{\theta})\cdot\left[-\frac{1}{2}\rho C_{D,y}S_yv_r|v_r|+L_y+D_y - V'\rho S v_r + k_\delta V_e^2(\delta_1 - \delta_3)\right] \\
         & \quad+ (\cos{\varphi}\cos{\theta}) \cdot\left[-k_{fan}\Omega^2-\frac{1}{2}\rho C_{D,z}S_zw_r|w_r|+L_z+D_z\right]
         \Bigg\}+g
@@ -573,13 +573,13 @@ DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的�
 \begin{equation}
     \begin{aligned}
         \dot{p}  &=\frac{1}{J_x}\Bigg\{ (J_y-J_z)qr+
-        \left[\frac{1}{2}\rho{l_a} C_{D,y}S_yv_r|v_r|+L_xl_d+C_{duct}\rho{R}
-        v_r|v_r| \right.\\
-        & \quad\left.- l_1k_\delta V_e^2(\delta_1 - \delta_3)-J_{fan}\Omega{q}\right] \\
+        \bigg[\frac{1}{2}\rho{l_a} C_{D,y}S_yv_r|v_r|+L_xl_d+C_{duct}\rho{R}
+        v_r|v_r| \bigg.\\
+        & \quad\bigg.- l_1k_\delta V_e^2(\delta_1 - \delta_3)-J_{fan}\Omega{q}\bigg]\Bigg\} \\
         \dot{q}  &=\frac{1}{J_y}\Bigg\{ (J_z-J_x)pr+
-        \left[-\frac{1}{2}\rho{l_a} C_{D,x}S_xu_r|u_r|+L_yl_d+C_{duct}\rho{R}
-        u_r|u_r| \right.\\
-        & \quad\left.+ l_1k_\delta V_e^2(\delta_4 - \delta_2)+J_{fan}\Omega{p}\right] \\
+        \bigg[-\frac{1}{2}\rho{l_a} C_{D,x}S_xu_r|u_r|+L_yl_d+C_{duct}\rho{R}
+        u_r|u_r| \bigg.\\
+        & \quad\bigg.+ l_1k_\delta V_e^2(\delta_4 - \delta_2)+J_{fan}\Omega{p}\bigg]\Bigg\} \\
         \dot{r}  &=\frac{1}{J_z}\Bigg\{ (J_x-J_y)pq+
         \left[-k_q\Omega^2 +l_2k_\delta V_e^2(\delta_1 + \delta_2 + \delta_3 + \delta_4)\right.\\
         & \quad\left.+V_e^2\varphi_0d_{af}+V_e\Omega{d_{ds}}\right]
