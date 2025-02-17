@@ -329,7 +329,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 涵道机身的气动阻力和力矩源于机身与气流错综复杂的相互作用。当无人机在空中飞行时，周围的气流会以一定的速度与涵道机身表面接触。这种相互碰撞、摩擦，形成了阻碍飞机前进的气动阻力。同时，由于气流在机身不同部位的速度和压强分布不均匀，会对机身产生一个使它绕某一轴转动的趋势，这便是气动力矩。根据空气动力学原理，气动阻力与飞机与气流相对速度的平方大致成正比关系。而且速度的变化还会影响气流在机身周围的流动形态，使得气动力矩也发生相应变化。另外，沿机体轴方向的横截面积同样是影响气动阻力和力矩的重要因素。较大的横截面积意味着气流与机身的接触面积更大，气流在流经机身时受到的阻碍也会增加。由于DFUAV的外部由涵道体包裹，因此横截面积较大，更会加剧这一过程。
 
-定义空速向量$\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$为机体相对于气流的速度在机体系的投影，标量表示为$V_a$，空速与环境风速有关。当环境风速$W^e$为零时，$\boldsymbol{V}_a^b=\boldsymbol{V}^b$。在机身产生的力与力矩可表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
+定义空速向量$\boldsymbol{V}_a^b= [ u_r \quad v_r \quad w_r ]^T$为机体相对于气流的速度在机体系的投影，标量表示为$V_a$，空速与环境风速有关。当环境风速$\boldsymbol{W}^e$为零时，$\boldsymbol{V}_a^b=\boldsymbol{V}^b$。在机身产生的力与力矩可表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
 \begin{gather}
     \boldsymbol{F}_{aero}^b=-\frac{1}{2}\rho
     \begin{bmatrix}
@@ -559,7 +559,7 @@ DFUAV的输入变量包括涵道风扇的转速$\Omega$和四个控制舵面的�
     \label{eq_41}
 \end{equation}
 
-姿态动态方程：
+欧拉角动态方程：
 \begin{equation}
     \begin{aligned}
         \dot{\varphi}&=p+\sin{\varphi}\tan{\theta}q+\cos{\varphi}\tan{\theta}r\\
