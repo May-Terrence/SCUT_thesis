@@ -285,7 +285,7 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
 \end{equation}
 其中
 \begin{equation}
-    \boldsymbol{H}_{gyro} \triangleq J_{fan}[-J_x^{-1}q\quad J_y^{-1}p\quad0]^T\in\mathbb{R}^{3}
+    \boldsymbol{H}_{gyro}(\boldsymbol{\omega}^b) \triangleq J_{fan}[-J_x^{-1}q\quad J_y^{-1}p\quad0]^T\in\mathbb{R}^{3}
     \label{3-32}
 \end{equation}
 
@@ -304,7 +304,7 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
 \begin{equation}
     \begin{aligned}
     \boldsymbol{\dot{\omega}}^b&=\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}^b)\Omega+\boldsymbol{L}(\boldsymbol{V}^e,\boldsymbol{\eta},\boldsymbol{W}^e,\boldsymbol{\omega}^b)\\
-    &=\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0^2+\boldsymbol{H}_{gyro0}\Omega_0+\boldsymbol{L}_0\\
+    &=\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0^2+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)\Omega_0+\boldsymbol{L}_0\\
     & +\left.\frac{\partial(\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2)}{\partial\boldsymbol{\nu}}\right|_{\boldsymbol{\nu}=\boldsymbol{\nu}_0}(\boldsymbol{\nu}-\boldsymbol{\nu}_0)
     +\left.\bigg[\frac{\partial(\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2)}{\partial\Omega}+\frac{\partial(\boldsymbol{H}_{gyro}\Omega)}{\partial\Omega}\bigg]\right|_{\Omega=\Omega_0}
     (\Omega-\Omega_0) \\
@@ -316,9 +316,9 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
     \end{aligned}
     \label{3-35}
 \end{equation}
-展开式中的第一项$\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0^2+\boldsymbol{H}_{gyro0}\Omega_0+\boldsymbol{L}_0$等价于工作点处的角加速度，可以由机载IMU测量的角速度经过差分滤波得到：
+展开式中的第一项$\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0^2+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)\Omega_0+\boldsymbol{L}_0$等价于工作点处的角加速度，可以由机载IMU测量的角速度经过差分滤波得到：
 \begin{equation}
-    \boldsymbol{\dot{\omega}}^b_0=\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0^2+\boldsymbol{H}_{gyro0}\Omega_0+\boldsymbol{L}_0
+    \boldsymbol{\dot{\omega}}^b_0=\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0^2+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)\Omega_0+\boldsymbol{L}_0
     \label{3-36}
 \end{equation}
 
@@ -332,10 +332,26 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
     \label{3-37}
 \end{equation}
 
+在无人机控制中，执行机构（如电机、舵机等）可在数十毫秒的时间尺度内完成控制指令的执行，产生所需的力与力矩。而机体的速度、姿态等状态变量受空气动力阻尼、质量惯性等因素的制约，其动态过程一般落后于执行机构响应1-2个数量级，因此上述假设是合理的。此外，对于外部环境风速扰动$\boldsymbol{W}^e$的变化是未知并且难以预测的，因此假定$(\boldsymbol{W}^e-\boldsymbol{W}_0^e\approx0)$。但此假设并没有排除外部环境风速扰动对系统的影响，缓慢变化的自然风对姿态造成的影响已被考虑在$\boldsymbol{L}_0$中。而应对快速变化的风速扰动则取决于所设计的姿态控制器的鲁棒性。
 
+其余关于外部控制输入的偏导数项如下：
+\begin{equation}
+    \begin{gathered}
+    \left.\frac{\partial(\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2)}{\partial\boldsymbol{\nu}}\right|_{\boldsymbol{\nu}=\boldsymbol{\nu}_0}(\boldsymbol{\nu}-\boldsymbol{\nu}_0)=\boldsymbol{H}_{vane}\Omega_0^2(\boldsymbol{\nu}-\boldsymbol{\nu}_0) \\
+    \left.\bigg[\frac{\partial(\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2)}{\partial\Omega}+\frac{\partial(\boldsymbol{H}_{gyro}\Omega)}{\partial\Omega}\bigg]\right|_{\Omega=\Omega_0}(\Omega-\Omega_0)=[2\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)](\Omega-\Omega_0)
+    \end{gathered}
+    \label{3-38}
+\end{equation}
 
+因此，角速度动态的一阶泰勒展开式\eqref{3-35}近似可以表示为：
+\begin{equation}
+    \begin{aligned}
+    \boldsymbol{\dot{\omega}}^b&=\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{H}_{vane}\Omega_0^2(\boldsymbol{\nu}-\boldsymbol{\nu}_0)+[2\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)](\Omega-\Omega_0)\\
+    \end{aligned}
+    \label{3-39}
+\end{equation}
 
-
+值得一提的是，风扇转速$\Omega$作为速度控制的输入信号并不直接参与姿态控制，因此不被视为姿态控制中输入信号的一部分。可以将$\Omega$作为在角速度动态中的已知参数，该参数可以从速度环设计中得到。为了简便表示，采用以下记号：
 
 
 
