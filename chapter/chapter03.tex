@@ -117,7 +117,7 @@ INDI理论的一个核心假设是时间尺度分离法则\cite{inproceedings}�
 \end{equation}
 由于涵道风扇的转速$\Omega$可由电调读取，机体的角速度$\boldsymbol\omega^b$可由机载的IMU测量得到，结合表\ref{DFUAV_parameters}中的模型参数，可以计算出涵道风扇的扭矩$\boldsymbol{M}_{fan}^b$和陀螺力矩$\boldsymbol{M}_{gyro}^b$。
 
-模型假设环境风速在$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴的分量为零，即$V_0=0$。根据式\ref{eq_20}以及式\ref{eq_22}，可将涵道出口风速$V_{e}$简化为：
+模型假设气流相对于机体的速度在$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴的分量为零，即$V_0=0$。根据式\ref{eq_20}以及式\ref{eq_22}，可将涵道出口风速$V_{e}$简化为：
 \begin{equation}
     V_e=\sqrt{\frac{k_{fan}}{\sigma_d\rho S}}\Omega={k_{f}}\Omega    \label{3-14}
 \end{equation}
@@ -205,7 +205,7 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
 
 对于大部分无人机姿态运动控制，常采用基于欧拉角参数化的局部线性化方法，横滚角、俯仰角和偏航角三个通道分别作为控制目标单独控制，使得无人机的旋转过程被线性化处理。但是不同于位置动态方程\eqref{eq_40}，欧拉角动态方程\eqref{eq_42}将三个姿态通道耦合在一起。实际上，无人机的姿态属于$SO(3)$上的流形结构，任何姿态变化都被视为流形上的测地线运动。而传统的局部线性化跟踪姿态的方法相当于在流形的切空间进行局部线性逼近，这种线性化处理方式导致了姿态轨迹生成过程中的不连续性，丢失了流形的曲率信息，所以在机动飞行时会导致姿态跟踪误差变大。因此本文参考文献\parencite{10.1115/1.4052714}在$SO(3)$上考虑姿态误差的表示。
 
-由于旋转矩阵$\boldsymbol{R}\in{SO(3)}$，姿态欧拉角$\boldsymbol{\eta}\in\mathbb{R}^3$，因此定义符号$[.]_\times$表示映射关系$\boldsymbol{R}^3\to SO(3)$，$(.)^\vee$表示对应的逆映射$SO(3)\to\boldsymbol{R}^3$。对于任意姿态$\boldsymbol{\eta}=[\varphi \quad \theta \quad \psi]^T$，对应的矩阵形式可以表示为：
+由于旋转矩阵$\boldsymbol{R}\in{SO(3)}$，姿态欧拉角$\boldsymbol{\eta}\in\mathbb{R}^3$，因此定义符号$[.]_\times$表示映射关系$\mathbb{R}^3\to SO(3)$，$(.)^\vee$表示对应的逆映射$SO(3)\to\mathbb{R}^3$。对于任意姿态$\boldsymbol{\eta}=[\varphi \quad \theta \quad \psi]^T$，对应的矩阵形式可以表示为：
 \begin{equation}
     \boldsymbol{R}=[\boldsymbol{\eta}]_\times=
     \begin{bmatrix}
@@ -227,7 +227,7 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
     \dot{\boldsymbol{\eta}}_1=-\boldsymbol{K}_R\boldsymbol{e}_R
     \label{3-24}
 \end{equation}
-其中$\boldsymbol{K}_R$为姿态误差的正定增益矩阵。式\eqref{3-24}所示的作差方式类似于于反馈信号减去给定信号，所以需要加负号。
+其中$\boldsymbol{K}_R=diag({K}_{R1},{K}_{R2},{K}_{R3})$为姿态误差的正定增益矩阵。式\eqref{3-24}所示的作差方式类似于于反馈信号减去给定信号，所以需要加负号。
 
 为提高系统的响应速度，确保快速跟踪期望姿态，引入微分前馈策略：
 \begin{equation}
@@ -338,21 +338,217 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
 \begin{equation}
     \begin{gathered}
     \left.\frac{\partial(\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2)}{\partial\boldsymbol{\nu}}\right|_{\boldsymbol{\nu}=\boldsymbol{\nu}_0}(\boldsymbol{\nu}-\boldsymbol{\nu}_0)=\boldsymbol{H}_{vane}\Omega_0^2(\boldsymbol{\nu}-\boldsymbol{\nu}_0) \\
-    \left.\bigg[\frac{\partial(\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2)}{\partial\Omega}+\frac{\partial(\boldsymbol{H}_{gyro}\Omega)}{\partial\Omega}\bigg]\right|_{\Omega=\Omega_0}(\Omega-\Omega_0)=[2\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)](\Omega-\Omega_0)
+    \left.\bigg[\frac{\partial(\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2)}{\partial\Omega}+\frac{\partial(\boldsymbol{H}_{gyro}\Omega)}{\partial\Omega}\bigg]\right|_{\Omega=\Omega_0}(\Omega-\Omega_0)=\big[2\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)\big](\Omega-\Omega_0)
     \end{gathered}
     \label{3-38}
 \end{equation}
 
 因此，角速度动态的一阶泰勒展开式\eqref{3-35}近似可以表示为：
 \begin{equation}
-    \begin{aligned}
-    \boldsymbol{\dot{\omega}}^b&=\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{H}_{vane}\Omega_0^2(\boldsymbol{\nu}-\boldsymbol{\nu}_0)+[2\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)](\Omega-\Omega_0)\\
-    \end{aligned}
+    \boldsymbol{\dot{\omega}}^b=\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{H}_{vane}\Omega_0^2(\boldsymbol{\nu}-\boldsymbol{\nu}_0)+\big[2\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)\big](\Omega-\Omega_0)
     \label{3-39}
 \end{equation}
 
-值得一提的是，风扇转速$\Omega$作为速度控制的输入信号并不直接参与姿态控制，因此不被视为姿态控制中输入信号的一部分。可以将$\Omega$作为在角速度动态中的已知参数，该参数可以从速度环设计中得到。为了简便表示，采用以下记号：
+值得一提的是，风扇转速$\Omega$作为速度控制的输入信号并不直接参与姿态控制。简化后的角速度动态（即式\eqref{3-21}）中与$\Omega$相关的项均与陀螺力矩$\boldsymbol{M}_{gyro}^b$有关，将由下文设计的陀螺力矩补偿算法补偿。因此$\Omega$不被视为姿态控制中输入信号的一部分，可以将$\Omega$作为在角速度动态中的已知参数，该参数可以从速度环设计中得到。为了简便表示，采用以下记号：
+\begin{equation}
+    \boldsymbol{T}(\Omega)=\big[2\boldsymbol{H}_{vane}\boldsymbol{\nu}_0\Omega_0+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}_0^b)\big](\Omega-\Omega_0)\in\mathbb{R}^3
+    \label{3-40}
+\end{equation}
 
+将式\eqref{3-40}代入式\eqref{3-39}，可以得到角速度$\boldsymbol{\omega}^b$动态的增量表达式：
+\begin{equation}
+    \begin{aligned}
+    \boldsymbol{\dot{\omega}}^b&=\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{H}_{vane}\Omega_0^2(\boldsymbol{\nu}-\boldsymbol{\nu}_0)+\boldsymbol{T}(\Omega)\\
+    &=\begin{bmatrix}\dot{p}_0 \\ \dot{q}_0 \\ \dot{r}_0 \end{bmatrix}
+    + k_{\delta}k_f^2\Omega_0^2
+    \left[\begin{array}{ccc}2J_x^{-1}l_1 & & \\& 2J_y^{-1}l_1 & \\& & 4J_z^{-1}l_2\end{array}\right]
+    \left(\begin{bmatrix}\nu_{x} \\ \nu_{y} \\ \nu_{z}\end{bmatrix}
+    -\begin{bmatrix}\nu_{x0} \\ \nu_{y0} \\ \nu_{z0}\end{bmatrix}\right)
+    +  \begin{bmatrix}T_{x}(\Omega) \\ T_{y}(\Omega) \\ T_{z}(\Omega)
+    \end{bmatrix}
+    \end{aligned}
+    \label{3-41}
+\end{equation}
+
+INDI通过对式\eqref{3-41}进行求逆，来得到期望的虚拟控制输入的增量表达式：
+\begin{equation}
+    \begin{aligned}
+        \boldsymbol{\nu}_d&=(\boldsymbol{H}_{vane}\Omega_0^2)^{-1}\Big\{\boldsymbol{\mu} -\big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}(\Omega)\big]\Big\}+\boldsymbol{\nu}_0\\
+        &=\frac{1}{k_{\delta}k_f^2\Omega_0^2}
+        \left[\begin{array}{ccc}2J_x^{-1}l_1 & & \\& 2J_y^{-1}l_1 & \\& & 4J_z^{-1}l_2\end{array}\right]^{-1}
+        \left\{\begin{bmatrix}\mu_{x} \\ \mu_{y} \\ \mu_{z}\end{bmatrix}
+        -\left (\begin{bmatrix}\dot{p}_0 \\ \dot{q}_0 \\ \dot{r}_0 \end{bmatrix}+\begin{bmatrix}T_{x}(\Omega) \\ T_{y}(\Omega) \\ T_{z}(\Omega)
+        \end{bmatrix}\right )\right\}
+        +  \begin{bmatrix}\nu_{x0} \\ \nu_{y0} \\ \nu_{z0}\end{bmatrix}
+    \end{aligned}
+    \label{3-42}
+\end{equation}
+
+其中，虚拟输入项$\boldsymbol{\nu}$被$\boldsymbol{\nu}_d$替换，表明是期望的输入。类似地，$\boldsymbol{\Omega}$被替换为$\boldsymbol{\Omega}_d$。
+
+将式\eqref{3-42}代入式\eqref{3-41}，得到线性化的角速度动态方程：
+\begin{equation}
+    \dot{\boldsymbol \omega}^b=\boldsymbol{\mu}
+    \label{3-43}
+\end{equation}
+
+最终，通过以下比例反馈律，可以得到稳定的角速度子系统：
+\begin{equation}
+    \boldsymbol{\mu}=\boldsymbol{K}_{\omega}(\boldsymbol{\omega}_d^b-\boldsymbol{\omega}^b)
+    \label{3-44}
+\end{equation}
+
+将式\eqref{3-44}代入式\eqref{3-43}中可以得到：
+\begin{equation}
+    \dot{\boldsymbol \omega}^b=\boldsymbol{K}_{\omega}(\boldsymbol{\omega}_d^b-\boldsymbol{\omega}^b)
+    \label{3-45}
+\end{equation}
+其中$\boldsymbol{K}_\omega=diag({K}_{\omega 1},{K}_{\omega 2},{K}_{\omega 3})$为正反馈增益矩阵。
+
+基于INDI的控制思想已经把非线性角速度动力学方程\eqref{3-34}简化为了一个一阶积分系统\eqref{3-43}，因此采用单一的比例控制器就可以确保闭环系统的稳定性，只需要保证反馈增益为正，而不管其具体取值。这进一步提供了一个指导，可以分别确定闭环系统的静态平衡点和动态性能。因此结合式\eqref{3-44}，可以将式\eqref{3-42}可以分为两部分：
+\begin{equation}
+    \boldsymbol{\nu}_d=\boldsymbol{\nu}_i + \boldsymbol{\nu}_f
+    \label{3-46}
+\end{equation}
+其中$\boldsymbol{\nu}_i$定义为INDI输入，$\boldsymbol{\nu}_f$定义为反馈输入，具体形式为：
+\begin{equation}
+    \begin{aligned}
+        \boldsymbol{\nu}_i&=-(\boldsymbol{H}_{vane}\Omega_0^2)^{-1} \big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}_d(\Omega)\big]+\boldsymbol{\nu}_0\\
+        &=-\frac{1}{k_{\delta}k_f^2\Omega_0^2}
+        \left[\begin{array}{ccc}2J_x^{-1}l_1 & & \\& 2J_y^{-1}l_1 & \\& & 4J_z^{-1}l_2\end{array}\right]^{-1}
+        \left (\begin{bmatrix}\dot{p}_0 \\ \dot{q}_0 \\ \dot{r}_0 \end{bmatrix}+\begin{bmatrix}T_{x}(\Omega) \\ T_{y}(\Omega) \\ T_{z}(\Omega)
+        \end{bmatrix}\right )
+        +  \begin{bmatrix}\nu_{x0} \\ \nu_{y0} \\ \nu_{z0}\end{bmatrix}
+    \end{aligned}
+    \label{3-47}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \boldsymbol{\nu}_f&=(\boldsymbol{H}_{vane}\Omega_0^2)^{-1}\boldsymbol{K}_{\omega}(\boldsymbol{\omega}_d^b-\boldsymbol{\omega}^b)\\
+        &=\frac{1}{k_{\delta}k_f^2\Omega_0^2}
+        \left[\begin{array}{ccc}2J_x^{-1}l_1 & & \\& 2J_y^{-1}l_1 & \\& & 4J_z^{-1}l_2\end{array}\right]^{-1}
+        \left[\begin{array}{ccc}{K}_{\omega 1} & & \\& {K}_{\omega 2} & \\& & {K}_{\omega 3}\end{array}\right]
+        \left (\begin{bmatrix}\dot{p}_d \\ \dot{q}_d \\ \dot{r}_d \end{bmatrix}-\begin{bmatrix}\dot{p} \\ \dot{q} \\ \dot{r}
+        \end{bmatrix}\right )
+    \end{aligned}
+    \label{3-48}
+\end{equation}
+
+INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角速度动力学耦合项$\boldsymbol{J}\boldsymbol{\omega}^b\times\boldsymbol{\omega}^b$造成的影响放在了$\dot {\boldsymbol{\omega}}_0^b$中处理。在每一个工作点计算的INDI输入都是基于上一个工作点的INDI输入加上模型误差、阵风扰动以及风扇转速输入对相邻两个工作点之间的角加速度影响。因此，模型误差不会随着时间进行累计，而是在每一个工作点实时补偿。而系统的稳定性由基于误差的角速度反馈来保证。
+
+根据上述分析，INDI输入的计算依赖于机体的角加速度值$\dot {\boldsymbol{\omega}}_0^b$，在现有条件下，该值可以通过机体陀螺仪测量的角速度进行一阶差分得到：
+\begin{equation}
+    \dot{\boldsymbol{\omega}}^b(k)=\frac{
+        \begin{bmatrix}
+        \boldsymbol{\omega}^b(k)-\boldsymbol{\omega}^b(k-1)
+        \end{bmatrix}}{\Delta t}
+    \label{3-49}
+\end{equation}
+其中$\Delta t$是陀螺仪传感器的采样时间。因此INDI也被称为基于传感器的方法。
+
+为了提高姿态控制器的响应速度和控制精度，$\Delta t$应该在条件允许的情况下尽可能小。但是传感器测量得到的角速度会受到机体震动和外部扰动等因素的影响，难免会有噪声，越小的采样时间更会放大这种噪声的影响。因此在实际应用中，需要对角速度进行滤波处理。但是滤波处理就会在角加速度的计算中引入延迟，由于INDI是将角速度动力学方程在工作点处进行一阶泰勒展开，所以需要保证展开式\eqref{3-41}中所有下标为0的项都位于同一工作点。一种方法是对角加速度进行预测，但是这种方法需要对角加速度进行额外的建模，并且角速度的干扰也无法预测。或者采用多个加速度计来直接测量角加速度，但是这种方式会导致机载航电系统设计过于复杂，并且加速度计受机体震动影响也较大。因此，本文针对所有下标为0的项进行同步滤波处理，除了角加速度项外，还包括虚拟控制输入项和风扇转速输入项。文献\parencite{smeurAdaptiveIncrementalNonlinear2015,smeurCascadedIncrementalNonlinear2018b}通过四旋翼飞行试验表明这种处理方式的可行性。本文实验使用的滤波器是二阶Butterworth低通滤波器，滤波器截止频率的具体数值应该根据飞行过程中信号的频率成分、带宽和噪声水平来综合确定。对于本文使用的DFUAV，滤波器截止频率为30Hz。为加以区分，所有下标为0的项经过滤波器滤波后，使用下标$(.)_f$表示。
+
+\subsection{陀螺力矩补偿}
+
+在基于INDI的控制架构中，陀螺力矩$\boldsymbol{M}_{gyro}^b$分量蕴含在了$\boldsymbol{T}(\Omega)$中（见式\eqref{3-40}），该力矩的存在会在姿态发生改变时影响姿态跟踪精度。因此，为了消除陀螺力矩对姿态控制的影响，需要在INDI输入$\boldsymbol{\nu}_i$中（见式\eqref{3-47}）对其进行补偿。由于姿态子系统的控制输入为控制舵面的偏转角度，并且根据式\eqref{eq_38}可知陀螺力矩的机理已十分明确。所以可以将陀螺力矩对应的值等价转化为虚拟控制输入量，然后在$\boldsymbol{\nu}_i$中减去该分量，即可对陀螺力矩造成的负面影响进行补偿。
+
+根据式\eqref{eq_35}、\eqref{eq_36}和式\eqref{3-14}，可用于理论计算的控制舵面力矩可表示为：
+\begin{gather}
+    \boldsymbol{M}_{vane}^b=\begin{bmatrix}
+        -l_1(F_1-F_3) \\ l_1(F_4-F_2) \\ l_2(F_1+F_2+F_3+F_4) 
+    \end{bmatrix}
+    \label{3-50}
+\end{gather}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{优先级控制分配}
 
 
 
