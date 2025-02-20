@@ -2,7 +2,7 @@
 
 基于第二章建立的DFUAV非线性系统动态方程分析，其多源力与力矩耦合叠加效应导致姿态动态模型尤为复杂。如横滚角的变化会在俯仰通道和偏航通道上都产生或者间接产生力矩影响，并且三维力矩都与环境风速呈现强相关性。最常用的姿态控制方法基于反馈线性化，比如不考虑系统的数学模型的PID控制算法，虽然该方法面对非线性系统有一定的鲁棒性，但仅通过比例-积分-微分的线性组合应对内外因素产生的力矩影响难免会使系统状态出现超调和滞后等问题。此外，可以使用基于系统模型的方法考虑内外因素对系统状态的影响，但在系统模型参数过多并且不精确的情况下也将为控制算法的设计和系统调试带来很大工作量。基于上述分析，姿态控制算法设计的核心在于如何对难以测得的力矩进行在线补偿。
 
-本章安排如下：将首先对DFUAV的姿态模型进行简化处理，方便下文姿态控制算法的设计。然后简要概述增量控制和控制分配的理论以及二者的结合，继而给出了基于INDI和优先级控制分配的DFUAV的姿态控制方案设计。为验证方案有效性，最后进行了仿真实验和飞行实验验证。
+本章安排如下：首先简要概述增量非线性动态逆控制和控制分配的理论以及二者的结合，然后对DFUAV的姿态模型进行简化处理，方便下文姿态控制算法的设计。接下来给出了基于INDI和优先级控制分配的DFUAV的姿态控制方案设计，最后为验证方案有效性，最后进行了仿真实验和飞行实验验证。
 
 \section{增量非线性动态逆控制与控制分配理论}
 
@@ -68,7 +68,7 @@ INDI理论的一个核心假设是时间尺度分离法则\cite{inproceedings}�
     \boldsymbol{\nu}=\boldsymbol{K}(\boldsymbol{x},\boldsymbol{u})
     \label{3-8}
 \end{equation}
-由于实际控制输入的约束$\boldsymbol{U}$存在，将实际控制输入变换为虚拟控制输入后有$\boldsymbol{\nu}\in\boldsymbol{\Phi}\in\mathbb{R}^{m}$。容许控制集合通过映射$\boldsymbol{K}$从$\mathbb{R}^{p}$空间映射到$\mathbb{R}^{m}$空间得到可达控制集合，如果$\boldsymbol{\nu}\in\boldsymbol{\Phi}$，则称虚拟控制输入为可达，否则为不可达。
+由于实际控制输入的约束$\boldsymbol{U}$存在，将实际控制输入变换为虚拟控制输入后有$\boldsymbol{\nu}\in\boldsymbol{\Phi}\in\mathbb{R}^{m}$。容许控制集合$\boldsymbol{U}$通过映射$\boldsymbol{K}$从$\mathbb{R}^{p}$空间映射到$\mathbb{R}^{m}$空间得到可达控制集合$\boldsymbol{\Phi}$，如果$\boldsymbol{\nu}\in\boldsymbol{\Phi}$，则称虚拟控制输入为可达，否则为不可达。虚拟控制输入的物理意义一般为力或力矩。
 
 对$\boldsymbol{\nu}$做一阶泰勒展开并且同样忽略关于系统状态的导数项，得到：
 \begin{equation}
@@ -180,21 +180,6 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
 \end{equation}
 上述简化的力矩模型将可控力矩与不可控力矩分开。控制舵面合力矩$\boldsymbol{M}_{vane}^b$作为可控力矩由下文设计的姿态控制算法来计算期望力矩（即期望的控制舵面偏转角度）。陀螺力矩$\boldsymbol{M}_{gyro}^b$同样作为可控力矩，但该力矩会对DFUAV的姿态造成负面影响，下文将根据其产生的机理设计对应的陀螺力矩补偿算法加以补偿。而$\boldsymbol{M}_{a}^b$作为不可控力矩将通过姿态控制算法在在线补偿。
 
-% \subsection{虚拟控制输入}
-
-% 如前文所述，DFUAV姿态子系统的控制输入为控制舵面的偏转角$\delta_i$，由四片控制舵面产生三维控制力矩，因此带来了过驱动的问题。因此引入虚拟控制输入$\boldsymbol{\nu}$将姿态子系统分为两部分，$\boldsymbol{\nu}$既作为姿态子系统的控制输入也作为控制分配算法的期望力矩。可表示为：
-% \begin{equation}
-%     \boldsymbol{\nu}=
-%     \begin{bmatrix}
-%     {\nu}_x \\ {\nu}_y \\ {\nu}_z
-%     \end{bmatrix}=\boldsymbol{B}
-%     \begin{bmatrix}
-%     \delta_1 \\ \delta_2 \\ \delta_3 \\ \delta_4
-%     \end{bmatrix}
-%     \label{3-20}
-% \end{equation}
-% 其中矩阵$\boldsymbol{B}$为四片控制舵面偏转角到三维虚拟控制输入的转换矩阵，有$\boldsymbol{B}\in\mathbb{R}^{3\times4}$。
-
 \section{基于INDI和优先级控制分配的姿态控制方案}
 
 根据本章开篇时的分析，姿态控制算法设计的核心在于如何对难以测得的力矩进行在线补偿。在第二节姿态模型简化中，将难以测得的力矩视为了未建模动态$\boldsymbol{M}_{a}^b$。基于INDI的控制架构设计，其优势主要体现在模型的鲁棒性与未建模误差的动态补偿能力。式\eqref{3-21}中的形式已十分适用于INDI控制器的设计：一方面，姿态子系统的输入通道的模型机理已经明确，由四片独立的控制舵面产生偏转角作为输入信号；另一方面，由于未建模动态$\boldsymbol{M}_{a}^b$作用于角加速度，所以可用机载IMU高频测量角速度并估算角加速度，并根据INDI的增量式求逆策略在线补偿未建模动态$\boldsymbol{M}_{a}^b$。在所构建的控制架构中，控制输入分为两部分：INDI输入与反馈输入。INDI输入针对未建模动态进行补偿，将非线性系统转化为线性形式；而反馈输入针对此线性形式设计反馈控制律，保证系统的稳定性和鲁棒性。
@@ -268,7 +253,7 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
         & & 4J_z^{-1}l_2
     \end{array}\right.\right]\in\mathbb{R}^{3\times3}
     \label{3-29}\\
-    \boldsymbol{B}\triangleq
+    \boldsymbol{B}=
     \begin{bmatrix}
     -0.5 & 0 & 0.5 & 0 \\
     0 & -0.5 & 0 & 0.5 \\
@@ -436,7 +421,7 @@ INDI通过对式\eqref{3-41}进行求逆，来得到期望的虚拟控制输入�
 
 INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角速度动力学耦合项$\boldsymbol{J}\boldsymbol{\omega}^b\times\boldsymbol{\omega}^b$造成的影响放在了$\dot {\boldsymbol{\omega}}_0^b$中处理。在每一个工作点计算的INDI输入都是基于上一个工作点的INDI输入加上模型误差、阵风扰动以及风扇转速输入对相邻两个工作点之间的角加速度影响。因此，模型误差不会随着时间进行累计，而是在每一个工作点实时补偿。而系统的稳定性由基于误差的角速度反馈来保证。
 
-根据上述分析，INDI输入的计算依赖于机体的角加速度值$\dot {\boldsymbol{\omega}}_0^b$，在现有条件下，该值可以通过机体陀螺仪测量的角速度进行一阶差分得到：
+根据上述分析，INDI输入的计算依赖于机体的角加速度值$\dot {\boldsymbol{\omega}}_0^b$，在现有条件下，该值可以通过对机体陀螺仪测量的相邻两个采样点的角速度进行一阶差分得到：
 \begin{equation}
     \dot{\boldsymbol{\omega}}^b(k)=\frac{
         \begin{bmatrix}
@@ -444,111 +429,204 @@ INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角
         \end{bmatrix}}{\Delta t}
     \label{3-49}
 \end{equation}
-其中$\Delta t$是陀螺仪传感器的采样时间。因此INDI也被称为基于传感器的方法。
+其中$\Delta t$是陀螺仪传感器的采样时间，$k$为传感器的采样点，泰勒展开式中的工作点一般选取为当前的采样时刻。因此INDI也被称为基于传感器的方法。
 
-为了提高姿态控制器的响应速度和控制精度，$\Delta t$应该在条件允许的情况下尽可能小。但是传感器测量得到的角速度会受到机体震动和外部扰动等因素的影响，难免会有噪声，越小的采样时间更会放大这种噪声的影响。因此在实际应用中，需要对角速度进行滤波处理。但是滤波处理就会在角加速度的计算中引入延迟，由于INDI是将角速度动力学方程在工作点处进行一阶泰勒展开，所以需要保证展开式\eqref{3-41}中所有下标为0的项都位于同一工作点。一种方法是对角加速度进行预测，但是这种方法需要对角加速度进行额外的建模，并且角速度的干扰也无法预测。或者采用多个加速度计来直接测量角加速度，但是这种方式会导致机载航电系统设计过于复杂，并且加速度计受机体震动影响也较大。因此，本文针对所有下标为0的项进行同步滤波处理，除了角加速度项外，还包括虚拟控制输入项和风扇转速输入项。文献\parencite{smeurAdaptiveIncrementalNonlinear2015,smeurCascadedIncrementalNonlinear2018b}通过四旋翼飞行试验表明这种处理方式的可行性。本文实验使用的滤波器是二阶Butterworth低通滤波器，滤波器截止频率的具体数值应该根据飞行过程中信号的频率成分、带宽和噪声水平来综合确定。对于本文使用的DFUAV，滤波器截止频率为30Hz。为加以区分，所有下标为0的项经过滤波器滤波后，使用下标$(.)_f$表示。
+在飞行控制系统的工程实现中，为了提高姿态控制器的响应速度和控制精度，$\Delta t$应该在条件允许的情况下尽可能小。但是传感器测量得到的角速度原始值会受到机体震动和外部扰动等因素的影响，难免会有噪声，对原始值进行差分运算后会放大这种噪声的影响，采样时间越小，噪声影响越大。因此在实际应用中，需要对角速度进行滤波处理。但是滤波处理就会在角加速度的计算中引入延迟，由于INDI是将角速度动力学方程在工作点处进行一阶泰勒展开，所以需要保证展开式\eqref{3-41}中所有下标为0的项都位于同一工作点。一种方法是对角加速度进行预测，如采用卡尔曼滤波器对其进行预测来补偿相位滞后，但是这种方法需要对角加速度进行额外的建模，并且角速度收到的的干扰也无法预测。或者采用多个加速度计数据融合来直接测量角加速度，但是这种方式会导致机载航电系统设计过于复杂，并且加速度计受机体震动影响也较大，多传感器数据融合的精度难以有效保证。
+
+因此，本文针对所有下标为0的项进行同步滤波处理，除了角加速度项外，还包括虚拟控制输入项和风扇转速输入项。文献\parencite{smeurAdaptiveIncrementalNonlinear2015,smeurCascadedIncrementalNonlinear2018b}通过四旋翼飞行实验表明这种处理方式的可行性。考虑到陀螺仪传感器的高频噪声影响，本文实验使用的滤波器是二阶巴特沃斯（Butterworth）低通滤波器，滤波器截止频率的具体数值应该根据飞行过程中信号的频率成分、带宽和噪声水平来综合确定。对于本文使用的DFUAV，滤波器截止频率为30Hz。为加以区分，所有下标为0的项经过滤波器滤波后，使用下标$(.)_s$表示。
 
 \subsection{陀螺力矩补偿}
 
 在基于INDI的控制架构中，陀螺力矩$\boldsymbol{M}_{gyro}^b$分量蕴含在了$\boldsymbol{T}(\Omega)$中（见式\eqref{3-40}），该力矩的存在会在姿态发生改变时影响姿态跟踪精度。因此，为了消除陀螺力矩对姿态控制的影响，需要在INDI输入$\boldsymbol{\nu}_i$中（见式\eqref{3-47}）对其进行补偿。由于姿态子系统的控制输入为控制舵面的偏转角度，并且根据式\eqref{eq_38}可知陀螺力矩的机理已十分明确。所以可以将陀螺力矩对应的值等价转化为虚拟控制输入量，然后在$\boldsymbol{\nu}_i$中减去该分量，即可对陀螺力矩造成的负面影响进行补偿。
 
-根据式\eqref{eq_35}、\eqref{eq_36}和式\eqref{3-14}，可用于理论计算的控制舵面力矩可表示为：
+根据式\eqref{eq_35}、\eqref{eq_36}和式\eqref{3-14}，在现有条件下可用于计算的控制舵面力矩可表示为：
 \begin{gather}
-    \boldsymbol{M}_{vane}^b=\begin{bmatrix}
-        -l_1(F_1-F_3) \\ l_1(F_4-F_2) \\ l_2(F_1+F_2+F_3+F_4) 
-    \end{bmatrix}
+    \boldsymbol{M}_{vane}^b=k_{\delta}k_f^2\Omega^2\begin{bmatrix}
+        -l_1 & 0 & l_1 & 0 \\
+        0 & -l_1 & 0 & l_1 \\
+        l_2 & l_2 & l_2 & l_2
+        \end{bmatrix}\boldsymbol{{\delta}}
     \label{3-50}
 \end{gather}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+将式\eqref{3-27}代入式\eqref{3-50}可得：
+\begin{gather}
+    \boldsymbol{M}_{vane}^b=k_{\delta}k_f^2\Omega^2\begin{bmatrix}
+        -l_1 & 0 & l_1 & 0 \\
+        0 & -l_1 & 0 & l_1 \\
+        l_2 & l_2 & l_2 & l_2
+        \end{bmatrix}\boldsymbol{B}^{\dagger}\boldsymbol{\nu}
+    \label{3-51}
+\end{gather}
+根据式\eqref{3-12}以及式\eqref{3-30}中矩阵B的值，可以计算得到$\boldsymbol{B}^{\dagger}$为：
+\begin{gather}
+    \boldsymbol{B}^{\dagger}=
+        \begin{bmatrix}
+        -1 & 0 & 1 \\
+        0 & -1 & 1  \\
+        1 & 0 & 1 \\
+        0 & 1 & 1
+        \end{bmatrix}
+    \label{3-52}
+\end{gather}
+
+如果直接计算与陀螺力矩等效的控制舵面的偏转角度，那么就有可能在在实际控制中出现控制舵面的偏转角度超过其可行范围的情况。这是因为与陀螺力矩等效的控制舵面的偏转角度未经过控制分配算法的优化分配，导致期望的控制效果与实际不符。因此，此处计算与陀螺力矩等效的虚拟控制输入以便于INDI输入$\boldsymbol{\nu}_i$一起参与优先级控制分配。
+
+令式\eqref{eq_38}所描述的陀螺力矩和式\eqref{3-51}描述的控制舵面力矩相等，可以得到与陀螺力矩等效的虚拟控制输入$\boldsymbol{\nu}_{gyro}$：
+\begin{equation}
+    \begin{gathered}
+        \boldsymbol{M}_{gyro}^b=\boldsymbol{M}_{vane}^b\\
+        \Rightarrow J_{fan}\Omega\begin{bmatrix}-q \\ p \\ 0\end{bmatrix}
+        =
+        k_{\delta}k_f^2\Omega^2\begin{bmatrix}
+            -l_1 & 0 & l_1 & 0 \\
+            0 & -l_1 & 0 & l_1 \\
+            l_2 & l_2 & l_2 & l_2
+            \end{bmatrix}\boldsymbol{B}^{\dagger}\boldsymbol{\nu}_{gyro}\\
+        \Rightarrow \boldsymbol{\nu}_{gyro}=\frac{J_{fan}}{k_{\delta}k_f^2\Omega}\boldsymbol{B}\begin{bmatrix}
+            -l_1 & 0 & l_1 & 0 \\
+            0 & -l_1 & 0 & l_1 \\
+            l_2 & l_2 & l_2 & l_2
+            \end{bmatrix}^{\dagger}\begin{bmatrix}-q \\ p \\ 0\end{bmatrix}
+        \label{3-53}
+    \end{gathered}
+\end{equation}
+
+因此，加入陀螺力矩补偿后的INDI输入$\boldsymbol{\nu}_i$为：
+\begin{equation}
+    \begin{aligned}
+        \boldsymbol{\nu}_i&=-(\boldsymbol{H}_{vane}\Omega_0^2)^{-1} \big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}_d(\Omega)\big]+\boldsymbol{\nu}_0-\boldsymbol{\nu}_{gyro}
+    \end{aligned}
+    \label{3-54}
+\end{equation}
+其中$\boldsymbol{\nu}_{gyro}$表达式中的风扇转速项$\Omega$和角速度项$\boldsymbol{\omega}^b$都需要同步滤波。
 
 \subsection{优先级控制分配}
+
+由于DFUAV的特殊构型，飞行过程中由期望控制输入计算出的控制舵面偏转角很可能超出其物理约束，所以底层设计用于解决控制分配问题。该问题可以描述为对于给定的三维期望虚拟控制输入$\boldsymbol{\nu}_d$，找到一组四片控制舵面的偏转角度在容许控制集合的范围内$\boldsymbol{\delta}_d\in \boldsymbol{U}$使得$\boldsymbol{\nu}_d=\boldsymbol{B}\boldsymbol{\delta}_d$，或者在无法找到这样一组解的情况下，需要找到一组最优解使得分配误差$\boldsymbol{\nu}_d-\boldsymbol{B}\boldsymbol{\delta}_d$最小化。容许控制集合$\boldsymbol{U}$由下式定义：
+\begin{equation}
+    \boldsymbol{U}=\{\boldsymbol{\delta}\in\mathbb{R}^4|-\delta_m\leq\delta_i\leq\delta_m,i=1,2,3,4\}
+    \label{3-55}
+\end{equation}
+
+对应的，虚拟控制输入$\boldsymbol{\nu}$的可达集合$\boldsymbol\Phi$表示为：
+\begin{equation}
+    \boldsymbol\Phi=\left\{\boldsymbol{\nu}\in\mathbb{R}^3|\boldsymbol{\nu}=\boldsymbol{B}\boldsymbol{\delta},\boldsymbol{\delta}\in \boldsymbol{U}\right\}
+    \label{3-56}
+\end{equation}
+其中$\boldsymbol{B}$由式\eqref{3-30}给出。
+
+为了实现控制分配的目标，广泛采用的方法是直接计算矩阵$\boldsymbol{B}$的伪逆矩阵$\boldsymbol{B}^{\dagger}$，然后计算$\boldsymbol{\delta}_d$：
+\begin{equation}
+    \boldsymbol{\delta}_d=\boldsymbol{B}^{\dagger}\boldsymbol{\nu}_d
+    \label{3-57}
+\end{equation}
+
+使用伪逆方法的优点是计算简单，易于理解。但是在工作点的约束边界区，即使$\boldsymbol{\nu}_d$保持在可达集合内，伪逆法计算出的$\boldsymbol{\delta}_d$中的部分分量也可能会超出约束边界，即$\boldsymbol{\delta}\notin\boldsymbol{U}$。在这种情况下，伪逆法会计算出一个基于某种性能指标的次最优解，次最优解可能有多种选择，所以次最优解之间亦有优劣之分。伪逆法没有对这些解进行优先级排序，因此无法保证次最优解的唯一性。
+
+为了弥补伪逆方法的不足，采用优先级控制分配方法，将期望的虚拟控制输入进行矢量分解划分各自的优先级，优先满足高优先级的控制输入分量。式\eqref{3-46}已将期望的虚拟控制输入$\boldsymbol{\nu}_d$分为两部分，即$\boldsymbol{\nu}_i$和$\boldsymbol{\nu}_f$，其中$\boldsymbol{\nu}_i$是INDI输入，$\boldsymbol{\nu}_f$是反馈输入。根据本节开篇时的分析，为优先补偿系统的非线性未建模动态和外在扰动，视$\boldsymbol{\nu}_i$为高优先级控制输入分量，而$\boldsymbol{\nu}_f$为低优先级控制输入分量。考虑到控制舵面的物理约束，期望的虚拟控制输入应该被限制在其可达集合内。在本文中，假设在适当的外部扰动下，无人机运动过程中总能满足高优先级分量的可达。即：
+\begin{equation}
+    \boldsymbol{\nu}_i\in\boldsymbol\Phi
+    \label{3-58}
+\end{equation}
+如果由于控制舵面的饱和而使得$\boldsymbol{\nu}_i$超出可达集合，那么姿态将不受控制，闭环系统失去可控性。但是这种情况不在本文的讨论范围内。
+
+由于总的虚拟控制输入$\boldsymbol{\nu}_d$是受到可达集合限制的，并且INDI输入分量$\boldsymbol{\nu}_i$假定总是可达的。这表明了总的虚拟控制输入中的另一部分分量，即反馈输入分量$\boldsymbol{\nu}_f$，可能会超出可达集合的范围，因此需要对$\boldsymbol{\nu}_f$进行约束。使用比例因子$\alpha$将$\boldsymbol{\nu}_f$限制在可达集合内，即：
+\begin{equation}
+    \boldsymbol{\nu}_d=\boldsymbol{\nu}_i+\alpha\boldsymbol{\nu}_f,\quad\text{其中}0\leq\alpha\leq1
+    \label{3-59}
+\end{equation}
+因为$\dot{\boldsymbol{\omega}}^b$仍由式\eqref{3-45}控制，所以保持$\boldsymbol{\nu}_i$不变并对$\boldsymbol{\nu}_f$进行缩放只会影响闭环系统的动态性能，而不会影响闭环系统的稳定性。
+
+当虚拟控制输入可达时，比例因子$\alpha$等于1，此时的优先级控制分配方法等价于伪逆法。当虚拟控制输入不可达时，比例因子$\alpha$小于1，表明对低优先级分量$\boldsymbol{\nu}_f$进行截断，保证了高优先级分量$\boldsymbol{\nu}_i$的可达性。
+
+综上所述，优先级控制分配算法可以通过解决以下线性优化问题来实现对高优先级分量的保持和低优先级分量的截断：
+\begin{equation}
+    \begin{gathered}
+        \max_{\alpha,\boldsymbol{\delta}}\alpha \\
+        \text{subject  to}
+        \begin{cases}
+        \boldsymbol{\delta}\in\boldsymbol{U} \\
+        \boldsymbol{B}\boldsymbol{\delta}=\boldsymbol{\nu}_i+\alpha\boldsymbol{\nu}_f \\
+        0\leq\alpha\leq1
+        \end{cases}
+    \end{gathered}
+    \label{3-60}
+\end{equation}
+
+在具体实践过程中，上述线性优化问题通过以下步骤进行求解：首先判断给定的$\boldsymbol{\nu}_d=\boldsymbol{\nu}_i+\boldsymbol{\nu}_f$是否可达，即$\alpha$等于1的情况。如果可达，直接使用伪逆法计算$\boldsymbol{\delta}_d$并返回最优解；如果不可达，即$0\leqslant\alpha<1$，则可以使用单纯形法通过基变量变换逐步迭代逼近最优解，最终得到$\alpha$的值，此时对$\boldsymbol{\nu}_f$截断即可返回容许控制。
+
+式\eqref{3-60}的优化结果能够保证对于每一个由上层姿态控制算法计算出的期望虚拟控制输入，都有：
+\begin{equation}
+    \boldsymbol{\nu}_d=\boldsymbol{\nu}_i+\alpha\boldsymbol{\nu}_f\in \boldsymbol{\Phi}
+\label{3-61}
+\end{equation}
+这保证了$\boldsymbol{\nu}_d$的可达性以及次最优解的唯一性，区别仅是$\alpha$的取值不同。
+
+值得注意的是，上述分解方式是人为规定的，在具体实践过程中还可以根据场景需求作其他种类的分解，比如定义分量的优先级和定义分解的维度等。除了INDI方法外，其他的控制方法包括串级PID控制律、ADRC控制律\cite{HKXB202010026}等都可以针对虚拟控制输入进行矢量分解。
+
+图\ref{实际框图}所示的控制系统框图展示了上层设计采用INDI姿态控制方法，底层设计采用优先级控制分配方法的分层控制架构。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+		\centering
+		\includegraphics[scale=1]{Fig/实际框图.pdf}
+		\caption{\label{实际框图}基于INDI和优先级控制分配法的姿态控制系统框图}
+	\end{minipage}%
+\end{figure}
+
+\section{实验和结果分析}
+
+为了验证提出的基于上层INDI+底层优先级控制分配的姿态控制方法的性能，本小节进行了一系列仿真实验与实际飞行实验。仿真实验平台的为MATLAB，DFUAV的仿真模型相关参数参考表\ref{DFUAV_parameters}，仿真模型中采用基于龙格-库塔（Runge-Kutta）法的ode45数值求解器求解DFUAV的非线性动态方程（式\eqref{eq_10}）。实际飞行实验平台使用2.1节介绍的试验样机。为提高数据的一致性并且减少风扇转速$\Omega$变化带来的耦合效应，需要保证姿态控制过程中的高度稳定，因此实验中采用了位置控制器，该控制器的设计方法将于第四章具体介绍。应当注意的是，位置控制器的加入并不影响姿态控制器的性能验证。悬停时风扇的旋转速度约为7639转/分钟。此外，姿态控制器的对照实验采用广泛使用的串级PID姿态控制器，其中角度环采用单一的P控制器，角速度环采用PI控制器。实验过程中使用的INDI姿态控制器和串级PID姿态控制器的参数如下表\ref{Control_parameters}所示。
+
+\begin{table}
+	\caption{\label{Control_parameters}INDI控制器和PID控制器的各项参数}
+	\centering
+	\small 
+	\begin{tabular}{cccccc}
+		\hline 
+		INDI控制器参数符号 & 数值                & PID控制器参数符号 & 数值  & PID控制器参数符号 & 数值               \tabularnewline
+		\hline 
+		$K_{R\varphi}$   & $5.5$ 		     & $K_{R\varphi}$   & $5.5  $& $I_{\omega p}$   & $0.1$ \tabularnewline
+		$K_{R\theta}$   & $5.5$ & $K_{R\theta}$   & $5.5$& $I_{\omega q}$   & $0.1$ \tabularnewline
+        $K_{R\psi}$   & $5.0$ & $K_{R\psi}$   & $5.0$& $I_{\omega r}$   & $0.1$ \tabularnewline
+        $K_{\omega p}$   & $0.3$ & $K_{\omega p}$   & $0.3$ \tabularnewline
+        $K_{\omega q}$   & $0.3$ & $K_{\omega q}$   & $0.3$ \tabularnewline
+        $K_{\omega r}$   & $0.18$ & $K_{\omega r}$   & $0.18$ \tabularnewline
+		\hline 
+	\end{tabular}
+\end{table}
+
+\subsection{主动扰动设计}
+
+为了体现所提出的姿态控制器的抗干扰性能，本文设计了一种主动产生扰动的方案。由于姿态动力学系统的输入信号为控制舵面的偏转角度，所以实验中通过在一些控制舵面上添加固定的偏置来引入干扰，如图所示。此外，为了防止因加入固定偏置而导致控制舵面饱和的问题，当添加固定偏置时，对应控制舵面的最大偏转角度也应该同步调整。
+
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{minipage}[c]{1\textwidth}
+% 		\centering
+% 		\includegraphics[scale=1]{Fig/主动扰动.pdf}
+% 		\caption{\label{主动扰动}主动扰动示意图}
+% 	\end{minipage}%
+% \end{figure}
+
+\subsection{仿真实验}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
