@@ -577,17 +577,16 @@ INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角
 
 \section{实验和结果分析}
 
-为了验证提出的基于上层INDI+底层优先级控制分配的姿态控制方法的性能，本小节进行了一系列仿真实验与实际飞行实验。仿真实验平台的为MATLAB，DFUAV的仿真模型相关参数参考表\ref{DFUAV_parameters}，仿真模型中采用基于龙格-库塔（Runge-Kutta）法的ode45数值求解器求解DFUAV的非线性动态方程（式\eqref{eq_10}）。实际飞行实验平台使用2.1节介绍的试验样机。为提高数据的一致性并且减少风扇转速$\Omega$变化带来的耦合效应，需要保证姿态控制过程中的高度稳定，因此实验中采用了位置控制器，该控制器的设计方法将于第四章具体介绍。应当注意的是，位置控制器的加入并不影响姿态控制器的性能验证。悬停时风扇的旋转速度约为7639转/分钟。此外，姿态控制器的对照实验采用广泛使用的串级PID姿态控制器，其中角度环采用单一的P控制器，角速度环采用PI控制器。实验过程中使用的INDI姿态控制器和串级PID姿态控制器的参数如下表\ref{Control_parameters}所示。
-
+为了验证提出的基于上层INDI+底层优先级控制分配的姿态控制方法的性能，本小节进行了一系列仿真实验与实际飞行实验，包括INDI姿态控制方法对比串级PID姿态控制方法和优先级控制分配方法对比伪逆方法。作为对照实验的串级PID控制方法中，角度环采用单一的P控制器，角速度环采用PI控制器。实验过程中使用的INDI姿态控制器和串级PID姿态控制器的参数如下表\ref{Control_parameters}所示，$\boldsymbol{K}_{R}$表示角度环比例增益，$\boldsymbol{K}_{\omega}$表示角速度环比例增益，$\boldsymbol{I}_{\omega}$表示角速度环积分增益。为了保证实验过程中其他条件的一致性，在INDI控制对比PID控制的实验过程中，底层控制分配方法都采用伪逆法。而在优先级控制分配方法对比伪逆方法的实验过程中，上层姿态控制均采用INDI方法。
 \begin{table}
 	\caption{\label{Control_parameters}INDI控制器和PID控制器的各项参数}
 	\centering
 	\small 
 	\begin{tabular}{cccccc}
 		\hline 
-		INDI控制器参数符号 & 数值                & PID控制器参数符号 & 数值  & PID控制器参数符号 & 数值               \tabularnewline
+		INDI控制器参数符号 & 数值 & PID控制器参数符号 & 数值 & PID控制器参数符号 & 数值 \tabularnewline
 		\hline 
-		$K_{R\varphi}$   & $5.5$ 		     & $K_{R\varphi}$   & $5.5  $& $I_{\omega p}$   & $0.1$ \tabularnewline
+		$K_{R\varphi}$ & $5.5$ & $K_{R\varphi}$ & $5.5 $& $I_{\omega p}$ & $0.1$ \tabularnewline
 		$K_{R\theta}$   & $5.5$ & $K_{R\theta}$   & $5.5$& $I_{\omega q}$   & $0.1$ \tabularnewline
         $K_{R\psi}$   & $5.0$ & $K_{R\psi}$   & $5.0$& $I_{\omega r}$   & $0.1$ \tabularnewline
         $K_{\omega p}$   & $0.3$ & $K_{\omega p}$   & $0.3$ \tabularnewline
@@ -597,31 +596,60 @@ INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角
 	\end{tabular}
 \end{table}
 
-\subsection{主动扰动设计}
+仿真实验平台为MATLAB，DFUAV的仿真模型相关参数参考表\ref{DFUAV_parameters}，仿真模型中采用基于龙格-库塔（Runge-Kutta）法的ode45数值求解器求解DFUAV的非线性动态方程（式\eqref{eq_10}）。实际飞行实验平台使用2.1节介绍的试验样机。为了提高数据的一致性并且减少风扇转速$\Omega$变化带来的耦合效应，需要保证姿态控制过程中的高度稳定，因此实验中采用了位置控制器，该控制器的设计方法将于第四章具体介绍。应当注意的是，位置控制器的加入并不影响姿态控制器的性能验证。悬停时风扇的旋转速度约为7639转/分钟。
 
-为了体现所提出的姿态控制器的抗干扰性能，本文设计了一种主动产生扰动的方案。由于姿态动力学系统的输入信号为控制舵面的偏转角度，所以实验中通过在一些控制舵面上添加固定的偏置来引入干扰，如图所示。此外，为了防止因加入固定偏置而导致控制舵面饱和的问题，当添加固定偏置时，对应控制舵面的最大偏转角度也应该同步调整。
+为了体现所提出的姿态控制器的抗干扰性能，本文设计了一种主动产生扰动的方案。由于姿态动力学系统的输入信号为控制舵面的偏转角度，所以实验中通过在一些控制舵面上添加固定的偏置来引入干扰，如图\ref{主动扰动}所示。此外，为了防止因加入固定偏置而导致控制舵面饱和的问题，当添加固定偏置时，对应控制舵面的最大偏转角度也应该同步调整。调整时也需要确保控制算法在正负方向上响应的对称性。例如在1号控制舵面上添加了$5^{\circ}$的固定偏置，那么1号控制舵面的最大偏转角度应该限制为$\pm(\delta_m-5^{\circ})$，即$\pm35^{\circ}$，其他舵面的最大偏转角度保持$\pm40^{\circ}$不变。
 
-% \begin{figure}[htbp]
-% 	\centering
-% 	\begin{minipage}[c]{1\textwidth}
-% 		\centering
-% 		\includegraphics[scale=1]{Fig/主动扰动.pdf}
-% 		\caption{\label{主动扰动}主动扰动示意图}
-% 	\end{minipage}%
-% \end{figure}
+\begin{figure}[htbp]
+	\centering
+        \subfloat[INDI对比PID的扰动设置]
+		{\includegraphics[scale=1]{Fig/主动扰动1.pdf}
+		\label{实验一扰动}}
+        \subfloat[优先级控制分配对比伪逆的扰动设置]
+        {\includegraphics[scale=1]{Fig/主动扰动2.pdf}
+		\label{实验二扰动}}
+    \caption{主动扰动实验设置}\label{主动扰动}
+\end{figure}
 
 \subsection{仿真实验}
 
+\subsubsection{INDI对比PID}
 
+本实验的目的是验证在MATLAB仿真环境中搭建的INDI控制器在有无干扰情况下的性能，采用PID姿态控制器作为实验对比。扰动的添加方式如图\ref{实验一扰动}所示，在1号控制舵面上添加$10^{\circ}$的固定偏置，这会在机体上产生额外的负横滚力矩和正偏航力矩，1号舵的偏转角度限幅被同时调整为$\pm30^{\circ}$。实验总时长为6s，仿真步长为0.01s。仅在横滚通道设置方波指令信号，俯仰和偏航通道的指令均设置为0。
 
+没有添加扰动时的实验对比结果如图\ref{INDI对比PID仿真无扰动}所示。根据实验结果可知，在横滚通道上，INDI控制和PID控制都可以及时地跟踪期望姿态指令，但是相比于PID控制，INDI控制器的超调量相对较小，并且收敛速度更快。对于俯仰和偏航通道，添加了陀螺力矩补偿的INDI控制器在横滚姿态变化时能够更好地抑制陀螺力矩的影响，从而提高了姿态控制的精度。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/INDI对比PID无扰动仿真实验结果.pdf}
+        \caption{\label{INDI对比PID仿真无扰动}INDI对比PID无扰动情况下的仿真实验结果}
+        \end{minipage}
+\end{figure}
 
+添加干扰情况下的实验对比结果如图\ref{INDI对比PID仿真有扰动}所示，扰动在方波输入时同步添加。在横滚通道上，INDI控制器在添加扰动后仍然能够保持较好的跟踪性能，这是由于INDI在补偿未建模动态的同时也纳入了对外在扰动的补偿，并且在每一个控制周期内都实时补偿而不会积累误差。但是PID控制器则在面对扰动的情况下表现出了明显的滞后与超调量，且当INDI控制达到稳态时，PID控制器仍存在明显的偏差。在偏航通道上，INDI对于扰动引起的偏航力矩的抑制能力也明显优于PID。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/INDI对比PID有扰动仿真实验结果.pdf}
+        \caption{\label{INDI对比PID仿真有扰动}INDI对比PID有扰动情况下的仿真实验结果}
+        \end{minipage}
+\end{figure}
 
+\subsubsection{优先级控制分配对比伪逆}
 
+本实验用于验证设计的优先级控制分配算法在控制舵面饱和情况下的有效性，对比实验为前文提到的伪逆方法。扰动的添加方式如图\ref{实验二扰动}所示，在1号控制舵面上添加$25^{\circ}$的固定偏置，并且在2号控制舵面上添加$10^{\circ}$的固定偏置，这会在机体上产生额外的负横滚力矩、负俯仰力矩和正偏航力矩。1号舵的偏转角度限幅被同时调整为$\pm15^{\circ}$，2号舵的偏转角度限幅被同时调整为$\pm30^{\circ}$。实验总时长为2s，仿真步长为0.01s。为了便于观察三个通道受扰动影响的情况，三个姿态通道的参考指令均设置为0，扰动在第1s时刻添加。
 
-
-
-
-
+% 姿态通道的实验结果如图\ref{优先级伪逆姿态仿真}所示。在横滚通道上，优先级控制分配算法在控制舵面饱和时能够更好地保持期望姿态，而伪逆方法则会出现控制舵面超出约束的情况。在俯仰通道上，优先级控制分配算法在控制舵面饱和时能够更好地保持期望姿态，而伪逆方法则会出现控制舵面超出约束的情况。在偏航通道上，优先级控制分配算法在控制舵面饱和时能够更好地保持期望姿态，而伪逆方法则会出现控制
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{minipage}[c]{1\textwidth}
+%         \centering
+%         \includegraphics[scale=1]{Fig/优先级对比伪逆的姿态保持仿真实验结果.pdf}
+%         \caption{\label{优先级伪逆姿态仿真}优先级控制分配对比伪逆法的姿态保持仿真实验结果}
+%         \end{minipage}
+% \end{figure}
 
 
 
