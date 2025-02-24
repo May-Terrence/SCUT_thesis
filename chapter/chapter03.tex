@@ -554,12 +554,34 @@ INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角
     \label{3-60}
 \end{equation}
 
-在具体实践过程中，上述线性优化问题通过以下步骤进行求解：首先判断给定的$\boldsymbol{\nu}_d=\boldsymbol{\nu}_i+\boldsymbol{\nu}_f$是否可达，即$\alpha$等于1的情况。如果可达，直接使用伪逆法计算$\boldsymbol{\delta}_d$并返回最优解；如果不可达，即$0\leqslant\alpha<1$，则可以使用单纯形法通过基变量变换逐步迭代逼近最优解，最终得到$\alpha$的值，此时对$\boldsymbol{\nu}_f$截断即可返回容许控制。
+在具体实践过程中，上述线性优化问题通过以下步骤进行求解：首先判断给定的$\boldsymbol{\nu}_d=\boldsymbol{\nu}_i+\boldsymbol{\nu}_f$是否可达，即$\alpha$等于1的情况。如果可达，直接使用伪逆法计算$\boldsymbol{\delta}_d$并返回最优解；如果不可达，即$0\leqslant\alpha<1$，则可以使用单纯形法通过基变量变换逐步迭代逼近最优解。首先通过以下公式满足高优先级分量$\boldsymbol{\nu}_i$：
+\begin{equation}
+    \boldsymbol{\nu}_i=\boldsymbol{B}\boldsymbol{\delta}^\prime,\quad\boldsymbol{\delta}^\prime=[\delta_{1}^\prime\quad\delta_{2}^\prime\quad\delta_{3}^\prime\quad\delta_{4}^\prime]^T\in\boldsymbol{U}
+    \label{3-61}
+\end{equation}
+
+如果$\boldsymbol{\nu}_i$不可达，则直接返回$\boldsymbol{\delta}_d=\boldsymbol{\delta}^\prime$。否则$\boldsymbol{\nu}_i$可达，接下来需要满足低优先级分量$\boldsymbol{\nu}_f$，此时容许控制集合变为：
+\begin{equation}
+    \boldsymbol{U}^\prime=\{\boldsymbol{\delta}\in\mathbb{R}^4|-\delta_m-\delta_{i}^\prime\leq\delta_i\leq\delta_m-\delta_{i}^\prime,i=1,2,3,4\}
+    \label{3-62}
+\end{equation}
+
+可以通过下式计算低优先级分量对应的舵面偏转：
+\begin{equation}
+    \boldsymbol{\nu}_f=\boldsymbol{B}\boldsymbol{\delta}^{\prime\prime},\quad\boldsymbol{\delta}^{\prime\prime}=[\delta_{1}^{\prime\prime}\quad\delta_{2}^{\prime\prime}\quad\delta_{3}^{\prime\prime}\quad\delta_{4}^{\prime\prime}]^T\in\boldsymbol{U}^{\prime}
+    \label{3-63}
+\end{equation}
+
+最终得到期望舵面偏转角为：
+\begin{equation}
+    \boldsymbol{\delta}_d = \boldsymbol{\delta}^{\prime}+\boldsymbol{\delta}^{\prime\prime}
+    \label{3-64}
+\end{equation}
 
 式\eqref{3-60}的优化结果能够保证对于每一个由上层姿态控制算法计算出的期望虚拟控制输入，都有：
 \begin{equation}
     \boldsymbol{\nu}_d=\boldsymbol{\nu}_i+\alpha\boldsymbol{\nu}_f\in \boldsymbol{\Phi}
-\label{3-61}
+\label{3-65}
 \end{equation}
 这保证了$\boldsymbol{\nu}_d$的可达性以及次最优解的唯一性，区别仅是$\alpha$的取值不同。
 
@@ -627,7 +649,7 @@ INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角
         \end{minipage}
 \end{figure}
 
-添加干扰情况下的实验对比结果如图\ref{INDI对比PID仿真有扰动}所示，扰动在方波输入时同步添加。在横滚通道上，INDI控制器在添加扰动后仍然能够保持较好的跟踪性能，这是由于INDI在补偿未建模动态的同时也纳入了对外在扰动的补偿，并且在每一个控制周期内都实时补偿而不会积累误差。但是PID控制器则在面对扰动的情况下表现出了明显的滞后与超调量，且当INDI控制达到稳态时，PID控制器仍存在明显的偏差。在偏航通道上，INDI对于扰动引起的偏航力矩的抑制能力也明显优于PID。
+添加干扰情况下的实验对比结果如图\ref{INDI对比PID仿真有扰动}所示，扰动在方波输入时同步添加。在横滚通道上，INDI控制器在添加扰动后仍然能够保持较好的跟踪性能，似乎与未添加扰动情况下的姿态响应曲线没有区别，这是由于INDI控制器在补偿未建模动态$\boldsymbol{M}_a^b$的同时也纳入了对外在扰动的补偿，并且在每一个控制周期内都会实时补偿而不会积累误差。但是PID控制器依赖误差才能修正，存在未知扰动的情况下由于无法及时预测和补偿误差，所以表现出了明显的滞后与超调量，且当INDI控制达到稳态时，PID控制器仍存在明显的偏差。在偏航通道上，INDI对于扰动引起的偏航力矩的抑制能力同样明显优于PID。
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth}
@@ -641,22 +663,85 @@ INDI采用增量控制策略，将未建模动态项$\boldsymbol{M}_{a}^b$和角
 
 本实验用于验证设计的优先级控制分配算法在控制舵面饱和情况下的有效性，对比实验为前文提到的伪逆方法。扰动的添加方式如图\ref{实验二扰动}所示，在1号控制舵面上添加$25^{\circ}$的固定偏置，并且在2号控制舵面上添加$10^{\circ}$的固定偏置，这会在机体上产生额外的负横滚力矩、负俯仰力矩和正偏航力矩。1号舵的偏转角度限幅被同时调整为$\pm15^{\circ}$，2号舵的偏转角度限幅被同时调整为$\pm30^{\circ}$。实验总时长为2s，仿真步长为0.01s。为了便于观察三个通道受扰动影响的情况，三个姿态通道的参考指令均设置为0，扰动在第1s时刻添加。
 
-% 姿态通道的实验结果如图\ref{优先级伪逆姿态仿真}所示。在横滚通道上，优先级控制分配算法在控制舵面饱和时能够更好地保持期望姿态，而伪逆方法则会出现控制舵面超出约束的情况。在俯仰通道上，优先级控制分配算法在控制舵面饱和时能够更好地保持期望姿态，而伪逆方法则会出现控制舵面超出约束的情况。在偏航通道上，优先级控制分配算法在控制舵面饱和时能够更好地保持期望姿态，而伪逆方法则会出现控制
-% \begin{figure}[htbp]
-% 	\centering
-% 	\begin{minipage}[c]{1\textwidth}
-%         \centering
-%         \includegraphics[scale=1]{Fig/优先级对比伪逆的姿态保持仿真实验结果.pdf}
-%         \caption{\label{优先级伪逆姿态仿真}优先级控制分配对比伪逆法的姿态保持仿真实验结果}
-%         \end{minipage}
-% \end{figure}
+姿态通道的实验结果如图\ref{优先级伪逆姿态仿真}所示。可以看出，三个姿态通道的误差变化情况都与扰动产生的力矩的变化情况相一致。但是以优先级控制分配算法作为底层分配算法时的姿态通道误差幅值明显比伪逆法更小，这是由于优先级控制分配算法优先满足了高优先级分量$\boldsymbol{\nu}_i$，使执行机构的变化能够及时的补偿未建模动态和外部扰动的影响。这也说明了本文的划分优先级分量思路的正确性。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/优先级对比伪逆的姿态保持仿真实验结果.pdf}
+        \caption{\label{优先级伪逆姿态仿真}优先级控制分配对比伪逆法的姿态保持仿真实验结果}
+        \end{minipage}
+\end{figure}
+
+另一种可以直观感受控制分配方法优劣的方式是比较分配误差。伪逆方法的分配误差定义为：
+\begin{equation}
+    \boldsymbol{e}_{pinv}=\boldsymbol{\nu}_d-\boldsymbol{B}^{\dagger}\boldsymbol{\nu}_d
+    \label{3-66}
+\end{equation}
+其中$\boldsymbol{\delta}_d$是通过式\eqref{3-57}计算得到的，该值需要被限制在容许控制集合$\boldsymbol{U}$内。
+
+优先级控制分配算法的分配误差定义为$\boldsymbol{e}_{i}+\boldsymbol{e}_{f}$，两个分量分别表示INDI分配误差和反馈分配误差。可以通过下式计算：
+\begin{equation}
+    \begin{gathered}
+        \begin{cases}
+            \boldsymbol{e}_{i}=\boldsymbol{\nu}_i-\boldsymbol{B}\boldsymbol{\delta}^{\prime} \\
+            \boldsymbol{e}_{f}=\boldsymbol{\nu}_f-\boldsymbol{B}\boldsymbol{\delta}^{\prime\prime}
+        \end{cases}
+    \end{gathered}
+    \label{3-67}
+\end{equation}
+其中$\boldsymbol{\delta}^{\prime}$可以由式\eqref{3-61}计算得到，$\boldsymbol{\delta}^{\prime\prime}$可以由式\eqref{3-63}计算得到。
+
+两种分配方法对应的分配误差如图\ref{优先级伪逆分配误差仿真}所示。可以看出，扰动添加的瞬间立刻在三个通道上产生分配误差。但是优先级控制分配算法的分配误差在1s后的短暂时间内迅速减小，而伪逆方法的分配误差则是不断增大一段时间才减小，且分配误差的幅值也明显大于优先级控制分配算法。说明本文使用的优先级控制分配算法提高了姿态控制的精度。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/优先级对比伪逆的分配误差仿真实验结果.pdf}
+        \caption{\label{优先级伪逆分配误差仿真}优先级控制分配对比伪逆法的分配误差仿真实验结果}
+        \end{minipage}
+\end{figure}
+
+图\ref{优先级分量分配误差仿真}展示了仿真实验中优先级分量各自对应的分配误差$\boldsymbol{e}_i$和$\boldsymbol{e}_f$的比较。从图中可以看出明显的INDI分配误差$\boldsymbol{e}_i$保持为零，这表明分量$\boldsymbol{\nu}_i$在实验过程中始终满足可达，这是因为INDI输入分量位于高优先级。而优先级控制分配的分配误差全由反馈分配误差$\boldsymbol{e}_f$贡献，这表明了优先级控制分配算法由于控制舵面的饱和对反馈输入进行了截断。这进一步验证了优先级控制分配算法的可行性和有效性。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/优先级各分量的分配误差仿真实验结果.pdf}
+        \caption{\label{优先级分量分配误差仿真}优先级分量各自的分配误差仿真实验结果}
+        \end{minipage}
+\end{figure}
+\subsection{实际飞行实验}
+
+\subsubsection{INDI对比PID}
+
+本实验的目的是使用第二章介绍的试验样机验证提出的基于INDI的姿态控制器在实际飞行中是否能够稳定的跟踪期望姿态以及抵抗外部干扰的能力。实验过程同样分为无扰动和有扰动两种情况。实验条件的设计与仿真实验中保持一致，包括扰动的添加方式（见图\ref{实验一扰动}）和方波指令的输入等。实际控制器的步长为0.01s。
+
+无扰动和有扰动情况下的姿态控制实际飞行实验结果分别如图\ref{INDI对比PID无扰动飞行实验结果}和图\ref{INDI对比PID有扰动飞行实验结果}所示。从实验结果可以看出，在实际飞行情况下，INDI姿态控制器跟踪期望姿态的能力同样优于PID姿态控制器。相比PID，INDI在横滚通道的超调量更小，上升时间更短，在俯仰和偏航通道上的姿态误差也更小。
+
+在添加干扰的情况下，INDI姿态控制器同样也表现出了更好的抗干扰能力，跟踪误差较小。而PID控制器则难以有效应对外部干扰，表现出了较大的跟踪误差。这进一步验证了INDI控制器在实际飞行中的有效性。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/INDI对比PID无扰动飞行实验结果.pdf}
+        \caption{\label{INDI对比PID无扰动飞行实验结果}INDI对比PID无扰动时的飞行实验结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/INDI对比PID有扰动飞行实验结果.pdf}
+        \caption{\label{INDI对比PID有扰动飞行实验结果}INDI对比PID有扰动时的飞行实验结果}
+        \end{minipage}
+\end{figure}
 
 
 
 
 
-
-
+\subsubsection{优先级控制分配对比伪逆}
 
 
 
