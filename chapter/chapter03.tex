@@ -214,7 +214,7 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
 \end{equation}
 其中$\boldsymbol{K}_R=diag({K}_{R\varphi},{K}_{R\theta},{K}_{R\psi})$为姿态误差的正定增益矩阵。式\eqref{3-24}所示的作差方式类似于于反馈信号减去给定信号，所以需要加负号。
 
-为提高系统的响应速度，确保快速跟踪期望姿态，引入微分前馈策略：
+为提高系统的响应速度，确保快速跟踪期望姿态，引入前馈控制策略：
 \begin{equation}
     \dot{\boldsymbol{\eta}}_2=\frac{d\boldsymbol{\eta}_d}{dt}
     \label{3-25}
@@ -358,17 +358,16 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
 INDI通过对式\eqref{3-41}进行求逆，来得到期望的虚拟控制输入的增量表达式：
 \begin{equation}
     \begin{aligned}
-        \boldsymbol{\nu}_d&=(\boldsymbol{H}_{vane}\Omega_0^2)^{-1}\Big\{\boldsymbol{\mu} -\big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}(\Omega)\big]\Big\}+\boldsymbol{\nu}_0\\
+        \boldsymbol{\nu}_d&=(\boldsymbol{H}_{vane}\Omega_0^2)^{-1}\Big\{\boldsymbol{\mu} -\big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}(\Omega_d)\big]\Big\}+\boldsymbol{\nu}_0\\
         &=\frac{1}{k_{\delta}k_f^2\Omega_0^2}
         \left[\begin{array}{ccc}2J_x^{-1}l_1 & & \\& 2J_y^{-1}l_1 & \\& & 4J_z^{-1}l_2\end{array}\right]^{-1}
         \left\{\begin{bmatrix}\mu_{x} \\ \mu_{y} \\ \mu_{z}\end{bmatrix}
-        -\left (\begin{bmatrix}\dot{p}_0 \\ \dot{q}_0 \\ \dot{r}_0 \end{bmatrix}+\begin{bmatrix}T_{x}(\Omega) \\ T_{y}(\Omega) \\ T_{z}(\Omega)
+        -\left (\begin{bmatrix}\dot{p}_0 \\ \dot{q}_0 \\ \dot{r}_0 \end{bmatrix}+\begin{bmatrix}T_{x}(\Omega_d) \\ T_{y}(\Omega_d) \\ T_{z}(\Omega_d)
         \end{bmatrix}\right )\right\}
         +  \begin{bmatrix}\nu_{x0} \\ \nu_{y0} \\ \nu_{z0}\end{bmatrix}
     \end{aligned}
     \label{3-42}
 \end{equation}
-
 其中，虚拟输入项$\boldsymbol{\nu}$被$\boldsymbol{\nu}_d$替换，表明是期望的输入。类似地，$\boldsymbol{\Omega}$被替换为$\boldsymbol{\Omega}_d$。
 
 将式\eqref{3-42}代入式\eqref{3-41}，得到线性化的角速度动态方程：
@@ -398,10 +397,10 @@ INDI通过对式\eqref{3-41}进行求逆，来得到期望的虚拟控制输入�
 其中$\boldsymbol{\nu}_i$定义为INDI输入，$\boldsymbol{\nu}_f$定义为反馈输入，具体形式为：
 \begin{equation}
     \begin{aligned}
-        \boldsymbol{\nu}_i&=-(\boldsymbol{H}_{vane}\Omega_0^2)^{-1} \big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}_d(\Omega)\big]+\boldsymbol{\nu}_0\\
+        \boldsymbol{\nu}_i&=-(\boldsymbol{H}_{vane}\Omega_0^2)^{-1} \big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}(\Omega_d)\big]+\boldsymbol{\nu}_0\\
         &=-\frac{1}{k_{\delta}k_f^2\Omega_0^2}
         \left[\begin{array}{ccc}2J_x^{-1}l_1 & & \\& 2J_y^{-1}l_1 & \\& & 4J_z^{-1}l_2\end{array}\right]^{-1}
-        \left (\begin{bmatrix}\dot{p}_0 \\ \dot{q}_0 \\ \dot{r}_0 \end{bmatrix}+\begin{bmatrix}T_{x}(\Omega) \\ T_{y}(\Omega) \\ T_{z}(\Omega)
+        \left (\begin{bmatrix}\dot{p}_0 \\ \dot{q}_0 \\ \dot{r}_0 \end{bmatrix}+\begin{bmatrix}T_{x}(\Omega_d) \\ T_{y}(\Omega_d) \\ T_{z}(\Omega_d)
         \end{bmatrix}\right )
         +  \begin{bmatrix}\nu_{x0} \\ \nu_{y0} \\ \nu_{z0}\end{bmatrix}
     \end{aligned}
@@ -412,7 +411,7 @@ INDI通过对式\eqref{3-41}进行求逆，来得到期望的虚拟控制输入�
         \boldsymbol{\nu}_f&=(\boldsymbol{H}_{vane}\Omega_0^2)^{-1}\boldsymbol{K}_{\omega}(\boldsymbol{\omega}_d^b-\boldsymbol{\omega}^b)\\
         &=\frac{1}{k_{\delta}k_f^2\Omega_0^2}
         \left[\begin{array}{ccc}2J_x^{-1}l_1 & & \\& 2J_y^{-1}l_1 & \\& & 4J_z^{-1}l_2\end{array}\right]^{-1}
-        \left[\begin{array}{ccc}{K}_{\omega 1} & & \\& {K}_{\omega 2} & \\& & {K}_{\omega 3}\end{array}\right]
+        \left[\begin{array}{ccc}{K}_{\omega p} & & \\& {K}_{\omega q} & \\& & {K}_{\omega r}\end{array}\right]
         \left (\begin{bmatrix}\dot{p}_d \\ \dot{q}_d \\ \dot{r}_d \end{bmatrix}-\begin{bmatrix}\dot{p} \\ \dot{q} \\ \dot{r}
         \end{bmatrix}\right )
     \end{aligned}
@@ -437,7 +436,7 @@ INDI采用增量控制策略，将未建模动态力矩项$\boldsymbol{M}_{a}^b$
 
 \subsection{陀螺力矩补偿}
 
-在基于INDI的控制架构中，陀螺力矩$\boldsymbol{M}_{gyro}^b$分量蕴含在了$\boldsymbol{T}(\Omega)$中(见式\eqref{3-40})，该力矩的存在会在姿态发生改变时影响姿态跟踪精度。因此，为了消除陀螺力矩对姿态控制的影响，需要在INDI输入$\boldsymbol{\nu}_i$中(见式\eqref{3-47})对其进行补偿。由于姿态子系统的控制输入为控制舵面的偏转角度，并且根据式\eqref{eq_38}可知陀螺力矩的机理已十分明确。所以可以将陀螺力矩对应的值等价转化为虚拟控制输入量，然后在$\boldsymbol{\nu}_i$中减去该分量，即可对陀螺力矩造成的负面影响进行补偿。
+在基于INDI的控制架构中，陀螺力矩$\boldsymbol{M}_{gyro}^b$分量蕴含在了$\boldsymbol{T}(\Omega)$中(见式\eqref{3-40})，该力矩的存在会在姿态发生改变时影响姿态跟踪精度。因此，为了消除陀螺力矩对姿态控制的影响，需要在INDI输入$\boldsymbol{\nu}_i$中对其进行补偿。由于姿态子系统的控制输入为控制舵面的偏转角度，并且根据式\eqref{eq_38}可知陀螺力矩的机理已十分明确。所以可以将陀螺力矩对应的值等价转化为虚拟控制输入量，然后在$\boldsymbol{\nu}_i$中减去该分量，即可对陀螺力矩造成的负面影响进行补偿。
 
 根据式\eqref{eq_35}、\eqref{eq_36}和式\eqref{3-14}，在现有条件下可用于计算的控制舵面力矩可表示为：
 \begin{gather}
@@ -495,7 +494,7 @@ INDI采用增量控制策略，将未建模动态力矩项$\boldsymbol{M}_{a}^b$
 因此，加入陀螺力矩补偿后的INDI输入$\boldsymbol{\nu}_i$为：
 \begin{equation}
     \begin{aligned}
-        \boldsymbol{\nu}_i&=-(\boldsymbol{H}_{vane}\Omega_0^2)^{-1} \big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}_d(\Omega)\big]+\boldsymbol{\nu}_0-\boldsymbol{\nu}_{gyro}
+        \boldsymbol{\nu}_i&=-(\boldsymbol{H}_{vane}\Omega_0^2)^{-1} \big[\boldsymbol{\dot{\omega}}_0^b+\boldsymbol{T}(\Omega_d)\big]+\boldsymbol{\nu}_0-\boldsymbol{\nu}_{gyro}
     \end{aligned}
     \label{3-54}
 \end{equation}
