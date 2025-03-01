@@ -1,6 +1,6 @@
 \chapter{涵道风扇式无人机的位置控制}
 
-为了实现对轨迹规划结果的准确跟踪，一个跟踪性能优良、抗扰能力强的位置控制器是必不可少的。本文构建了基于分层解耦的外环-内环模块化控制框架，外环控制即位置控制器，内环控制即姿态控制器。位置控制作为轨迹跟踪的核心决策单元，首先通过融合IMU、卫星定位模块和气压计等多源传感器数据，实时解算无人机在三维空间中的位置、速度等系统状态信息。然后需要根据当前时刻的位置误差、速度误差和受力状态等因素，计算出涵道风扇的总拉力(对应转速指令$\Omega$)，并结合期望的姿态指令$\boldsymbol{\eta}_d=[\varphi_d\quad \theta_d\quad \psi_d]^T$，实现期望的位置、速度控制。基于解耦的模块化控制框架，实际的位置跟踪问题可以按照单独的外环控制来考虑，而不用考虑内环控制。并且模块化设计使得位置控制回路可以独立于姿态动力学环节进行控制器参数调节，有效地降低了DFUAV这一多变量耦合系统的设计复杂度。对于内环控制，则采用第三章介绍的基于INDI和优先级控制分配的姿态控制策略，期望的姿态指令由位置控制器解算得到。
+为了实现对轨迹规划结果的准确跟踪，一个跟踪性能优良、抗扰能力强的位置控制器是必不可少的。本文构建了基于分层解耦的外环-内环模块化控制框架，外环控制即位置控制器，内环控制即姿态控制器。位置控制作为轨迹跟踪的核心决策单元，首先通过融合IMU、卫星定位模块和气压计等多源传感器数据，使用基于误差状态的卡尔曼滤波(ESKF)算法实时解算无人机在三维空间中的位置、速度等系统状态信息。然后根据当前时刻的位置误差、速度误差和受力状态因素，计算出涵道风扇的总拉力(对应转速指令$\Omega$)，并结合期望的姿态指令$\boldsymbol{\eta}_d=[\varphi_d\quad \theta_d\quad \psi_d]^T$，实现期望的位置、速度控制。基于解耦的模块化控制框架，实际的位置跟踪问题可以按照单独的外环控制来考虑，而不用考虑内环控制。并且模块化设计使得位置控制回路可以独立于姿态动力学环节进行控制器参数调节，有效地降低了DFUAV这一多变量耦合系统的设计复杂度。对于内环控制，则采用第三章介绍的基于INDI和优先级控制分配的姿态控制策略，期望的姿态指令由位置控制器解算得到。
 
 在户外复杂气流环境中，阵风引起的非定常气流扰动是制约DFUAV位置控制精度的重要因素。计算流体力学仿真研究表明，当环境风速达到4.6m/s时，建筑物周围空气流速最高可以达到7.6m/s，这无疑会对DFUAV造成非常强烈的干扰，显著影响DFUAV的稳定性。因此，设计一个能够有效抗风的位置控制器尤为重要。针对该问题，广泛使用的PID位置控制器在有阵风的情况下存在其固有的缺陷：积分环节I在面对持续的风扰动时，补偿效果具有明显的相位滞后特性；而微分环节面对高频风速干扰则容易引发超调和震荡。如果环境风速变化已知，那么就可以及时补偿扰动以减小位置误差。为了测量环境风速，一种可能的解决方案是使用风速计测量机体速度与环境风速的相对速度，但环境风速可能来自各个方向，所以至少需要在无人机机体上安装三个风速计，这无疑会增加DFUAV硬件系统设计的复杂性和成本。并且风速计在低速的情况下存在明显噪声，误差较大。
 
@@ -238,21 +238,90 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
 期望的加速度输入$\boldsymbol{a}_{ud}$是在地面坐标系下的，而DFUAV的拉力向量始终作用在机体坐标系的$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴方向上。根据式\eqref{4_2}以及旋转矩阵不影响矢量大小的性质，可以得到期望的涵道风扇拉力大小$\|\boldsymbol{F}_{fan}\|$：
 \begin{equation}
     \begin{aligned}
-        \|\boldsymbol{F}_{fan}\|&=m\|\boldsymbol{a}_{ud}\|\\
+        \|\boldsymbol{F}_{fan}\|_2&=m\|\boldsymbol{a}_{ud}\|_2\\
         &=m\sqrt{a_{udx}^2+a_{udy}^2+a_{udz}^2}
     \end{aligned}
     \label{4_23}
 \end{equation}
 
-根据拉力大小可求出涵道风扇的转速$\Omega$：
+根据拉力大小可求出期望的涵道风扇的转速$\Omega_d$：
 \begin{equation}
     \begin{aligned}
-        \Omega&=\sqrt{\frac{\|\boldsymbol{F}_{fan}\|}{k_{fan}}}
+        \Omega_d&=\sqrt{\frac{\|\boldsymbol{F}_{fan}\|_2}{k_{fan}}}
     \end{aligned}
     \label{4_24}
 \end{equation}
 
+由于偏航角$\psi$对DFUAV的飞行轨迹不产生影响，所以在位置控制时可以人为自主设定期望的偏航角。一般情况下设定期望的偏航角为实际运动方向与地理北极的夹角。例如在轨迹跟踪过程中，假设当前时刻的参考位置为$\boldsymbol{P}^e_d=[x^e_d\quad y^e_d\quad z^e_d]^T$，上一时刻的参考位置为$\boldsymbol{P}^e_{d-1}=[x^e_{d-1}\quad y^e_{d-1}\quad z^e_{d-1}]^T$，则期望的偏航角$\psi_d$可以设置为：
+\begin{equation}
+    \psi_d=atan2(y_d^e-y_{d-1}^e,x_d^e-x_{d-1}^e)
+    \label{4_25}
+\end{equation}
+其中$atan2$表示接收两个参数的反正切函数，返回的角度范围是$(-\pi,\pi]$。
 
+为了求解期望的滚转角$\varphi_d$和俯仰角$\theta_d$，本文采用几何解算方法，首先计算出期望的姿态旋转矩阵，再根据旋转矩阵求解出期望的滚转角和俯仰角。设期望的姿态旋转矩阵为$\boldsymbol{R}_d$，则有：
+\begin{equation}
+    \boldsymbol{R}_d=\begin{bmatrix}b_1 \quad b_2 \quad b_3\end{bmatrix}
+    \label{4_26}
+\end{equation}
+其中，$b_1$、$b_2$和$b_3$分别为期望的姿态旋转矩阵$\boldsymbol{R}_d$的三个列向量。分别表示机体坐标系的三个轴在地面坐标系下的方向向量。
 
+由于虚拟控制输入的矢量和方向与机体坐标系$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴方向相同，所以有：
+\begin{equation}
+    b_3=\frac{\boldsymbol{a}_{ud}}{\|\boldsymbol{a}_{ud}\|_2}
+    \label{4_27}
+\end{equation}
 
+为了计算出$b_1$和$b_2$，引入中间坐标系$c$系，如图\ref{中间坐标系}所示。中间坐标系的$\boldsymbol{O}_c-\boldsymbol{Z}_c$轴与地面坐标系的$\boldsymbol{O}_e-\boldsymbol{Z}_e$轴重合，中间坐标系的$\boldsymbol{O}_c-\boldsymbol{X}_c$轴和$\boldsymbol{O}_c-\boldsymbol{Y}_c$轴分别与地面坐标系的$\boldsymbol{O}_e-\boldsymbol{X}_e$轴和$\boldsymbol{O}_e-\boldsymbol{Y}_e$轴成$\psi_d$的夹角。因此$\boldsymbol{O}_c-\boldsymbol{X}_c$轴在地面坐标系下的方向向量为：
+\begin{equation}
+    \begin{aligned}
+        c_1&=\begin{bmatrix}cos(\psi_d) \\sin(\psi_d) \\0\end{bmatrix}
+    \end{aligned}
+    \label{4_28}
+\end{equation}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/中间坐标系.pdf}
+        \caption{\label{中间坐标系}中间坐标系示意图}
+        \end{minipage}
+\end{figure}
 
+显然，中间坐标系的$\boldsymbol{O}_c-\boldsymbol{X}_c$轴处于机体坐标系的$\boldsymbol{O}_b-\boldsymbol{X}_b-\boldsymbol{Z}_b$平面内，因此$\boldsymbol{O}_c-\boldsymbol{X}_c$轴垂直于$\boldsymbol{O}_b-\boldsymbol{Y}_b$轴，所以$b_2$在地面坐标系下的的方向向量为：
+\begin{equation}
+    \begin{aligned}
+        b_2&=\frac{b_3\times c_1}{\|b_3\times c_1\|_2}
+    \end{aligned}
+    \label{4_29}
+\end{equation}
+式\eqref{4_29}中如果分母为0，那么表明$b_3$和$c_1$共线，这种情况下有俯仰角$\theta_d=\pm90^\circ$。对于本文研究的DFUAV，由于实际姿态指令和控制舵面角度的约束，不会存在这种情况。
+
+最后，根据右手定则求解出$b_1$：
+\begin{equation}
+    \begin{aligned}
+        b_1&=b_2\times b_3
+    \end{aligned}
+    \label{4_30}
+\end{equation}
+
+设$R_{i,j}$表示期望旋转矩阵$\boldsymbol{R}_d$的第$i$行第$j$列元素，根据第二章式\eqref{eq_5}定义的‘Z-Y-X'旋转顺序的旋转矩阵，可以求得期望的滚转角${\varphi}_d$和俯仰角${\theta}_d$：
+\begin{equation}
+    \begin{cases}
+        \varphi_d=\tan^{-1}\left(\dfrac{\sin\varphi}{\cos\varphi}\right)=\tan^{-1}\left(\dfrac{R_{32}}{R_{33}}\right) \\
+        \theta_d=\sin^{-1}\left({\sin\theta}\right)=\sin^{-1}\left(-{R_{31}}\right) & 
+        \end{cases}
+    \label{4_31}
+\end{equation}
+
+完整的基于INDI的位置控制系统框图如图\ref{INDI位置控制系统框图}所示。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/INDI实际框图.pdf}
+        \caption{\label{INDI位置控制系统框图}INDI位置控制系统框图}
+        \end{minipage}
+\end{figure}
+
+\section{实验结果和分析}
