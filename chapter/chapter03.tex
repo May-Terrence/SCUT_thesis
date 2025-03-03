@@ -600,7 +600,7 @@ INDI采用增量控制策略，将未建模动态力矩项$\boldsymbol{M}_{a}^b$
 
 为了验证提出的基于上层INDI+底层优先级控制分配的姿态控制方法的性能，本小节进行了一系列仿真实验与实际飞行实验，包括INDI姿态控制方法对比串级PID姿态控制方法和优先级控制分配方法对比伪逆方法。作为对照实验的串级PID控制方法中，角度环采用单一的P控制器，角速度环采用PI控制器。实验过程中使用的INDI姿态控制器和串级PID姿态控制器的参数如下表\ref{Control_parameters}所示，$\boldsymbol{K}_{R}$表示角度环比例增益，$\boldsymbol{K}_{\omega}$表示角速度环比例增益，$\boldsymbol{I}_{\omega}$表示角速度环积分增益。为了保证实验过程中其他条件的一致性，在INDI控制对比PID控制的实验过程中，底层控制分配方法都采用伪逆法。而在优先级控制分配方法对比伪逆方法的实验过程中，上层姿态控制均采用INDI方法。
 \begin{table}
-	\caption{\label{Control_parameters}INDI控制器和PID控制器的各项参数}
+	\caption{\label{Control_parameters}INDI姿态控制器和PID姿态控制器的控制参数}
 	\centering
 	\small 
 	\begin{tabular}{cccccc}

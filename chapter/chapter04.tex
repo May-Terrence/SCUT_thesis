@@ -4,7 +4,7 @@
 
 在户外复杂气流环境中，阵风引起的非定常气流扰动是制约DFUAV位置控制精度的重要因素。计算流体力学仿真研究表明，当环境风速达到4.6m/s时，建筑物周围空气流速最高可以达到7.6m/s，这无疑会对DFUAV造成非常强烈的干扰，显著影响DFUAV的稳定性。因此，设计一个能够有效抗风的位置控制器尤为重要。针对该问题，广泛使用的PID位置控制器在有阵风的情况下存在其固有的缺陷：积分环节I在面对持续的风扰动时，补偿效果具有明显的相位滞后特性；而微分环节面对高频风速干扰则容易引发超调和震荡。如果环境风速变化已知，那么就可以及时补偿扰动以减小位置误差。为了测量环境风速，一种可能的解决方案是使用风速计测量机体速度与环境风速的相对速度，但环境风速可能来自各个方向，所以至少需要在无人机机体上安装三个风速计，这无疑会增加DFUAV硬件系统设计的复杂性和成本。并且风速计在低速的情况下存在明显噪声，误差较大。
 
-第三章介绍了基于传感器的INDI方法的优越性：使用陀螺仪的测量值进行一阶差分来计算角加速度，进而基于角加速度的测量值估计出一个执行器周期内对未建模动态力矩的影响并实时补偿。牛顿第二定律揭示了加速度的大小与力的大小成正比关系$(\Delta \boldsymbol{F}\propto\Delta \boldsymbol{a})$，所以基于机载IMU中的加速度计三轴比力的测量值，可以直接估计出DFUAV所受环境风扰动的等效外力矢量。这一点与使用陀螺仪估计未建模动态力矩变化的思路是一致的。既然DFUAV的姿态可以被控制，那么位置控制同样可以采用这种思路，设计出一个用于控制DFUAV线性加速度的增量控制器。
+第三章介绍了基于传感器的INDI方法的优越性：使用陀螺仪的测量值进行一阶差分来计算角加速度，进而基于角加速度的测量值估计出一个控制周期内对未建模动态力矩的影响并实时补偿。牛顿第二定律揭示了加速度的大小与力的大小成正比关系$(\Delta \boldsymbol{F}\propto\Delta \boldsymbol{a})$，所以基于机载IMU中的加速度计三轴比力的测量值，可以直接估计出DFUAV所受环境风扰动的等效外力矢量。这一点与使用陀螺仪估计未建模动态力矩变化的思路是一致的。既然DFUAV的姿态可以被控制，那么位置控制同样可以采用这种思路，设计出一个用于控制DFUAV线性加速度的增量控制器。
 
 因此本章安排如下：首先对位置动力学模型进行简化处理以适应INDI位置控制器的设计。然后根据加速度计可估算力这一优势，设计基于INDI的位置控制器。最后进行仿真实验与实际飞行实验，验证所提出的位置控制器的有效性。
 
@@ -325,3 +325,86 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
 \end{figure}
 
 \section{实验结果和分析}
+
+为了检验本章提出的基于INDI的位置控制器设计的有效性，本节进行了一系列仿真实验与实际飞行试验。仿真试验包括验证INDI位置控制器在外部环境风速扰动下的性能，以及INDI位置控制器的轨迹跟踪性能，仿真实验均使用PID位置控制器作为比较。在串级PID位置控制方法中，位置环和速度环均采用了PI控制器。实际飞行实验中使用INDI位置控制器跟踪方形轨迹和圆形轨迹以验证控制器的轨迹跟踪能力。实验过程中使用的控制器参数如表\ref{outloop_Control_parameters}所示。仿真实验平台和实际飞行实验平台均与第三章的姿态控制实验相同，为了进行可变控制，在验证位置控制器性能时，内环的姿态控制器均采用第三章设计的基于INDI和优先级控制分配的姿态控制器。
+\begin{table}
+	\caption{\label{outloop_Control_parameters}INDI位置控制器和PID位置控制器的控制参数}
+	\centering
+	\small 
+	\begin{tabular}{cccccc}
+		\hline 
+		INDI控制器参数符号 & 数值 & PID控制器参数符号 & 数值 & PID控制器参数符号 & 数值 \tabularnewline
+		\hline 
+		$K_{Px}$ & $0.5$ & $K_{Px}$ & $0.5$& $I_{Px}$  & $1$ \tabularnewline
+		$K_{Py}$ & $0.5$ & $K_{Py}$ & $0.5$& $I_{Py}$  & $1$ \tabularnewline
+        $K_{Pz}$ & $2.0$ & $K_{Pz}$ & $2.0$& $I_{Pz}$  & $0.05$ \tabularnewline
+        $K_{Vx}$ & $1.5$ & $K_{Vx}$ & $1.5$& $I_{Vx}$  & $0.25$ \tabularnewline
+        $K_{Vy}$ & $1.5$ & $K_{Vy}$ & $1.5$& $I_{Vy}$  & $0.25$ \tabularnewline
+        $K_{Vz}$ & $2.0$ & $K_{Vz}$ & $2.0$& $I_{Vz}$  & $0$ \tabularnewline
+		\hline 
+	\end{tabular}
+\end{table}
+
+\subsection{仿真实验}
+
+\subsubsection{悬停抗风实验}
+
+本实验用于验证在MATLAB仿真环境中搭建的INDI位置控制器在模拟环境风速扰动情况下的定点悬停性能，采用PID位置控制器作为对比。模拟的环境风速扰动的数学表达式如下：
+\begin{equation}
+    \begin{gathered}
+        \|\boldsymbol{W}^e\|_2=V_{mean}+V_{low\_freq}+V_{high\_freq}+V_{noise}\\
+        \text{其中}
+        \begin{cases}
+            V_{mean}=5 \\
+            V_{low\_freq}=\sin (2\pi f_{low\_freq}t) \\
+            V_{high\_freq}=0.5\sin (2\pi f_{high\_freq}t) \\
+            V_{noise}=0.1rand(t) \\
+        \end{cases}
+    \end{gathered}
+    \label{4_32}
+\end{equation}
+实验中采用四部分分量组成模拟环境风速扰动，分别是平均基本风速$V_{mean}$、低频正弦风速$V_{low\_freq}$模拟大气尺度的缓慢波动、高频正弦风速$V_{high\_freq}$模拟小尺度湍流和随机噪声扰动$V_{noise}$。其中低频正弦风速的频率为0.05Hz，高频正弦风速的频率为1Hz。风速随时间变化的波形如图\ref{模拟环境风速扰动结果}所示。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/模拟环境风速扰动结果.pdf}
+        \caption{\label{模拟环境风速扰动结果}模拟环境风速扰动结果}
+        \end{minipage}
+\end{figure}
+
+为方便结果分析，风速扰动仅被添加到$\boldsymbol{O}_e-\boldsymbol{X}_e$方向上，所以有：
+\begin{equation}
+    \begin{aligned}
+        \boldsymbol{W}^e&=\begin{bmatrix}\|\boldsymbol{W}^e\|_2 \\0 \\0\end{bmatrix}
+    \end{aligned}
+    \label{4_33}
+\end{equation}
+
+实验过程中期望的偏航角始终指向正北方向，即($\psi_d=0$)，初始位置为$\boldsymbol{P}^e_{start}=[0 \quad 0 \quad -10]^Tm$，期望位置指令设置为$\boldsymbol{P}^e_{d}=[0 \quad 0 \quad -10]^Tm$，即保持定点。仿真时长为10s，仿真步长为0.01s，扰动在第1s时刻添加。图\ref{INDI位置控制定点悬停抗风实验仿真结果}展示了分别使用INDI位置控制器和PID位置控制器的实验过程中DFUAV的位置随时间变化的响应曲线。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/INDI位置控制定点悬停抗风实验仿真结果.pdf}
+        \caption{\label{INDI位置控制定点悬停抗风实验仿真结果}INDI位置控制定点悬停抗风实验仿真结果}
+        \end{minipage}
+\end{figure}
+
+比较两个实验中的位置响应曲线可知，基于所设定的来自X轴正向风速扰动，从扰动添加的第1s时刻开始，在两种控制器的控制下，DFUAV在X轴的位置均发生了一定程度的偏移。但是INDI位置控制器的位置响应曲线在X轴的最大误差为0.18m，而PID位置控制器的位置响应曲线在X轴的最大误差为1.53m，远大于INDI控制下的位置误差。并且在第4s时刻，INDI位置控制下X轴的位置误差已经近似收敛为0，但是PID位置控制下的位置误差仍然较大且在仿真时间内无法收敛。这说明INDI位置控制器在外部环境风速扰动下的定点悬停性能优于PID位置控制器，性能优势归因于INDI位置控制器可以通过加速度计测量值估计外部环境的风速扰动并在每个控制周期内实时补偿，不会积累误差，从而提升了系统的抗风性能。而PID位置控制器保持位置稳定依赖于误差的积累，响应速度较慢，在外部风速扰动下无法实时补偿，导致位置误差无法收敛。
+
+此外，从位置误差变化曲线的斜率来看，也能说明PID位置控制滞后性较强，而INDI位置控制器的响应速度更快。并且从图中可以看出，在PID位置控制下，X/Y轴位置通道与Z轴高度通道会存在耦合，即在X/Y轴位置误差较大时，Z轴高度误差也会增大，而INDI位置控制器的位置通道之间则没有这种耦合现象。
+
+\subsubsection{轨迹跟踪实验}
+
+本实验用于验证所提出的INDI位置控制器在执行轨迹跟踪任务下的性能。实验中选取了一个简单的斜坡轨迹作为参考轨迹，参考轨迹的数学表达式为：
+\begin{equation}
+    \begin{aligned}
+        \boldsymbol{P}^e_{d}(t)&=\begin{bmatrix}x_d^e(t) \\y_d^e(t) \\z_d^e(t)\end{bmatrix}
+        =\begin{bmatrix}t \\0 \\-10\end{bmatrix}
+    \end{aligned}
+    \label{4_34}
+\end{equation}
+
+
+
