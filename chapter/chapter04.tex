@@ -252,7 +252,7 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \label{4_24}
 \end{equation}
 
-由于偏航角$\psi$对DFUAV的飞行轨迹不产生影响，所以在位置控制时可以人为自主设定期望的偏航角。一般情况下设定期望的偏航角为实际运动方向与地理北极的夹角。例如在轨迹跟踪过程中，假设当前时刻的参考位置为$\boldsymbol{P}^e_d=[x^e_d\quad y^e_d\quad z^e_d]^T$，上一时刻的参考位置为$\boldsymbol{P}^e_{d-1}=[x^e_{d-1}\quad y^e_{d-1}\quad z^e_{d-1}]^T$，则期望的偏航角$\psi_d$可以设置为：
+由于偏航角$\psi$对DFUAV的飞行轨迹不产生影响，所以在位置控制时可以人为自主设定期望的偏航角。一般情况下设定期望的偏航角为实际运动方向与地理北极的夹角，即期望的轨迹方向。例如在轨迹跟踪过程中，假设当前时刻的参考位置为$\boldsymbol{P}^e_d=[x^e_d\quad y^e_d\quad z^e_d]^T$，上一时刻的参考位置为$\boldsymbol{P}^e_{d-1}=[x^e_{d-1}\quad y^e_{d-1}\quad z^e_{d-1}]^T$，则期望的偏航角$\psi_d$可以设置为：
 \begin{equation}
     \psi_d=atan2(y_d^e-y_{d-1}^e,x_d^e-x_{d-1}^e)
     \label{4_25}
@@ -381,13 +381,13 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \label{4_33}
 \end{equation}
 
-实验过程中期望的偏航角始终指向正北方向，即($\psi_d=0$)，初始位置为$\boldsymbol{P}^e_{start}=[0 \quad 0 \quad -10]^Tm$，期望位置指令设置为$\boldsymbol{P}^e_{d}=[0 \quad 0 \quad -10]^Tm$，即保持定点。仿真时长为10s，仿真步长为0.01s，扰动在第1s时刻添加。图\ref{INDI位置控制定点悬停抗风实验仿真结果}展示了分别使用INDI位置控制器和PID位置控制器的实验过程中DFUAV的位置随时间变化的响应曲线。
+实验过程中期望的偏航角始终指向正北方向，即($\psi_d=0$)，初始位置为$\boldsymbol{P}^e_{start}=[0 \quad 0 \quad -10]^T$m，期望位置指令设置为$\boldsymbol{P}^e_{d}=[0 \quad 0 \quad -10]^T$m，即保持定点，初始速度为$\boldsymbol{V}^e_{start}=[0 \quad 0 \quad 0]^T$m/s。仿真时长为10s，仿真步长为0.01s，扰动在第1s时刻添加。图\ref{INDI位置控制定点悬停抗风实验仿真结果}展示了实验中分别使用INDI位置控制器和PID位置控制器的DFUAV的位置随时间变化的响应曲线。
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth}
         \centering
         \includegraphics[scale=1]{Fig/INDI位置控制定点悬停抗风实验仿真结果.pdf}
-        \caption{\label{INDI位置控制定点悬停抗风实验仿真结果}INDI位置控制定点悬停抗风实验仿真结果}
+        \caption{\label{INDI位置控制定点悬停抗风实验仿真结果}INDI对比PID位置控制定点悬停抗风实验仿真结果}
         \end{minipage}
 \end{figure}
 
@@ -405,6 +405,111 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \end{aligned}
     \label{4_34}
 \end{equation}
+
+为了进行可变控制，轨迹跟踪实验中不添加外部环境风速扰动。实验过程中期望的偏航角始终指向正北方向，即($\psi_d=0$)，初始位置为$\boldsymbol{P}^e_{start}=[0 \quad 0 \quad -10]^T$m，初始速度为$\boldsymbol{V}^e_{start}=[0 \quad 0 \quad 0]^T$m/s，仿真时长为10s，仿真步长为0.01s。图\ref{INDI位置控制轨迹跟踪实验仿真结果}展示了实验中分别使用INDI位置控制器和PID位置控制器的DFUAV的位置随时间变化的响应曲线。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/INDI位置控制轨迹跟踪实验仿真结果.pdf}
+        \caption{\label{INDI位置控制轨迹跟踪实验仿真结果}INDI对比PID位置控制轨迹跟踪实验仿真结果}
+        \end{minipage}
+\end{figure}
+
+根据两组实验的结果可以看出，无论是INDI位置控制器还是PID位置控制器，DFUAV均能跟踪上期望的轨迹。但是INDI位置控制器的轨迹跟踪性能要明显优于PID位置控制器，一方面INDI位置控制器的轨迹跟踪响应曲线在X轴的最大跟踪误差为0.55m，而PID位置控制器的轨迹跟踪响应曲线在X轴的最大误差为1.44m，远大于INDI控制下的位置误差。另一方面，INDI控制下的位置曲线在第4s时就已基本无误差，但是在PID控制下的位置曲线在第6s时才跟踪上，并且由于积分的累计作用出现了超调，导致位置曲线在第6s后超过了期望轨迹。INDI位置控制的轨迹跟踪性能优势主要得益于采用了位置环和速度环的前馈控制策略，提前根据输入的变化趋势进行控制，从而提升了系统的响应速度和精度。
+
+通过上述两个仿真实验，证明了所设计的基于INDI的位置控制器具有较强的抗风性能和轨迹跟踪性能。
+
+\subsection{实际飞行实验}
+
+本小节通过实际飞行实验验证所提出的INDI位置控制器的轨迹跟踪性能。实验中选取了方形轨迹和圆形轨迹作为参考轨迹，以验证试验样机的点对点轨迹跟踪性能和圆弧轨迹跟踪性能。
+
+\subsubsection{点对点轨迹飞行实验}
+
+点对点轨迹飞行实验的参考轨迹为40m $\times$ 40m的方形，期望高度保持为-5m。初始位置为$\boldsymbol{P}^e_{start}=[0 \quad 0 \quad -5]^T$m，初始速度为$\boldsymbol{V}^e_{start}=[0 \quad 0 \quad 0]^T$m/s，最大平飞速度设置为2m/s。期望的偏航角始终指向期望轨迹的方向，由式\eqref{4_25}计算得到。实验过程中，试验样机在地面坐标系下的位置跟踪曲线、速度跟踪曲线、姿态跟踪曲线和二维平面轨迹分别如图\ref{点对点轨迹飞行实验位置跟踪结果}到图\ref{点对点轨迹飞行实验二维平面轨迹结果}所示。
+
+根据实验结果可知，试验样机在整个轨迹跟踪过程中均能够保持在期望轨迹附近，实验过程中X方向的最大位置误差为0.47m，Y方向的最大位置误差为0.34m，Z方向的最大位置误差为0.085m，这是由于X/Y方向上的位置控制与期望的姿态角$\varphi_d$和$\theta_d$的跟踪精度有关，而高度通道的控制与姿态角无关，控制较为简单，因此高度误差相对较小。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/点对点轨迹飞行实验位置跟踪结果.pdf}
+        \caption{\label{点对点轨迹飞行实验位置跟踪结果}点对点轨迹飞行实验位置跟踪结果}
+        \end{minipage}
+\end{figure}
+
+对于速度响应曲线，仅在每段加减速过程中有少许超调量，X方向和Y方向的最大速度误差均为0.7m/s，但是在加减速过程结束后，速度响应曲线均能够较好地稳定在期望速度上。由于飞行过程中期望偏航角$\psi_d$始终沿着飞行方向，因此DFUAV的俯仰角会经历较大变化，根据姿态跟踪曲线可以看出，俯仰角的跟踪效果较好，最大误差为$3.89^{\circ}$,无明显超调。滚转角和俯仰角的跟踪误差同样较小，位于合理范围内。
+
+通过二维平面轨迹可以更加直观地看出，试验样机在整个轨迹飞行过程中能够较好地跟踪期望的方形轨迹，证明了点对点的轨迹跟踪性能较好。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/点对点轨迹飞行实验速度跟踪结果.pdf}
+        \caption{\label{点对点轨迹飞行实验速度跟踪结果}点对点轨迹飞行实验速度跟踪结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/点对点轨迹飞行实验姿态跟踪结果.pdf}
+        \caption{\label{点对点轨迹飞行实验姿态跟踪结果}点对点轨迹飞行实验姿态跟踪结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/点对点轨迹飞行实验二维平面轨迹结果.pdf}
+        \caption{\label{点对点轨迹飞行实验二维平面轨迹结果}点对点轨迹飞行实验二维平面轨迹结果}
+        \end{minipage}
+\end{figure}
+
+
+\subsubsection{圆形轨迹飞行实验}
+
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/圆弧轨迹飞行实验位置跟踪结果.pdf}
+        \caption{\label{圆弧轨迹飞行实验位置跟踪结果}圆弧轨迹飞行实验位置跟踪结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/圆弧轨迹飞行实验速度跟踪结果.pdf}
+        \caption{\label{圆弧轨迹飞行实验速度跟踪结果}圆弧轨迹飞行实验速度跟踪结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/圆弧轨迹飞行实验姿态跟踪结果.pdf}
+        \caption{\label{圆弧轨迹飞行实验姿态跟踪结果}圆弧轨迹飞行实验姿态跟踪结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/圆弧轨迹飞行实验二维平面轨迹结果.pdf}
+        \caption{\label{圆弧轨迹飞行实验二维平面轨迹结果}圆弧轨迹飞行实验二维平面轨迹结果}
+        \end{minipage}
+\end{figure}
+
+
+
+
+
+
+
+
+
 
 
 
