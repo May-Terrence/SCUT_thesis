@@ -1,14 +1,14 @@
 \chapter{涵道风扇式无人机的轨迹规划设计}
 
-为了提升DFUAV的自主性，满足复杂环境下的飞行需求，本章对DFUAV的轨迹规划问题展开研究。根据第一章的介绍，轨迹规划过程一般分为路径规划和轨迹优化两个阶段。在路径规划阶段，为了在复杂环境中快速找到无碰撞的初始路线，本文选用基于采样的RRT路径搜索算法。但常规的RRT算法存在采样效率低下和搜索路径非最优的问题，因此本章针对上述问题提出C-RRT*算法以加快路径搜索速度，同时在搜索过程中保证路径的最优性。在轨迹优化阶段，针对不平滑且不满足DFUAV动力学约束的初始路径，采用B样条曲线对其进行平滑处理，以保证DFUAV的飞行安全性和稳定性。
+为了提升DFUAV的自主性，满足错综复杂环境下的飞行需求，本章针对DFUAV的轨迹规划问题展开研究。根据第一章的介绍分析，轨迹规划过程一般分为路径规划和轨迹优化两个阶段。在路径规划阶段，为了在复杂环境中快速找到无碰撞的初始路线，本文选用基于采样的RRT全局路径搜索算法。但常规的RRT算法存在采样效率低下和搜索路径非最优的问题，因此本章针对上述问题提出C-RRT*算法以加快路径搜索速度，同时在搜索过程中对路径进行优化，保证总路径长度尽可能短。在轨迹优化阶段，针对不平滑且不满足DFUAV动力学约束的初始路径，采用B样条曲线对其进行平滑处理，以保证DFUAV的飞行安全性和稳定性。
 
-本章安排如下：首先介绍RRT路径搜索算法及其改进算法RRT-Connect算法和RRT*算法的基本原理，然后结合RRT-Connect算法和RRT*算法的优势提出C-RRT*算法。接下来介绍B样条曲线的基本原理，并使用B样条曲线法对C-RRT*算法寻找的初始路径进行优化。最后使用第四章设计的DFUAV的基于INDI的位置控制器对轨迹规划结果进行跟踪实验。
+本章安排如下：首先介绍传统的RRT路径搜索算法及其改进算法RRT-Connect算法和RRT*算法的基本原理，然后结合RRT-Connect算法和RRT*算法的优势提出C-RRT*算法。接下来介绍B样条曲线的基本原理，并使用B样条曲线法对C-RRT*算法寻找的初始路径进行优化。最后使用第四章设计的DFUAV的基于INDI的位置控制器对轨迹规划结果进行跟踪实验。
 
 \section{RRT算法及其改进算法理论介绍}
 
 \subsection{RRT算法}
 
-快速扩展随机树(Rapidly-exploring Random Tree, rrt)算法是一种随机采样的路径搜索算法，其基本思想是从树的根节点(起点)出发，通过随机采样的方式不断扩展树的子节点，一旦扩展到目标点附近，那么就可以通过回溯树的路径来生成从起点到目标点的路径。RRT算法的伪代码如算法\ref{RRT算法}所示：
+快速扩展随机树(Rapidly-exploring Random Tree, RRT)算法是一种随机采样的路径搜索算法，其基本思想是从树的根节点(起点)出发，通过随机采样的方式不断扩展树的子节点，一旦扩展到目标点附近，那么就可以通过回溯树的路径来生成从起点到目标点的路径。RRT算法的伪代码如算法\ref{RRT算法}所示：
 \begin{algorithm}
 \caption{RRT算法}
 \label{RRT算法}
@@ -16,21 +16,22 @@
     \setlength{\baselineskip}{16pt}
 \State $\boldsymbol{T}\leftarrow\boldsymbol{x}_{start};\boldsymbol{E}\leftarrow\emptyset;$
 \While{true}
-    \State $\boldsymbol{x}_{rand}=\text{RandomSample}();$
-    \State $\boldsymbol{x}_{near}=\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T});$
-    \State $\boldsymbol{x}_{new}=\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},t);$
-    \If{$\text{CollisionCheck}(\boldsymbol{x}_{new},\boldsymbol{x}_{near}) == \text{true}$}
+    \State $\boldsymbol{x}_{rand} \gets \text{RandomSample}();$
+    \State $\boldsymbol{x}_{near}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T});$
+    \State $\boldsymbol{x}_{new}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},t);$
+    \If{$\text{ObstacleFree}(\boldsymbol{x}_{new},\boldsymbol{x}_{near})$}
         \State $\boldsymbol{T}\leftarrow \boldsymbol{T}\cup\{\boldsymbol{x}_{new}\};$
         $\boldsymbol{E}\leftarrow \boldsymbol{E}\cup\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\};$
         \If{$\text{dist}(\boldsymbol{x}_{new},\boldsymbol{x}_{goal}) < d_{th}$}
-        \State break
+        \State break;
         \EndIf
     \EndIf
-\EndWhile
+\EndWhile \\
+\Return $(\boldsymbol{T},\boldsymbol{E})$
 \end{algorithmic}
 \end{algorithm}
 
-其中，$\boldsymbol{T}$表示RRT随机树节点的集合，$\boldsymbol{E}$表示RRT随机树的边集合，表示节点之间的连接关系。算法开始先将起点$\boldsymbol{x}_{start}$作为树的初始节点加入集合$\boldsymbol{T}$，并将边集合置为空集。然后循环在可行域内随机采样，对每一个采样点$\boldsymbol{x}_{rand}$，都可以找到树节点集合$\boldsymbol{T}$中距离$\boldsymbol{x}_{rand}$最近的节点$\boldsymbol{x}_{near}$。然后在节点向量$\boldsymbol{x}_{near}-\boldsymbol{x}_{rand}$方向上以固定的步长$t$生成一个新节点$\boldsymbol{x}_{new}$，并检查$\boldsymbol{x}_{new}$和$\boldsymbol{x}_{near}$之间的连线与障碍物是否存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new}$加入到集合$\boldsymbol{T}$中并且将边$\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\}$添加到集合$\boldsymbol{E}$中。接下来判断新节点$\boldsymbol{x}_{new}$是否与目标点$\boldsymbol{x}_{goal}$的距离小于设定的距离阈值$d_{th}$，如果是则跳出循环返回路径搜索结果，否则继续下一次迭代过程，直至到达目标点附近为止。
+算法中，$\boldsymbol{T}$表示RRT随机树节点的集合，$\boldsymbol{E}$表示RRT随机树的边集合，表示节点之间的连接关系。算法在初始阶段将起点$\boldsymbol{x}_{start}$作为树的初始节点加入集合$\boldsymbol{T}$，并将边集合置为空集。然后循环在可行域内随机采样，对每一个采样点$\boldsymbol{x}_{rand}$，都可以找到集合$\boldsymbol{T}$中距离$\boldsymbol{x}_{rand}$最近的节点$\boldsymbol{x}_{near}$。然后以$\boldsymbol{x}_{near}$为起点，在$\boldsymbol{x}_{near}-\boldsymbol{x}_{rand}$方向上以固定的步长$t$生成一个新节点$\boldsymbol{x}_{new}$，并检查$\boldsymbol{x}_{new}$和$\boldsymbol{x}_{near}$之间的连线与障碍物是否存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new}$加入到集合$\boldsymbol{T}$中并且将边$\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\}$添加到集合$\boldsymbol{E}$中。接下来判断新节点$\boldsymbol{x}_{new}$是否与目标点$\boldsymbol{x}_{goal}$的距离小于设定的阈值$d_{th}$，如果是则跳出循环返回路径搜索结果，否则继续下一次迭代过程，直至到达目标点附近为止。最后返回随机树的节点集合和边集合，通过回溯的方式得到从起点到目标点的路径。
 
 根据RRT算法的原理可知，如果存在从起点到目标点的无碰撞路径，那么在有限的时间内，RRT算法一定会找到一条可行的路径。图\ref{RRT算法仿真结果}展示了RRT算法仿真实验结果。
 \begin{figure}[htbp]
@@ -42,13 +43,13 @@
         \end{minipage}
 \end{figure}
 
-RRT算法存在采样效率低和搜索路径非最优的问题：一方面，RRT算法每次都是在可行域内均匀随机采样，缺乏目标导向，这就会导致搜索可行路径的过程中可能会搜索到大量的无效节点，从而浪费大量时间和计算资源；另一方面，RRT算法在搜索路径的时候没有优化过程，导致最终路径可能经过许多不必要的节点，从而导致路径长度较长，非最优路径。为了解决上述问题，研究者们提出了RRT-Connect算法和RRT*算法。
+传统的RRT算法存在采样效率低下和搜索路径非最优的问题：一方面，RRT算法每次都是在可行域内均匀随机采样，缺乏目标导向，这就会导致在搜索可行路径的过程中可能会搜索到大量的无效节点，从而浪费大量时间和计算资源；另一方面，RRT算法在搜索路径的时候没有优化过程，导致最终路径可能经过许多不必要的节点，从而导致路径长度较长，非最优路径。针对RRT算法的不足，研究者们基于RRT算法提出了一些改进的算法，如RRT-Connect算法和RRT*算法等。
 
 \subsection{RRT-Connect算法和RRT*算法}
 
 \subsubsection{RRT-Connect算法}
 
-为了解决传统的RRT算法搜索路径的单源性和搜索效率低下的局限性，有研究学者提出了RRT-Connect算法，该算法相比RRT算法添加了双向协同搜索架构和贪婪扩展策略，其基本思想是构建起点和目标点两棵随机树，通过交替执行拓展操作逼近彼此，并且通过贪婪策略以加快路径搜索速度。
+为了解决传统的RRT算法搜索路径的单源性和搜索效率低下的局限性，有研究学者提出了RRT-Connect算法，该算法相比RRT算法使用了双向协同搜索架构和贪婪扩展策略，其基本思想是分别构建以起点和以目标点为根节点的两棵随机树，通过对两棵树交替执行拓展操作逼近彼此，并且引入贪婪扩展策略以加快路径搜索速度。
 RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
 \begin{algorithm}
     \caption{RRT-Connect算法}
@@ -58,31 +59,37 @@ RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
         % \setcounter{ALG@line}{4}
         \State $\boldsymbol{T}_1\leftarrow\boldsymbol{x}_{start};\boldsymbol{E}_1\leftarrow\emptyset;$
         \State $\boldsymbol{T}_2\leftarrow\boldsymbol{x}_{end};\boldsymbol{E}_2\leftarrow\emptyset;$
-        \While{true}
-            \State $\boldsymbol{x}_{rand}=\text{RandomSample}();$
-            \State $\boldsymbol{x}_{near1}=\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T}_1);$
-            \State $\boldsymbol{x}_{new1}=\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near1},t);$
-            \If{$\text{CollisionCheck}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near1}) == \text{true}$}
+        \State $\text{Final} \gets false ;$
+        \While{$not$ Final}
+            \State $\boldsymbol{x}_{rand}\gets\text{RandomSample}();$
+            \State $\boldsymbol{x}_{near1}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T}_1);$
+            \State $\boldsymbol{x}_{new1}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near1},t);$
+            \If{$\text{ObstacleFree}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near1})$}
                 \State $\boldsymbol{T}_1\leftarrow \boldsymbol{T}_1\cup\{\boldsymbol{x}_{new1}\};$
                 $\boldsymbol{E}_1\leftarrow \boldsymbol{E}_1\cup\{\boldsymbol{x}_{near1},\boldsymbol{x}_{new1}\};$
-                \State $\boldsymbol{x}_{near2}=\text{GetNearest}(\boldsymbol{x}_{new1},\boldsymbol{T}_2);$
-                \If{$\text{CollisionCheck}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2}) == \text{true} \text{ \&\& } \text{dist}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2}) < d_{th}$}
-                    \State break
-                \EndIf
-                \State $\boldsymbol{x}_{new2}=\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
-                \While{$\text{CollisionCheck}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near2}) == \text{true}$}
+                \State $\boldsymbol{x}_{near2}\gets\text{GetNearest}(\boldsymbol{x}_{new1},\boldsymbol{T}_2);$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \While{$\text{ObstacleFree}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near2})$}
                 \State $\boldsymbol{T}_2\leftarrow \boldsymbol{T}_2\cup\{\boldsymbol{x}_{new2}\};$
                 $\boldsymbol{E}_2\leftarrow \boldsymbol{E}_2\cup\{\boldsymbol{x}_{near2},\boldsymbol{x}_{new2}\};$
-                \State $\boldsymbol{x}_{near2}=\boldsymbol{x}_{new2};$
-                \State $\boldsymbol{x}_{new2}=\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \State $\boldsymbol{x}_{near\_tmp}\gets\text{GetNearest}(\boldsymbol{x}_{new2},\boldsymbol{T}_1);$
+                \If{$\text{ObstacleFree}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near\_tmp}) \text{ }and \text{ dist}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near\_tmp}) < d_{th}$}
+                    \State $\text{Final} \gets true ;$
+                    \State break;
+                \EndIf
+                \State $\boldsymbol{x}_{near2}\gets\boldsymbol{x}_{new2};$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
                 \EndWhile
                 \State swap$(\boldsymbol{T}_1,\boldsymbol{T}_2);$swap$(\boldsymbol{E}_1,\boldsymbol{E}_2);$
             \EndIf
-        \EndWhile
+        \EndWhile \\
+        \Return $(\boldsymbol{T}_1,\boldsymbol{T}_2,\boldsymbol{E}_1,\boldsymbol{E}_2)$
 \end{algorithmic}
 \end{algorithm}
 
-根据RRT-Connect算法流程可知，相比于RRT算法，RRT-Connect算法在初始化阶段建立了两棵随机树，并将起点和目标点分别作为两棵随机树的初始节点。然后执行与RRT算法相同的步骤来循环地随机寻找新节点$\boldsymbol{x}_{new1}$，不同的是在随机找到新节点后，会判断新节点与另一棵树的最近节点$\boldsymbol{x}_{near2}$之间是否不存在碰撞以及距离是否小于阈值$d_{th}$，如果两个条件都满足的话，则跳出循环并返回路径搜索结果。如果任一条件不满足，则在$\boldsymbol{x}_{near2}-\boldsymbol{x}_{new1}$方向上以固定的步长$t$生成一个新节点$\boldsymbol{x}_{new2}$，并检查节点$\boldsymbol{x}_{new2}$与节点$\boldsymbol{x}_{near2}$之间是否存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new2}$加入到集合$\boldsymbol{T}_2$中并且将边$\{\boldsymbol{x}_{near2},\boldsymbol{x}_{new2}\}$添加到集合$\boldsymbol{E}_2$中。然后执行贪婪策略，随机树$\boldsymbol{T}_2$以$\boldsymbol{x}_{new2}$为新的起点(设置为$\boldsymbol{x}_{near2}$)继续向$\boldsymbol{x}_{new1}$方向生成新节点，直到检测到新节点与$\boldsymbol{x}_{near2}$之间存在碰撞为止。如果存在碰撞，则交换两棵随机树的节点集合和边集合，继续下一次随机采样过程，直至找到一条可行路径。
+根据算法流程可知，相比于RRT算法，RRT-Connect算法在初始化阶段建立了两棵随机树，并将起点和目标点分别作为两棵随机树的初始节点，然后执行与RRT算法相同的步骤来循环地随机寻找新节点$\boldsymbol{x}_{new1}$。在随机找到与障碍物无碰撞的新节点后，根据新节点的位置可以找到随机树$\boldsymbol{T}_{2}$上与新节点距离最近的节点$\boldsymbol{x}_{near2}$。接下来执行贪婪扩展策略，以$\boldsymbol{x}_{near2}$为起点，在$\boldsymbol{x}_{near2}-\boldsymbol{x}_{new1}$方向上以固定的步长$t$生成新节点$\boldsymbol{x}_{new2}$，并检查$\boldsymbol{x}_{new2}$与$\boldsymbol{x}_{near2}$之间的连线是否与障碍物存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new2}$加入集合$\boldsymbol{T}_2$中并且将边$\{\boldsymbol{x}_{near2},\boldsymbol{x}_{new2}\}$添加到集合$\boldsymbol{E}_2$中。然后从$\boldsymbol{T}_{1}$上找到距离$\boldsymbol{x}_{new2}$的最近节点$\boldsymbol{x}_{near\_tmp}$，判断$\boldsymbol{x}_{new2}$与$\boldsymbol{x}_{near\_tmp}$之间是否与障碍物无碰撞以及两节点之间的距离是否小于$d_{th}$，如果两个条件都满足的话，则跳出循环并返回路径搜索结果。如果上述任一条件不满足，则继续执行贪婪策略，$\boldsymbol{T}_2$以$\boldsymbol{x}_{new2}$为新的起点(为方便编程表示，此处将其设为$\boldsymbol{x}_{near2}$)继续向$\boldsymbol{x}_{new1}$方向生成新节点，直到检测到新节点与$\boldsymbol{x}_{near2}$之间存在障碍物为止。如果贪婪扩展过程中检测到障碍物碰撞，则交换两棵随机树的节点集合和边集合，继续随机采样过程，直至两棵树存在叶子节点之间的距离小于$d_{th}$且无障碍物。最后根据两棵树的节点集合和边集合回溯得到路径搜索的结果。
+% 因为此处涉及到两层循环，所以设置标志位Final来跳出循环。
+% (为方便编程表示，此处将其设置为$\boldsymbol{x}_{near2}$)
 
 图\ref{RRT-Connect算法仿真结果}展示了使用RRT-Connect算法进行路径规划仿真的结果。由于RRT-Connect算法中的两棵树是双向生长的，并且通过贪婪策略优先在两棵树之间节点的可扩展区域进行生长，使得两棵树可以快速相交。所以RRT-Connect相比于RRT算法大量减少了无效节点的生成，加快了路径搜索的速度。但是由于RRT-Connect算法的单次查询性质，其仍然存在路径非最优的问题。
 \begin{figure}[htbp]
@@ -96,45 +103,163 @@ RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
 
 \subsubsection{RRT*算法}
 
-为了解决RRT算法中路径非最优的问题，有研究学者提出了RRT*算法。RRT*算法属于渐进优化的算法，其基本思想是在随机树中添加新节点时，通过对新节点邻域半径内的节点进行选择性地重连操作，以保证选取的是当前范围内的最优父节点，并借助新节点使用重布线优化机制动态优化树结构，进一步提高路径的最优性。RRT*算法的伪代码如算法\ref{RRT*算法}所示。
+为了解决RRT算法中路径非最优的问题，有研究学者提出了RRT*算法。RRT*算法属于渐进优化的算法，其基本思想是在随机树中添加新节点时，通过对新节点邻域半径内的节点进行选择性地重连操作，以保证选取的是当前范围内的最优父节点，并借助新节点使用重布线优化机制动态优化树结构，进一步确保路径的渐进最优性。RRT*算法的伪代码如算法\ref{RRT*算法}所示。
 \begin{algorithm}
     \caption{RRT*算法}
     \label{RRT*算法}
     \begin{algorithmic}[1]
         \setlength{\baselineskip}{16pt}
-        \State $\boldsymbol{T}\leftarrow\boldsymbol{x}_{start};\boldsymbol{E}\leftarrow\emptyset;$
+        \State $\boldsymbol{T}\leftarrow\boldsymbol{x}_{start};\boldsymbol{E}\leftarrow\emptyset; \text{Cost}(\boldsymbol{x}_{start}) \gets 0;$
         \While{true}
-            \State $\boldsymbol{x}_{rand}=\text{RandomSample}();$
-            \State $\boldsymbol{x}_{near}=\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T});$
-            \State $\boldsymbol{x}_{new}=\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},t);$
-            \If{$\text{CollisionCheck}(\boldsymbol{x}_{new},\boldsymbol{x}_{near}) == \text{true}$}
+            \State $\boldsymbol{x}_{rand}\gets\text{RandomSample}();$
+            \State $\boldsymbol{x}_{near}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T});$
+            \State $\boldsymbol{x}_{new}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},t);$
+            \If{$\text{ObstacleFree}(\boldsymbol{x}_{new},\boldsymbol{x}_{near})$}
+                \State $\text{Cost}(\boldsymbol{x}_{new})\gets\text{Cost}(\boldsymbol{x}_{near}) + t ;$
                 \State $\boldsymbol{T}\leftarrow \boldsymbol{T}\cup\{\boldsymbol{x}_{new}\};$
                 $\boldsymbol{E}\leftarrow \boldsymbol{E}\cup\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\};$
-                \State $\boldsymbol{C}=\text{GetNodeInCircle}(\boldsymbol{x}_{new},\boldsymbol{T},r);$
-                \State $\boldsymbol{x}_{near\_new}=\text{GetNearest}(\boldsymbol{x}_{new},\boldsymbol{C});$
-                \State $\boldsymbol{E}\leftarrow \boldsymbol{E}\setminus\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\};$
-                $\boldsymbol{E}\leftarrow \boldsymbol{E}\cup\{\boldsymbol{x}_{near\_new},\boldsymbol{x}_{new}\};$
-                \If{$\text{CollisionCheck}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2}) == \text{true} \text{ \&\& } \text{dist}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2}) < d_{th}$}
-                    \State break
+                \State $\boldsymbol{C}\gets\text{GetNodeInCircle}(\boldsymbol{x}_{new},\boldsymbol{T},r);$
+                \If{$\text{IsNotEmpty}(\boldsymbol{C}$)}
+                    \State $\boldsymbol{x}_{near\_new}\gets\text{GetLowestCost}(\boldsymbol{x}_{new},\boldsymbol{C});$
+                    \State $\boldsymbol{E}\leftarrow \boldsymbol{E}\setminus\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\};$
+                    $\boldsymbol{E}\leftarrow \boldsymbol{E}\cup\{\boldsymbol{x}_{near\_new},\boldsymbol{x}_{new}\};$
+                    \For{$\boldsymbol{x}_{i}\in\boldsymbol{C}$}
+                        \If{$\text{dist}(\boldsymbol{x}_{i},\boldsymbol{x}_{new}) + \text{Cost}(\boldsymbol{x}_{new}) < \text{Cost}(\boldsymbol{x}_{i})$}
+                            \State $\boldsymbol{x}_{parent}\gets\text{Parent}(\boldsymbol{x}_{i});$
+                            \State $\boldsymbol{E}\leftarrow \boldsymbol{E}\setminus\{\boldsymbol{x}_{i},\boldsymbol{x}_{parent}\};$
+                            $\boldsymbol{E}\leftarrow \boldsymbol{E}\cup\{\boldsymbol{x}_{i},\boldsymbol{x}_{new}\};$
+                        \EndIf
+                    \EndFor
                 \EndIf
-                \State $\boldsymbol{x}_{new2}=\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
-                \While{$\text{CollisionCheck}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near2}) == \text{true}$}
+                \If{$\text{dist}(\boldsymbol{x}_{new},\boldsymbol{x}_{goal}) < d_{th}$}
+                \State break;
+                \EndIf
+            \EndIf
+        \EndWhile \\
+        \Return $(\boldsymbol{T},\boldsymbol{E})$
+\end{algorithmic}
+\end{algorithm}
+
+根据RRT*算法流程可知，RRT*算法对于每一个节点，都会计算其代价$\text{Cost}(x_i)$，具体值常用距离来表示。对于每一个通过随机采样得到的的新节点$\boldsymbol{x}_{new}$，RRT*算法会寻找以$\boldsymbol{x}_{new}$为中心，半径为$r$的邻域内的所有连接无碰撞的节点(节点集合使用$\boldsymbol{C}$表示)。如果集合$\boldsymbol{C}$不为空集，那么就从$\boldsymbol{C}$中选择一个节点$\boldsymbol{x}_{near\_new}$，该节点需满足从$\boldsymbol{x}_{start}$到$\boldsymbol{x}_{near\_new}$的代价加上从$\boldsymbol{x}_{near\_new}$到$\boldsymbol{x}_{new}$的代价最小。然后将$\boldsymbol{x}_{near}$作为$\boldsymbol{x}_{new}$的父节点，同时更新边集合$\boldsymbol{E}$，将原来的边$\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\}$替换为$\{\boldsymbol{x}_{near\_new},\boldsymbol{x}_{new}\}$。这一步即为最优父节点选择操作。
+接下来需要重布线优化树结构，通过遍历$\boldsymbol{C}$中的所有节点$\boldsymbol{x}_{i}$，如果新节点$\boldsymbol{x}_{new}$到节点$\boldsymbol{x}_{i}$的距离加上节点$\boldsymbol{x}_{new}$的代价小于节点$\boldsymbol{x}_{i}$的代价，则更新节点$\boldsymbol{x}_{i}$的父节点为新节点$\boldsymbol{x}_{new}$。
+最后判断新节点$\boldsymbol{x}_{new}$是否与目标点$\boldsymbol{x}_{goal}$的距离小于设定的距离阈值$d_{th}$，如果是则跳出循环返回路径搜索结果，否则继续下一次迭代过程，直至找到一条可行路径。
+
+RRT*算法的仿真结果如图\ref{RRT*算法仿真结果}所示。可以看出，RRT*算法相比RRT算法和RRT-Connect算法，搜索的路径的长度有明显的减小。这得益于RRT*算法的渐进优化机制，在搜索过程中动态地对树结构进行优化，使路径向全局最优靠拢。Karaman等学者证明了随着搜索节点数目的增加，RRT*算法得到的路径会逐渐收敛到全局最优路径\cite{karaman2011sampling}。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/RRT_Star算法仿真结果.pdf}
+        \caption{\label{RRT*算法仿真结果}RRT*算法仿真实验结果}
+        \end{minipage}
+\end{figure}
+
+但也正因为RRT*算法的渐进优化机制，对每一个采样点都需要进行最优父节点选择和树结构优化策略，使得RRT*算法相比于RRT算法多了许多代价比较和碰撞检测的过程。进而导致RRT*算法在搜索过程中的计算量很大，耗时很长。在搜索空间大、空间维数高的情况下，RRT*算法的搜索效率会受到很大的影响。
+
+\section{C-RRT*算法}
+
+本节针对RRT算法的采样效率低和搜索路径非最优的问题，结合RRT-Connect算法和RRT*算法各自的优势，提出了C-RRT*算法。一方面，C-RRT*算法采用RRT-Connect算法的双向搜索架构和贪婪扩展策略，有侧重地优先向目标点方向(或起点方向)搜索，大量地减少无效节点的生成，加快路径搜索的速度；另一方面，C-RRT*算法引入RRT*算法的渐进优化机制，对每一个新节点$\boldsymbol{x}_{new}$都执行最优父节点选择和周围邻域半径内的树结构优化策略，显著降低路径的累计代价。
+
+\subsection{冗余节点删除策略}
+
+经过采样搜索的路径存在转折角度小，弯曲多的特征，不利于DFUAV的飞行安全。因此，C-RRT*算法引入了冗余节点删除策略，遍历搜索得到的初始路径，在与障碍物无碰撞的情况下删除路径上的冗余节点。冗余节点删除策略的伪代码如算法\ref{冗余节点删除策略}所示：
+\begin{algorithm}
+    \caption{RemoveRedundantNodes}
+    \label{冗余节点删除策略}
+    \begin{algorithmic}[1]
+        \setlength{\baselineskip}{16pt}
+            \State  $\textbf{Input:}\text{ initPath}$
+            \State  $\text{optiPath} \gets \text{initPath};$
+            \State  $\text{index} \gets 1;$
+            \While{$\text{index} <= \text{optiPath.size()}$-2}
+                % \State $\text{node1}\gets\text{optiPath[index]};$
+                % \State $\text{node2}\gets\text{optiPath[index+1]};$
+                % \State $\text{node3}\gets\text{optiPath[index+2]};$
+                \If{$\text{ObstacleFree}(\text{optiPath[index]},\text{optiPath[index+2]})$}
+                    \State $\text{optiPath} \gets \text{optiPath.remove}(\text{index+1});$
+                \Else
+                    \State $\text{index} \gets \text{index} + 1;$
+                \EndIf
+            \EndWhile
+            \State $\textbf{Output:}\text{ optiPath}$
+\end{algorithmic}
+\end{algorithm}
+
+根据算法流程，冗余节点删除策略会遍历搜索得到的初始路径，对路径上除最后两个节点外的的每一个节点optiPath[index]，都会检查节点optiPath[index]和节点optiPath[index+2]之间的连线是否与障碍物存在碰撞，如果无碰撞，则可以删除节点optiPath[index+1]，直至遍历完整个路径。最后返回优化后的路径。以图\ref{RRT算法仿真结果}中经RRT算法搜索得到的路径为例进行测试，测试结果如图\ref{冗余节点删除策略仿真结果}所示。经过对比可以发现，使用冗余节点删除策略优化后的路径减少了许多弯折，初始路径长度明显缩短。
+% 优化前的路径长度为109.78m，而优化后的路径长度为90.27m
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/冗余节点删除策略仿真结果.pdf}
+        \caption{\label{冗余节点删除策略仿真结果}冗余节点删除前后仿真实验对比结果}
+        \end{minipage}
+\end{figure}
+
+
+
+\subsection{C-RRT*算法流程}
+
+基于5.1节介绍的RRT-Connect算法和RRT*算法的基本原理，并且结合冗余节点删除策略，可以得到C-RRT*算法的伪代码如算法\ref{C-RRT*算法}所示：
+\begin{algorithm}
+    \caption{C-RRT*算法}
+    \label{C-RRT*算法}
+    \begin{algorithmic}[1]
+        \setlength{\baselineskip}{16pt}
+        % \setcounter{ALG@line}{4}
+        \State $\boldsymbol{T}_1\leftarrow\boldsymbol{x}_{start};\boldsymbol{E}_1\leftarrow\emptyset; \text{Cost}(\boldsymbol{x}_{start}) \gets 0;$
+        \State $\boldsymbol{T}_2\leftarrow\boldsymbol{x}_{end};\boldsymbol{E}_2\leftarrow\emptyset; \text{Cost}(\boldsymbol{x}_{end}) \gets 0;$
+        \State $\text{Final} \gets false ;$
+        \While{$not$ Final}
+            \State $\boldsymbol{x}_{rand}\gets\text{RandomSample}();$
+            \State $\boldsymbol{x}_{near1}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T}_1);$
+            \State $\boldsymbol{x}_{new1}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near1},t);$
+            \If{$\text{ObstacleFree}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near1})$}
+                \State $\text{Cost}(\boldsymbol{x}_{new1})\gets\text{Cost}(\boldsymbol{x}_{near1}) + t ;$
+                \State $\boldsymbol{T}_1\leftarrow \boldsymbol{T}_1\cup\{\boldsymbol{x}_{new1}\};$
+                $\boldsymbol{E}_1\leftarrow \boldsymbol{E}_1\cup\{\boldsymbol{x}_{near1},\boldsymbol{x}_{new1}\};$
+                \State $\boldsymbol{C_1}\gets\text{GetNodeInCircle}(\boldsymbol{x}_{new1},\boldsymbol{T_1},r);$
+                \If{$\text{IsNotEmpty}(\boldsymbol{C_1}$)}
+                    \State $\boldsymbol{E}_1\leftarrow \text{RrtStarAlgorithm}(\boldsymbol{x}_{new1},\boldsymbol{C}_1,\boldsymbol{E}_1);$
+                \EndIf
+                \State $\boldsymbol{x}_{near2}\gets\text{GetNearest}(\boldsymbol{x}_{new1},\boldsymbol{T}_2);$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \While{$\text{ObstacleFree}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near2})$}
+                \State $\text{Cost}(\boldsymbol{x}_{new2})\gets\text{Cost}(\boldsymbol{x}_{near2}) + t ;$
                 \State $\boldsymbol{T}_2\leftarrow \boldsymbol{T}_2\cup\{\boldsymbol{x}_{new2}\};$
                 $\boldsymbol{E}_2\leftarrow \boldsymbol{E}_2\cup\{\boldsymbol{x}_{near2},\boldsymbol{x}_{new2}\};$
-                \State $\boldsymbol{x}_{near2}=\boldsymbol{x}_{new2};$
-                \State $\boldsymbol{x}_{new2}=\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \State $\boldsymbol{C_2}\gets\text{GetNodeInCircle}(\boldsymbol{x}_{new2},\boldsymbol{T_2},r);$
+                \If{$\text{IsNotEmpty}(\boldsymbol{C_2}$)}
+                    \State $\boldsymbol{E}_2\leftarrow \text{RrtStarAlgorithm}(\boldsymbol{x}_{new2},\boldsymbol{C}_2,\boldsymbol{E}_2);$
+                \EndIf
+                \State $\boldsymbol{x}_{near\_tmp}\gets\text{GetNearest}(\boldsymbol{x}_{new2},\boldsymbol{T}_1);$
+                \If{$\text{ObstacleFree}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near\_tmp}) \text{ } and \text{ dist}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near\_tmp}) < d_{th}$}
+                    \State $\text{Final} \gets true ;$
+                    \State break;
+                \EndIf
+                \State $\boldsymbol{x}_{near2}\gets\boldsymbol{x}_{new2};$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
                 \EndWhile
                 \State swap$(\boldsymbol{T}_1,\boldsymbol{T}_2);$swap$(\boldsymbol{E}_1,\boldsymbol{E}_2);$
             \EndIf
         \EndWhile
+        \State $(\boldsymbol{T}_1,\boldsymbol{T}_2) \gets \text{RemoveRedundantNodes}(\boldsymbol{T}_1,\boldsymbol{T}_2);$\\
+        \Return $(\boldsymbol{T}_1,\boldsymbol{T}_2,\boldsymbol{E}_1,\boldsymbol{E}_2)$
 \end{algorithmic}
 \end{algorithm}
 
+C-RRT*算法流程中体现出了RRT-Connect算法和RRT*算法各自的特点：既包含了RRT-Connect算法的使用两棵树双向搜索架构和贪婪扩展策略，减少无效节点的生成，加快了路径搜索速度；又引入了RRT*算法的最优父节点选择和重布线优化策略，使得C-RRT*算法同样有渐进优化的特性。为了减少伪代码的冗余显示，算法\ref{C-RRT*算法}中简写了RRT*算法相关的伪代码，使用函数RrtStarAlgorithm封装了RRT*算法伪代码\ref{RRT*算法}中的第12至第19行的优化操作。对于寻得的初始路径，使用RemoveRedundantNodes函数对路径上的冗余节点进行删除，得到最终的路径搜索结果。
 
+图\ref{C-RRT*算法仿真结果}展示了C-RRT*算法的仿真实验结果。可以看出，C-RRT*算法搜索的节点数目远小于RRT算法和RRT*算法，极大地减少了路径规划的时间；并且搜索的最终路径长度相比RRT算法和RRT-Connect算法也明显缩短，在路径的弯曲度上也有明显的改善。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/RRT_Star_Connect算法仿真结果.pdf}
+        \caption{\label{C-RRT*算法仿真结果}C-RRT*算法仿真实验结果}
+        \end{minipage}
+\end{figure}
 
-\section{C-RRT*算法}
+\subsection{基于RRT思想的路径搜索方法性能评估}
 
-
-
-
-
+值得注意的是，无论的是传统的RRT算法，还是基于RRT算法思想衍生改进的算法，本质都还是基于采样的思想，具有一定的随机性。为了减小随机性的影响，并定量评估本文提出的C-RRT*算法的路径搜索性能，本文通过对RRT算法、RRT-Connect算法、RRT*算法和C-RRT*算法各进行200次路径搜索仿真实验，对结果进行统计分析。评估指标主要包括：路径搜索时间、路径搜索节点数目、路径长度和路径弯曲度。
