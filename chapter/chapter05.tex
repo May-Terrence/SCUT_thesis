@@ -304,7 +304,40 @@ B样条(B-spline)曲线是一种常用的样条曲线，样条曲线的特点是
         \end{minipage}
 \end{figure}
 
+节点矢量所包含的$n+k$个区间并非都是B样条曲线的定义域。前$k-1$个区间和后$k-1$个区间都不能激活$k$个基函数，因此无法生成有效曲线。在区间$[t_{k-1},t_{k}]$内，前$k$个基函数被激活，结合前$k$个控制点生成B样条曲线的首段曲线。以此类推，直到$[t_{n},t_{n+1}]$区间内激活最后$k$个基函数，结合最后$k$个控制点生成末段曲线。因此，B样条曲线的定义域为$[t_{k-1},t_{n+1}]$。在定义域内，全体B样条基函数的和为1：
+\begin{equation}
+    \sum_{i=0}^{n}B_{i,k}(t)=1 \quad t\in[t_{k-1},t_{n+1}]
+    \label{5_3}
+\end{equation}
+这也被称为B样条基函数的规范性。
 
+当阶数$k>1$时，$k$阶B样条基函数由两个$k-1$阶B样条基函数线性组合得到。由于$B_{i,1}(t)$是常数，所以$B_{i,2}(t)$是关于$t$的一次函数。以此类推，$B_{i,k}(t)$是关于$t$的$k-1$次函数。因此，$k$阶B样条基函数也被称为$k-1$次B样条基函数。如果需要B样条曲线在节点矢量处达到二阶导数的连续，那么需要四阶三次B样条曲线。在涉及到B样条理论相关文献中，B样条基函数中的$k$有的代表阶数有的代表次数，如果使用次数表示，那么式\ref{5_2}中的递推式也需要对应修改。
+
+B样条基函数的微分公式为\cite{计算机图形学}：
+\begin{equation}
+    \frac{d}{dt}B_{i,k}(t)=\frac{k-1}{t_{i+k-1}-t_i}B_{i,k-1}(t)-\frac{k-1}{t_{i+k}-t_{i+1}}B_{i+1,k-1}(t)
+    \label{5_4}
+\end{equation}
+由式\ref{5_4}可以得到B样条曲线的导数为：
+\begin{equation}
+    \begin{aligned}
+        \frac{d\boldsymbol{P}(t)}{dt} & =\left(\sum_{i=0}^{n}B_{i,k}(t)\boldsymbol{P}_{i}\right)^{\prime} \\
+         & =(k-1)\sum_{i=0}^{n}\left(\frac{B_{i,k-1}(t)}{t_{i+k-1}-t_{i}}-\frac{B_{i+1,k-1}(t)}{t_{i+k}-t_{i+1}}\right)\boldsymbol{P}_{i} \\
+         & =(k-1)\sum_{i=0}^{n-1}B_{i,k-1}(t)\frac{\boldsymbol{P}_{i+1}-\boldsymbol{P}_{i}}{t_{i+k}-t_{i+1}}
+        \end{aligned}
+    \label{5_5}
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+\subsection{基于B样条的路径平滑与动力学约束}
 
 
 
