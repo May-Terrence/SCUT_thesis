@@ -18,7 +18,7 @@
 \While{true}
     \State $\boldsymbol{x}_{rand} \gets \text{RandomSample}();$
     \State $\boldsymbol{x}_{near}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T});$
-    \State $\boldsymbol{x}_{new}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},t);$
+    \State $\boldsymbol{x}_{new}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},step);$
     \If{$\text{ObstacleFree}(\boldsymbol{x}_{new},\boldsymbol{x}_{near})$}
         \State $\boldsymbol{T}\leftarrow \boldsymbol{T}\cup\{\boldsymbol{x}_{new}\};$
         $\boldsymbol{E}\leftarrow \boldsymbol{E}\cup\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\};$
@@ -31,7 +31,7 @@
 \end{algorithmic}
 \end{algorithm}
 
-算法中，$\boldsymbol{T}$表示RRT随机树节点的集合，$\boldsymbol{E}$表示RRT随机树的边集合，表示节点之间的连接关系。算法在初始阶段将起点$\boldsymbol{x}_{start}$作为树的初始节点加入集合$\boldsymbol{T}$，并将边集合置为空集。然后循环在可行域内随机采样，对每一个采样点$\boldsymbol{x}_{rand}$，都可以找到集合$\boldsymbol{T}$中距离$\boldsymbol{x}_{rand}$最近的节点$\boldsymbol{x}_{near}$。然后以$\boldsymbol{x}_{near}$为起点，在$\boldsymbol{x}_{near}-\boldsymbol{x}_{rand}$方向上以固定的步长$t$生成一个新节点$\boldsymbol{x}_{new}$，并检查$\boldsymbol{x}_{new}$和$\boldsymbol{x}_{near}$之间的连线与障碍物是否存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new}$加入到集合$\boldsymbol{T}$中并且将边$\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\}$添加到集合$\boldsymbol{E}$中。接下来判断新节点$\boldsymbol{x}_{new}$是否与目标点$\boldsymbol{x}_{goal}$的距离小于设定的阈值$d_{th}$，如果是则跳出循环返回路径搜索结果，否则继续下一次迭代过程，直至到达目标点附近为止。最后返回随机树的节点集合和边集合，通过回溯的方式得到从起点到目标点的路径。
+算法中，$\boldsymbol{T}$表示RRT随机树节点的集合，$\boldsymbol{E}$表示RRT随机树的边集合，表示节点之间的连接关系。算法在初始阶段将起点$\boldsymbol{x}_{start}$作为树的初始节点加入集合$\boldsymbol{T}$，并将边集合置为空集。然后循环在可行域内随机采样，对每一个采样点$\boldsymbol{x}_{rand}$，都可以找到集合$\boldsymbol{T}$中距离$\boldsymbol{x}_{rand}$最近的节点$\boldsymbol{x}_{near}$。然后以$\boldsymbol{x}_{near}$为起点，在$\boldsymbol{x}_{near}-\boldsymbol{x}_{rand}$方向上以固定的步长$step$生成一个新节点$\boldsymbol{x}_{new}$，并检查$\boldsymbol{x}_{new}$和$\boldsymbol{x}_{near}$之间的连线与障碍物是否存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new}$加入到集合$\boldsymbol{T}$中并且将边$\{\boldsymbol{x}_{near},\boldsymbol{x}_{new}\}$添加到集合$\boldsymbol{E}$中。接下来判断新节点$\boldsymbol{x}_{new}$是否与目标点$\boldsymbol{x}_{goal}$的距离小于设定的阈值$d_{th}$，如果是则跳出循环返回路径搜索结果，否则继续下一次迭代过程，直至到达目标点附近为止。最后返回随机树的节点集合和边集合，通过回溯的方式得到从起点到目标点的路径。
 
 根据RRT算法的原理可知，如果存在从起点到目标点的无碰撞路径，那么在有限的时间内，RRT算法一定会找到一条可行的路径。图\ref{RRT算法仿真结果}展示了RRT算法仿真实验结果。
 \begin{figure}[htbp]
@@ -63,12 +63,12 @@ RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
         \While{$not$ Final}
             \State $\boldsymbol{x}_{rand}\gets\text{RandomSample}();$
             \State $\boldsymbol{x}_{near1}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T}_1);$
-            \State $\boldsymbol{x}_{new1}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near1},t);$
+            \State $\boldsymbol{x}_{new1}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near1},step);$
             \If{$\text{ObstacleFree}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near1})$}
                 \State $\boldsymbol{T}_1\leftarrow \boldsymbol{T}_1\cup\{\boldsymbol{x}_{new1}\};$
                 $\boldsymbol{E}_1\leftarrow \boldsymbol{E}_1\cup\{\boldsymbol{x}_{near1},\boldsymbol{x}_{new1}\};$
                 \State $\boldsymbol{x}_{near2}\gets\text{GetNearest}(\boldsymbol{x}_{new1},\boldsymbol{T}_2);$
-                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},step);$
                 \While{$\text{ObstacleFree}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near2})$}
                 \State $\boldsymbol{T}_2\leftarrow \boldsymbol{T}_2\cup\{\boldsymbol{x}_{new2}\};$
                 $\boldsymbol{E}_2\leftarrow \boldsymbol{E}_2\cup\{\boldsymbol{x}_{near2},\boldsymbol{x}_{new2}\};$
@@ -78,7 +78,7 @@ RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
                     \State break;
                 \EndIf
                 \State $\boldsymbol{x}_{near2}\gets\boldsymbol{x}_{new2};$
-                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},step);$
                 \EndWhile
                 \State swap$(\boldsymbol{T}_1,\boldsymbol{T}_2);$swap$(\boldsymbol{E}_1,\boldsymbol{E}_2);$
             \EndIf
@@ -87,7 +87,7 @@ RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
 \end{algorithmic}
 \end{algorithm}
 
-根据算法流程可知，相比于RRT算法，RRT-Connect算法在初始化阶段建立了两棵随机树，并将起点和目标点分别作为两棵随机树的初始节点，然后执行与RRT算法相同的步骤来循环地随机寻找新节点$\boldsymbol{x}_{new1}$。在随机找到与障碍物无碰撞的新节点后，根据新节点的位置可以找到随机树$\boldsymbol{T}_{2}$上与新节点距离最近的节点$\boldsymbol{x}_{near2}$。接下来执行贪婪扩展策略，以$\boldsymbol{x}_{near2}$为起点，在$\boldsymbol{x}_{near2}-\boldsymbol{x}_{new1}$方向上以固定的步长$t$生成新节点$\boldsymbol{x}_{new2}$，并检查$\boldsymbol{x}_{new2}$与$\boldsymbol{x}_{near2}$之间的连线是否与障碍物存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new2}$加入集合$\boldsymbol{T}_2$中并且将边$\{\boldsymbol{x}_{near2},\boldsymbol{x}_{new2}\}$添加到集合$\boldsymbol{E}_2$中。然后从$\boldsymbol{T}_{1}$上找到距离$\boldsymbol{x}_{new2}$的最近节点$\boldsymbol{x}_{near\_tmp}$，判断$\boldsymbol{x}_{new2}$与$\boldsymbol{x}_{near\_tmp}$之间是否与障碍物无碰撞以及两节点之间的距离是否小于$d_{th}$，如果两个条件都满足的话，则跳出循环并返回路径搜索结果。如果上述任一条件不满足，则继续执行贪婪策略，$\boldsymbol{T}_2$以$\boldsymbol{x}_{new2}$为新的起点(为方便编程表示，此处将其设为$\boldsymbol{x}_{near2}$)继续向$\boldsymbol{x}_{new1}$方向生成新节点，直到检测到新节点与$\boldsymbol{x}_{near2}$之间存在障碍物为止。如果贪婪扩展过程中检测到障碍物碰撞，则交换两棵随机树的节点集合和边集合，继续随机采样过程，直至两棵树存在叶子节点之间的距离小于$d_{th}$且无障碍物。最后根据两棵树的节点集合和边集合回溯得到路径搜索的结果。
+根据算法流程可知，相比于RRT算法，RRT-Connect算法在初始化阶段建立了两棵随机树，并将起点和目标点分别作为两棵随机树的初始节点，然后执行与RRT算法相同的步骤来循环地随机寻找新节点$\boldsymbol{x}_{new1}$。在随机找到与障碍物无碰撞的新节点后，根据新节点的位置可以找到随机树$\boldsymbol{T}_{2}$上与新节点距离最近的节点$\boldsymbol{x}_{near2}$。接下来执行贪婪扩展策略，以$\boldsymbol{x}_{near2}$为起点，在$\boldsymbol{x}_{near2}-\boldsymbol{x}_{new1}$方向上以固定的步长$step$生成新节点$\boldsymbol{x}_{new2}$，并检查$\boldsymbol{x}_{new2}$与$\boldsymbol{x}_{near2}$之间的连线是否与障碍物存在碰撞，如果不存在碰撞，则将$\boldsymbol{x}_{new2}$加入集合$\boldsymbol{T}_2$中并且将边$\{\boldsymbol{x}_{near2},\boldsymbol{x}_{new2}\}$添加到集合$\boldsymbol{E}_2$中。然后从$\boldsymbol{T}_{1}$上找到距离$\boldsymbol{x}_{new2}$的最近节点$\boldsymbol{x}_{near\_tmp}$，判断$\boldsymbol{x}_{new2}$与$\boldsymbol{x}_{near\_tmp}$之间是否与障碍物无碰撞以及两节点之间的距离是否小于$d_{th}$，如果两个条件都满足的话，则跳出循环并返回路径搜索结果。如果上述任一条件不满足，则继续执行贪婪策略，$\boldsymbol{T}_2$以$\boldsymbol{x}_{new2}$为新的起点(为方便编程表示，此处将其设为$\boldsymbol{x}_{near2}$)继续向$\boldsymbol{x}_{new1}$方向生成新节点，直到检测到新节点与$\boldsymbol{x}_{near2}$之间存在障碍物为止。如果贪婪扩展过程中检测到障碍物碰撞，则交换两棵随机树的节点集合和边集合，继续随机采样过程，直至两棵树存在叶子节点之间的距离小于$d_{th}$且无障碍物。最后根据两棵树的节点集合和边集合回溯得到路径搜索的结果。
 % 因为此处涉及到两层循环，所以设置标志位Final来跳出循环。
 % (为方便编程表示，此处将其设置为$\boldsymbol{x}_{near2}$)
 
@@ -113,7 +113,7 @@ RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
         \While{true}
             \State $\boldsymbol{x}_{rand}\gets\text{RandomSample}();$
             \State $\boldsymbol{x}_{near}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T});$
-            \State $\boldsymbol{x}_{new}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},t);$
+            \State $\boldsymbol{x}_{new}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near},step);$
             \If{$\text{ObstacleFree}(\boldsymbol{x}_{new},\boldsymbol{x}_{near})$}
                 \State $\text{Cost}(\boldsymbol{x}_{new})\gets\text{Cost}(\boldsymbol{x}_{near}) + t ;$
                 \State $\boldsymbol{T}\leftarrow \boldsymbol{T}\cup\{\boldsymbol{x}_{new}\};$
@@ -213,7 +213,7 @@ RRT*算法的仿真结果如图\ref{RRT*算法仿真结果}所示。可以看出
         \While{$not$ Final}
             \State $\boldsymbol{x}_{rand}\gets\text{RandomSample}();$
             \State $\boldsymbol{x}_{near1}\gets\text{GetNearest}(\boldsymbol{x}_{rand},\boldsymbol{T}_1);$
-            \State $\boldsymbol{x}_{new1}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near1},t);$
+            \State $\boldsymbol{x}_{new1}\gets\text{GetNewNode}(\boldsymbol{x}_{rand},\boldsymbol{x}_{near1},step);$
             \If{$\text{ObstacleFree}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near1})$}
                 \State $\text{Cost}(\boldsymbol{x}_{new1})\gets\text{Cost}(\boldsymbol{x}_{near1}) + t ;$
                 \State $\boldsymbol{T}_1\leftarrow \boldsymbol{T}_1\cup\{\boldsymbol{x}_{new1}\};$
@@ -223,7 +223,7 @@ RRT*算法的仿真结果如图\ref{RRT*算法仿真结果}所示。可以看出
                     \State $\boldsymbol{E}_1\leftarrow \text{RrtStarAlgorithm}(\boldsymbol{x}_{new1},\boldsymbol{C}_1,\boldsymbol{E}_1);$
                 \EndIf
                 \State $\boldsymbol{x}_{near2}\gets\text{GetNearest}(\boldsymbol{x}_{new1},\boldsymbol{T}_2);$
-                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},step);$
                 \While{$\text{ObstacleFree}(\boldsymbol{x}_{new2},\boldsymbol{x}_{near2})$}
                 \State $\text{Cost}(\boldsymbol{x}_{new2})\gets\text{Cost}(\boldsymbol{x}_{near2}) + t ;$
                 \State $\boldsymbol{T}_2\leftarrow \boldsymbol{T}_2\cup\{\boldsymbol{x}_{new2}\};$
@@ -238,7 +238,7 @@ RRT*算法的仿真结果如图\ref{RRT*算法仿真结果}所示。可以看出
                     \State break;
                 \EndIf
                 \State $\boldsymbol{x}_{near2}\gets\boldsymbol{x}_{new2};$
-                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},t);$
+                \State $\boldsymbol{x}_{new2}\gets\text{GetNewNode}(\boldsymbol{x}_{new1},\boldsymbol{x}_{near2},step);$
                 \EndWhile
                 \State swap$(\boldsymbol{T}_1,\boldsymbol{T}_2);$swap$(\boldsymbol{E}_1,\boldsymbol{E}_2);$
             \EndIf
@@ -288,7 +288,7 @@ B样条(B-spline)曲线是一种常用的样条曲线，样条曲线的特点是
         1 & t_i\leqslant t<t_{i+1} \\
         0 & \text{其他}
         \end{cases} \\
-        B_{i,k}(t)=\frac{t-t_i}{t_{i+k-1}-t_i}B_{i,k-1}(t)+\frac{t_{i+k}-t}{t_{i+k}-t_{i+1}}B_{i+l,k-1}(t)\quad t_i\leqslant t<t_{i+k}
+        B_{i,k}(t)=\frac{t-t_i}{t_{i+k-1}-t_i}B_{i,k-1}(t)+\frac{t_{i+k}-t}{t_{i+k}-t_{i+1}}B_{i+1,k-1}(t)\quad t_i\leqslant t<t_{i+k}
         \end{cases}
     \label{5_2}
 \end{equation}
@@ -304,9 +304,9 @@ B样条(B-spline)曲线是一种常用的样条曲线，样条曲线的特点是
         \end{minipage}
 \end{figure}
 
-节点矢量所包含的$n+k$个区间并非都是B样条曲线的定义域。前$k-1$个区间和后$k-1$个区间都不能激活$k$个基函数，因此无法生成有效曲线。在区间$[t_{k-1},t_{k}]$内，前$k$个基函数被激活，结合前$k$个控制点生成B样条曲线的首段曲线。以此类推，在$[t_{n},t_{n+1}]$区间内激活最后$k$个基函数，结合最后$k$个控制点生成B样条曲线的末段曲线。因此，B样条曲线的定义域为$[t_{k-1},t_{n+1}]$，共包含$n-k+2$个节点区间，即$n-k+2$个曲线段。在定义域内，全体B样条基函数的和为1：
+节点矢量所包含的$n+k$个区间并非都是B样条曲线的定义域。前$k-1$个区间和后$k-1$个区间都不能激活$k$个基函数，因此无法生成有效曲线。在区间$[t_{k-1},t_{k})$内，前$k$个基函数被激活，结合前$k$个控制点生成B样条曲线的首段曲线。以此类推，在$[t_{n},t_{n+1})$区间内激活最后$k$个基函数，结合最后$k$个控制点生成B样条曲线的末段曲线。因此，B样条曲线的定义域为$[t_{k-1},t_{n+1})$，共包含$n-k+2$个节点区间，即$n-k+2$个曲线段。在定义域内，全体B样条基函数的和为1：
 \begin{equation}
-    \sum_{i=0}^{n}B_{i,k}(t)=1 \quad t\in[t_{k-1},t_{n+1}]
+    \sum_{i=0}^{n}B_{i,k}(t)=1 \quad t\in[t_{k-1},t_{n+1})
     \label{5_3}
 \end{equation}
 这也被称为B样条基函数的规范性。
@@ -320,16 +320,16 @@ B样条(B-spline)曲线是一种常用的样条曲线，样条曲线的特点是
 \end{equation}
 因此修改$t\in[t_{i},t_{i+1})$内的曲线段时，最多需要修改相邻的$k$个控制点($\boldsymbol{P}_j(j=i-k+1,i-k+2,\cdots,i)$)，与其他控制点无关。并且由于基函数$B_{i,k}(t)$仅定义在区间$[t_i, t_{i+k})$内，改变一个控制点$\boldsymbol{P}_i$时，仅影响一段曲线，不影响整条曲线。这种局部支撑性使得B样条曲线具有局部调整的能力。
 
-根据式\ref{5_2}可知，当阶数$k>1$时，$k$阶B样条基函数由两个$k-1$阶B样条基函数线性组合得到。由于$B_{i,1}(t)$是常数，所以$B_{i,2}(t)$是关于$t$的一次函数。以此类推，$B_{i,k}(t)$是关于$t$的$k-1$次函数。因此，$k$阶B样条基函数也被称为$k-1$次B样条基函数。如果需要B样条曲线在定义域内的节点矢量处达到二阶导数的连续，那么需要四阶三次B样条曲线。
+根据式\eqref{5_2}可知，当阶数$k>1$时，$k$阶B样条基函数由两个$k-1$阶B样条基函数线性组合得到。由于$B_{i,1}(t)$是常数，所以$B_{i,2}(t)$是关于$t$的一次函数。以此类推，$B_{i,k}(t)$是关于$t$的$k-1$次函数。因此，$k$阶B样条基函数也被称为$k-1$次B样条基函数。如果需要B样条曲线在定义域内的节点矢量处达到二阶导数的连续，那么需要四阶三次B样条曲线。
 
-在涉及到B样条理论相关文献中，B样条基函数中的$k$有的代表阶数有的代表次数，如果使用次数表示，那么式\ref{5_2}中的递推式也需要对应修改。
+在涉及到B样条理论相关文献中，B样条基函数中的$k$有的代表阶数有的代表次数，如果使用次数表示，那么式\eqref{5_2}中的递推式也需要对应修改。
 
 B样条基函数的微分公式为\cite{计算机图形学}：
 \begin{equation}
     \frac{d}{dt}B_{i,k}(t)=\frac{k-1}{t_{i+k-1}-t_i}B_{i,k-1}(t)-\frac{k-1}{t_{i+k}-t_{i+1}}B_{i+1,k-1}(t)
     \label{5_5}
 \end{equation}
-由式\ref{5_4}可以得到B样条曲线的导数为：
+由式\eqref{5_4}可以得到B样条曲线的一阶导数为：
 \begin{equation}
     \begin{aligned}
         \frac{d\boldsymbol{P}(t)}{dt} & =\sum_{i=0}^{n}\boldsymbol{P}_{i}\frac{d}{dt}B_{i,k}(t) \\
@@ -352,9 +352,9 @@ B样条基函数的微分公式为\cite{计算机图形学}：
 
 (1)均匀B样条曲线：如果节点矢量中相邻的两个节点之间的差值$t_{i+1}-t_i$都相等$(i=0,1,\cdots,n+k-1)$，这样的曲线为均匀B样条曲线。如图\ref{均匀B样条}所示，一般情况下，B样条曲线的起点和终点不会位于首末控制点上。
 
-(2)准均匀B样条曲线：如果节点矢量在两端节点存在$k$个重复度，而中间$n-k+1$个节点的相邻节点值之差都相等，那么称这样的B样条曲线为准均匀B样条曲线。如图\ref{准均匀B样条}所示，由于两端节点的$k$个重复度，准均匀B样条曲线的起点和终点会位于首末控制点上。
+(2)准均匀B样条曲线：如果节点矢量在两端节点存在$k$次重复度，而中间$n-k+1$个节点的相邻节点值之差都相等，那么称这样的B样条曲线为准均匀B样条曲线。如图\ref{准均匀B样条}所示，由于两端节点的$k$次重复度，准均匀B样条曲线的起点和终点会位于首末控制点上。
 
-(3)分段贝塞尔曲线：如果节点矢量在两端节点存在$k$个重复度，而中间$n-k+1$个节点的重复度为$k-1$，这样的曲线称为分段贝塞尔曲线，如图\ref{分段贝塞尔B样条}所示。为确保达到该条件，分段贝塞尔曲线需要满足控制点个数减一为B样条曲线阶数减一的整数倍，即$n\mod(k-1) = 0$。
+(3)分段贝塞尔曲线：如果节点矢量在两端节点存在$k$次重复度，而中间$n-k+1$个节点的重复度为$k-1$，这样的曲线称为分段贝塞尔曲线，如图\ref{分段贝塞尔B样条}所示。为确保达到该条件，分段贝塞尔曲线需要满足控制点个数减一为B样条曲线阶数减一的整数倍，即$n\mod(k-1) = 0$。
 
 (4)非均匀B样条曲线：在保证节点矢量非递减，并且两端节点重复度不大于$k$，并且内部节点重复度不大于$k-1$的情况下，可以任取节点矢量。图\ref{非均匀B样条}所示的节点矢量为随机生成，且满足上述条件的情况。
 
@@ -367,24 +367,66 @@ B样条基函数的微分公式为\cite{计算机图形学}：
         {\includegraphics[scale=1]{Fig/准均匀B样条曲线示意图.pdf}
 		\label{准均匀B样条}}
         \vskip\baselineskip % 增加一些垂直间距
+        \vspace{-10pt}
         \subfloat[分段贝塞尔曲线示意图]
         {\includegraphics[scale=1]{Fig/分段贝塞尔曲线示意图.pdf}
 		\label{分段贝塞尔B样条}}
         \subfloat[非均匀B样条曲线示意图]
         {\includegraphics[scale=1]{Fig/非均匀B样条曲线示意图.pdf}
-		\label{非均匀B样条}}
+        \label{非均匀B样条}}
     \caption{四种B样条曲线示意图}\label{四种B样条曲线示意图}
 \end{figure}
 
 \subsection{基于B样条的路径平滑与动力学约束}
 
-本节将介绍基于B样条曲线的路径平滑方法，并结合DFUAV的动力学约束，对平滑后的路径进行动力学优化。根据5.3.1节介绍的B样条曲线理论，B样条曲线具有许多优良的性质。利用B样条曲线的凸包性，可以将B样条曲线限制在控制点形成的凸包内，如果位置控制点形成的凸包内没有障碍物，那么生成的B样条曲线也不会经过障碍物。进一步地，如果速度控制点也都位于DFUAV的最大速度地限制内，那么生成的速度曲线也不会超过最大飞行速度，加速度约束同理。利用B样条曲线的局部支撑性，仅需修改那些超出约束限制的控制点，使其位于约束限制内，即可得到满足动力学约束的曲线，而不需要整体调整。利用B样条曲线的可导性质，可以方便求出速度曲线和加速度曲线的控制点，并根据动力学约束作对应的调整。
+本节将介绍基于B样条曲线的路径平滑方法，并结合DFUAV的动力学约束，对平滑后的路径进行动力学优化。根据5.3.1节介绍的B样条曲线理论，B样条曲线具有许多优良的性质。利用B样条曲线的凸包性，可以将B样条曲线限制在控制点形成的凸包内，如果位置控制点形成的凸包内没有障碍物，那么生成的B样条曲线也不会经过障碍物。进一步地，如果速度控制点也都位于DFUAV的最大速度的限制内，那么生成的速度曲线也不会超过最大飞行速度，加速度约束同理。利用B样条曲线的可导性质，可以方便求出速度曲线和加速度曲线的控制点，并根据动力学约束作对应的调整。利用B样条曲线的局部支撑性，仅需修改那些超出约束限制的控制点，使其位于约束限制内，即可得到满足动力学约束的曲线，而不需要整体调整。
+
+% \subsubsection{基于B样条的路径平滑}
+
+根据一组已知点得到一条B样条曲线可以分为两种方法：如果要求B样条曲线必须经过所有已知点，这种B样条曲线称为插值B样条；如果不强制要求B样条曲线经过已知点(可能经过其中部分节点)，但能够贴近已知点连线形成的路径，这样的B样条曲线称为逼近B样条。根据5.2节介绍的C-RRT*全局路径搜索算法，可以得到一条从起点到终点的折线路径。实际上，除了折线路径的起点和终点外，DFUAV并非需要严格通过折线路径上的其他点，所以本文使用逼近B样条，通过在C-RRT*算法搜索到的初始路径上以合适的步长取点作为控制点$\boldsymbol{P}_i$，生成逼近B样条曲线来逼近折线路径，进而实现路径的平滑。
+
+由于均匀B样条曲线的时间节点矢量相邻节点之间的间距是相等的，因此用均匀B样条曲线更容易表示B样条曲线的导数。假设相邻节点间的间距是$\Delta t$，那么式\eqref{5_6}可以简化为：
+\begin{equation}
+        \frac{d\boldsymbol{P}(t)}{dt} =\sum_{i=0}^{n-1}B_{i,k-1}(t)\frac{\boldsymbol{P}_{i+1}-\boldsymbol{P}_{i}}{\Delta t}
+    \label{5_8}
+\end{equation}
+
+此外，为了使DFUAV的运动过程更加平滑，通常需要满足加速度连续。所以本文选择四阶三次的均匀B样条曲线进行路径平滑，并且保证B样条曲线的二阶导数连续。
+
+根据图\ref{均匀B样条}可知，均匀B样条曲线一般不会经过第一个控制点$\boldsymbol{P}_0$和最后一个控制点$\boldsymbol{P}_n$，但是在折线路径上取点作为控制点时，$\boldsymbol{P}_0$和$\boldsymbol{P}_n$应分别作为路径的起点和终点，因此需要确保均匀B样条曲线始于点$\boldsymbol{P}_0$，终于点$\boldsymbol{P}_n$。根据文献\parencite{计算机图形学}，对于$k$阶$k-1$次均匀B样条曲线，如果某控制点$\boldsymbol{P}_i$具有$k-1$次重复度，那么曲线$\boldsymbol{P}(t)$一定会经过该控制点。这一点利用B样条基函数的规范性可以得到证明。
+因此，通过折线路径获取到一组控制点后，需要在首末控制点处额外各加入两个控制点，分别于首末控制点相同，保证首末控制点各有3次重复度。这样做有如下三个优势：
+
+(1)可以保证位置轨迹B样条曲线开始于第一个控制点，终止于最后一个控制点，符合轨迹规划要求。
+
+(2)四阶三次位置B样条曲线的一阶导数为三阶二次速度B样条曲线，并且根据式\eqref{5_8}可知，如果位置控制点具有3次重复度，那么根据位置控制点差分计算得到的速度控制点具有2次重复度，并且该速度控制点为$\boldsymbol{0}$。这就确保了速度B样条曲线的起始和终止速度为0，符合DFUAV的边界条件。
+
+(3)加速度控制点同理，根据速度控制点差分可以得到首末加速度控制点均为$\boldsymbol{0}$，并且加速度B样条曲线为二阶一次曲线，因此加速度B样条曲线的起始和终止加速度为0，符合DFUAV的边界条件。
+
+以图\ref{C-RRT*算法仿真结果}中搜索的折线路径为例，通过均匀B样条曲线对折线路径进行平滑处理。处理结果如图\ref{B样条曲线路径平滑结果}所示。可以看出，生成的B样条曲线不仅在折线的转折处平滑过渡，而且还始于起点，终于终点。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/B样条曲线路径平滑结果.pdf}
+        \caption{\label{B样条曲线路径平滑结果}B样条曲线路径平滑结果}
+        \end{minipage}
+\end{figure}
+
+根据图\ref{B样条曲线路径平滑结果}可以看出，无论是初始折线路径，还是B样条曲线平滑后的路径，都在某些区域距离障碍物较近。考虑到实际情况下的位置误差，直接将此路径应用于DFUAV的飞行是不合适的。通常的做法是对障碍物进行膨胀，在障碍物膨胀后的地图上进行路径规划，使得DFUAV的飞行过程更加安全。
+
+图\ref{B样条曲线路径平滑结果}所示的规划结果仅包含了位置信息，如果需要得到速度和加速度信息，可以根据式\eqref{5_8}进行计算。如果计算得到的速度或者加速度超出DFUAV的最大速度或者最大加速度限制，那么需要对速度和加速度进行调整确保位于动力学约束范围内。但是对速度和加速度进行整体缩小不是一个好的选择，这样会导致原本位于速度和加速度限制内的控制点也被缩小，进而增加轨迹跟踪的时间成本。值得注意的是，根据B样条曲线的局部支撑性和凸包性，若某段B样条曲线的速度控制点或者加速度控制点超限，仅需对该控制点作针对性约束至可行范围内，无需调整所有控制点，即可得到满足约束的曲线。
+
+实践过程中可以以B样条曲线的定义域$[t_{k-1},t_{n+1})$作为物理时间基准，规划出初步的轨迹。假如存在速度控制点$\boldsymbol{V}_i=[v_{xi}\quad v_{yi}]$超出了DFUAV的最大速度$\boldsymbol{V}_{max}$约束，那么可以通过以下方式调整速度控制点$\boldsymbol{V}_i$：
+\begin{equation}
+    \boldsymbol{V}_i=\boldsymbol{V}_i\min\left(\frac{\boldsymbol{V}_{max}}{\|\boldsymbol{V}_i\|},\boldsymbol{1}\right)
+    \label{5_9}
+\end{equation}
 
 
 \section{仿真实验分析}
 
 % \subsection{基于RRT思想的路径搜索方法性能评估}
-\subsection{C-RRT*算法综合性能验证与对比分析}
+\subsection{C-RRT*性能验证与对比分析}
 
 需要特别指出的是，尽管传统的RRT算法及其改进型算法(如RRT-Connect、RRT*)在路径规划领域已展现出广泛的适用性，但其基于随机采样的本质特性仍会导致规划结果的不确定性。为系统性评估本文提出的C-RRT*算法的综合性能，本文构建了仿真测试环境，并基于蒙特卡洛方法对四类算法RRT、RRT-Connect、RRT*和C-RRT*进行各500次独立重复实验。通过对实验结果统计分析，从平均路径搜索时间、平均路径搜索节点数目、平均路径长度和平均路径弯曲度四个维度量化算法的性能差异。仿真实验结果如表\ref{C-RRT*算法性能评估结果}所示。
 % 值得注意的是，无论的是传统的RRT算法，还是基于RRT算法思想衍生改进的算法，本质都还是基于采样的思想，具有一定的随机性。为了减小随机性的影响，并定量评估本文提出的C-RRT*算法的路径搜索性能，本文通过对RRT算法、RRT-Connect算法、RRT*算法和C-RRT*算法各进行200次路径搜索仿真实验，对结果进行统计分析。评估指标主要包括：路径搜索时间、路径搜索节点数目、路径长度和路径弯曲度。
@@ -415,6 +457,10 @@ B样条基函数的微分公式为\cite{计算机图形学}：
 此处的平均路径弯曲度定义为搜索的路径的转向角度，该值反映了路径的平滑程度。更平滑的路径更容易被轨迹跟踪控制器执行，减小机械结构磨损。RRT算法的平均路径弯曲度最大，达到32.04rad，远远高于其他三类算法。RRT-Connect算法的平均路径弯曲度为14.21rad，相比于RRT算法有所减小，这是因为RRT-Connect算法的贪婪策略使得搜索的路径在障碍物较少的区域都为直线路径，这一点从图\ref{RRT-Connect算法仿真结果}中可以明显看出。其次是RRT*算法的平均路径弯曲度为7.74rad，这得益于RRT*渐进优化机制，对路径进行了优化，使得路径更加平滑。平均路径弯曲度最小的是C-RRT*算法，为2.32rad，这是因为C-RRT*算法不仅综合了RRT-Connect算法和RRT*算法的优势，还使用冗余节点删除策略，进一步平滑路径。
 
 根据以上对比分析可得，本文提出的C-RRT*算法在比较的四个维度上综合性能表现最好。
+
+\subsection{基于C-RRT*和B样条的轨迹规划与跟踪实验}
+
+由于实验中使用的试验样机占地面积约为0.4m$\times$0.4m，因此下节的实验中将先对障碍物进行0.8m的膨胀，然后再进行路径规划。
 
 \section{本章小结}
 
