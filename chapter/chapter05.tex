@@ -456,7 +456,7 @@ B样条基函数的微分公式为\cite{计算机图形学}：
 	\centering
 	\begin{minipage}[c]{1\textwidth}
         \centering
-        \includegraphics[scale=1]{Fig/B样条曲线路径平滑结果.pdf}
+        \includegraphics[scale=1]{Fig/仿真实验地图.pdf}
         \caption{\label{仿真实验地图}仿真实验地图}
         \end{minipage}
 \end{figure}
@@ -495,7 +495,50 @@ B样条基函数的微分公式为\cite{计算机图形学}：
 
 \subsection{基于C-RRT*和B样条的轨迹规划与跟踪实验}
 
-本小节首先利用C-RRT*算法在图\ref{仿真实验地图}中生成一条初始折线路径，然后以4m的步长在每一段折线路径上取点作为B样条曲线的控制点。接下来通过B样条曲线对折线路径进行平滑处理，最后根据DFUAV的动力学约束对平滑后的路径进行动力学优化。实验中设定DFUAV在每个轴方向上的最大速度为3m/s，最大加速度为2.5m/s$^2$，起点和目标点的速度和加速度都为0。仿真实验结果如图\ref{C-RRT*算法仿真结果}所示。
+本小节首先利用C-RRT*算法在图\ref{仿真实验地图}中生成一条初始折线路径，然后以4m的步长在每一段折线路径上取点作为B样条曲线的控制点。接下来通过B样条曲线对折线路径进行平滑处理，最后根据DFUAV的动力学约束对平滑后的路径进行动力学优化。实验中设定DFUAV在每个轴方向上的最大速度为3m/s，最大加速度为2m/s$^2$，起点和目标点的速度和加速度都为0。飞行过程中期望的偏航角始终指向期望的轨迹方向。
 
+图\ref{B样条曲线路径平滑实验结果}展示了使用C-RRT*算法搜索的初始路径以及使用B样条曲线对初始路径进行平滑处理后的路径。初始路径的搜索时间为0.264s，路径长度为83.79m，路径转折角度为1.49rad。可见，C-RRT*算法能够在较短时间内搜索出较短且弯曲度小的路径，并且经过B样条平滑处理后的曲线可以在转折处较好地过渡。
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{minipage}[c]{1\textwidth}
+%         \centering
+%         \includegraphics[scale=1]{Fig/仿真实验地图.pdf}
+%         \caption{\label{仿真实验地图}仿真实验地图}
+%         \end{minipage}
+% \end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/B样条曲线路径平滑实验结果.pdf}
+        \caption{\label{B样条曲线路径平滑实验结果}B样条曲线路径平滑实验结果}
+        \end{minipage}
+\end{figure}
+
+图\ref{位置曲线规划与跟踪结果}、图\ref{速度曲线规划与跟踪结果}和图\ref{加速度曲线规划与跟踪结果}分别展示了经过动力学约束后的期望位置曲线、期望速度曲线和期望加速度曲线，以及使用第四章介绍的基于INDI的位置控制器对上述曲线进行跟踪的情况。可以看出，无论是期望的速度曲线还是期望的加速度曲线，都满足实验中设定的DFUAV的动力学约束条件。由于位置跟踪过程中存在位置误差，所以速度的给定值和加速度的给定值实际上是各自的期望值加上通过INDI位置控制器根据误差计算出的补偿值。
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/位置曲线规划与跟踪结果.pdf}
+        \caption{\label{位置曲线规划与跟踪结果}位置曲线规划与跟踪结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/位置曲线规划与跟踪结果.pdf}
+        \caption{\label{速度曲线规划与跟踪结果}速度曲线规划与跟踪结果}
+        \end{minipage}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}[c]{1\textwidth}
+        \centering
+        \includegraphics[scale=1]{Fig/位置曲线规划与跟踪结果.pdf}
+        \caption{\label{加速度曲线规划与跟踪结果}加速度曲线规划与跟踪结果}
+        \end{minipage}
+\end{figure}
 \section{本章小结}
 
