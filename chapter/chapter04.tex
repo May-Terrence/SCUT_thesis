@@ -1,14 +1,14 @@
-\chapter{涵道风扇无人机的位置控制}
+\chapter{涵道风扇无人机位置控制}
 
-为了实现对轨迹规划结果的准确跟踪，一个跟踪性能优良、抗扰能力强的位置控制器是必不可少的。本文构建了基于分层解耦的外环-内环模块化控制框架，外环控制即位置控制器，内环控制即姿态控制器。位置控制作为轨迹跟踪的核心决策单元，首先通过融合IMU、卫星定位模块和气压计等多源传感器数据，使用基于误差状态的卡尔曼滤波(ESKF)算法实时解算无人机在三维空间中的位置、速度等系统状态信息。然后根据当前时刻的位置误差、速度误差和受力状态因素，计算出涵道风扇的总拉力(对应转速指令$\Omega$)，并结合期望的姿态指令$\boldsymbol{\eta}_d=[\varphi_d\quad \theta_d\quad \psi_d]^T$，实现期望的位置、速度控制。基于解耦的模块化控制框架，实际的位置跟踪问题可以按照单独的外环控制来考虑，而不用考虑内环控制。并且模块化设计使得位置控制回路可以独立于姿态动力学环节进行控制器参数调节，有效地降低了DFUAV这一多变量耦合系统的设计复杂度。对于内环控制，则采用第三章介绍的基于INDI和优先级控制分配的姿态控制策略，期望的姿态指令由位置控制器解算得到。
+为了实现对飞行轨迹规划结果的准确跟踪，一个跟踪性能优良、抗扰能力强的位置控制器是必不可少的。本文构建了基于分层解耦的外环-内环模块化控制框架，外环控制即位置控制器，内环控制即姿态控制器。位置控制作为轨迹跟踪的核心决策单元，首先通过融合IMU、卫星定位模块和气压计等多源传感器数据，实时解算无人机在三维空间中的位置、速度等系统状态信息。然后结合当前时刻的期望位置、期望速度和受力状态等因素，计算出涵道风扇的总拉力(对应风扇转速指令$\Omega$)，并结合期望的姿态指令$\boldsymbol{\eta}_d=[\varphi_d\quad \theta_d\quad \psi_d]^T$，实现期望的位置和速度控制。基于分层解耦的模块化控制框架，实际的位置跟踪问题可以按照单独的外环控制来考虑，而不用考虑内环控制。并且模块化设计使得位置控制回路可以独立于姿态动力学环节进行控制器参数调节，有效地降低了DFUAV这一多变量耦合系统的设计复杂度。对于内环控制，则采用第三章介绍的基于INDI和优先级控制分配的姿态控制策略，期望的姿态指令由位置控制器解算得到。
 
-在户外复杂气流环境中，阵风引起的非定常气流扰动是制约DFUAV位置控制精度的重要因素。计算流体力学仿真研究表明，当环境风速达到4.6m/s时，建筑物周围空气流速最高可以达到7.6m/s，这无疑会对DFUAV造成非常强烈的干扰，显著影响DFUAV的稳定性。因此，设计一个能够有效抗风的位置控制器尤为重要。针对该问题，广泛使用的PID位置控制器在有阵风的情况下存在其固有的缺陷：积分环节I在面对持续的风扰动时，补偿效果具有明显的相位滞后特性；而微分环节面对高频风速干扰则容易引发超调和震荡。如果环境风速变化已知，那么就可以及时补偿扰动以减小位置误差。为了测量环境风速，一种可能的解决方案是使用风速计测量机体速度与环境风速的相对速度，但环境风速可能来自各个方向，所以至少需要在无人机机体上安装三个风速计，这无疑会增加DFUAV硬件系统设计的复杂性和成本。并且风速计在低速的情况下存在明显噪声，误差较大。
+在户外复杂气流环境中，阵风引起的非定常气流扰动是制约DFUAV位置控制精度的重要因素。计算流体力学仿真研究表明，当环境风速达到4.6m/s时，建筑物周围空气流速最高可以达到7.6m/s\cite{smeurCascadedIncrementalNonlinear2018b}，这无疑会对DFUAV造成非常强烈的干扰，显著影响DFUAV的稳定性。因此，设计一个能够有效抗风的位置控制器尤为重要。针对该问题，广泛使用的PID位置控制器在有阵风的情况下存在其固有的缺陷：积分环节在面对持续的风扰动时，补偿效果具有明显的相位滞后特性；而微分环节面对高频风速干扰则容易引发超调和震荡。如果环境风速变化已知，那么就可以及时补偿扰动以减小位置误差。为了测量环境风速，一种可能的解决方案是使用风速计测量机体速度与环境风速的相对速度，但环境风速可能来自各个方向，所以至少需要在无人机机体上安装三个风速计，这无疑会增加DFUAV硬件系统设计的复杂性和成本。并且风速计在低速的情况下存在明显噪声，误差较大。
 
-第三章介绍了基于传感器的INDI方法的优越性：使用陀螺仪的测量值进行一阶差分来计算角加速度，进而基于角加速度的测量值估计出一个控制周期内对未建模动态力矩的影响并实时补偿。牛顿第二定律揭示了加速度的大小与力的大小成正比关系$(\Delta \boldsymbol{F}\propto\Delta \boldsymbol{a})$，所以基于机载IMU中的加速度计三轴比力的测量值，可以直接估计出DFUAV所受环境风扰动的等效外力矢量。这一点与使用陀螺仪估计未建模动态力矩变化的思路是一致的。既然DFUAV的姿态可以被控制，那么位置控制同样可以采用这种思路，设计出一个用于控制DFUAV线性加速度的增量控制器。
+第三章介绍了基于传感器的INDI方法的优越性：使用陀螺仪的测量值进行一阶差分来计算角加速度，进而基于角加速度的测量值估计出一个控制周期内对未建模动态力矩的影响并实时补偿。牛顿第二定律揭示了加速度的大小与力的大小成正比关系$(\Delta \boldsymbol{F}\propto\Delta \boldsymbol{a})$，所以基于机载IMU中的加速度计三轴比力的测量值，可以直接估计出DFUAV所受环境风扰动的等效外力矢量。这一点与使用陀螺仪估计未建模动态力矩变化的思路一致。既然DFUAV的姿态可以被控制，那么位置控制同样可以采用这种思路，设计出一个用于控制DFUAV线性加速度的增量控制器。
 
-因此本章安排如下：首先对位置动力学模型进行简化处理以适应INDI位置控制器的设计。然后根据加速度计可估算力这一特点，设计基于INDI的位置控制器。最后进行仿真实验与实际飞行试验，验证所提出的位置控制器的有效性。
+因此本章安排如下：首先对位置动力学模型进行简化处理以适应INDI位置控制器的设计。然后根据加速度计可估算力这一特点，设计基于INDI的位置控制器，对外力扰动进行补偿并计算出三轴期望加速度。接下来介绍一种几何方法根据三轴期望加速度解算出期望姿态指令。最后进行仿真与实际飞行试验，验证所提出的位置控制器的有效性。
 
-\section{位置动力学模型简化}
+\section{位置动力学模型简化}\label{位置动力学模型简化}
 
 在设计位置控制器之前，首先需要对位置动力学模型进行简化处理。根据本章开篇时的分析，可以使用IMU中的加速度计对无人机机体加速度的测量来估算机体所受外力。加速度计对加速度的测量本质上是基于比力的物理概念。在惯性导航系统中，比力被定义为无人机所受的合外力(包括气动力、推进力等)与重力矢量作向量差然后再除以飞行器的总质量。比力具有与加速度相同的量纲(m/s$^2$)。根据式\eqref{eq_7}，$\boldsymbol{F}^b$表示的合外力已除去重力作用，所以比力在机体坐标系下可以表示为：
 \begin{equation}
@@ -39,9 +39,9 @@ DFUAV位置子系统的控制输入为涵道风扇的转速$\Omega$，为与加�
     \label{4_3}
 \end{equation}
 
-类似地，将不包括重力作用的合外力矢量$\boldsymbol{F}^b$除去涵道风扇的拉力矢量统一表示为DFUAV的气动力，使用$\bar{\boldsymbol{A}}^e$表示气动力在地面坐标系下的加速度：
+类似地，将不包括重力作用的合外力矢量$\boldsymbol{F}^b$除去涵道风扇的拉力矢量统一表示为DFUAV的气动力，使用${\boldsymbol{\bar A}}^e$表示气动力在地面坐标系下的加速度：
 \begin{equation}
-    \bar{\boldsymbol{A}}^e=
+    {\boldsymbol{\bar A}}^e=
     \begin{bmatrix}
     A_x^e \\
     A_y^e \\
@@ -55,17 +55,17 @@ DFUAV位置子系统的控制输入为涵道风扇的转速$\Omega$，为与加�
     \label{4_4}
 \end{equation}
 
-根据建模分析中$\boldsymbol{F}^b$的组成可知，$\bar{\boldsymbol{A}}^e$可表示为姿态$\boldsymbol{\eta}$、速度$\boldsymbol{V}^e$和环境风速$\boldsymbol{W}^e$的函数：
+根据建模分析中$\boldsymbol{F}^b$的组成可知，${\boldsymbol{\bar A}}^e$可表示为姿态$\boldsymbol{\eta}$、速度$\boldsymbol{V}^e$和环境风速$\boldsymbol{W}^e$的函数：
 \begin{equation}
-    \bar{\boldsymbol{A}}^e=\bar{\boldsymbol{A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)
+    {\boldsymbol{\bar A}}^e={\boldsymbol{\bar A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)
     \label{4_5}
 \end{equation}
 
-结合式\eqref{eq_7}、\eqref{4_3}和\eqref{4_5}，可以得到位置动力学模型的简化形式：
+结合式\eqref{eq_7}、式\eqref{4_3}和式\eqref{4_5}，可以得到位置动力学模型的简化形式：
 \begin{equation}
     \begin{aligned}
         \dot{\boldsymbol{V}}^e&=\dfrac{1}{m}\boldsymbol{R}_b^e\boldsymbol{F}^b+g\boldsymbol{e}_3\\
-        &=\bar{\boldsymbol{A}}^e+\boldsymbol{a}_u+g\boldsymbol{e}_3\\
+        &={\boldsymbol{\bar A}}^e+\boldsymbol{a}_u+g\boldsymbol{e}_3\\
         &=  \begin{bmatrix}A_x^e \\A_y^e \\\bar{A}_z^e\end{bmatrix}+
         \begin{bmatrix}a_{ux} \\a_{uy} \\a_{uz}\end{bmatrix}+
         \begin{bmatrix}0 \\0 \\g\end{bmatrix}
@@ -73,9 +73,9 @@ DFUAV位置子系统的控制输入为涵道风扇的转速$\Omega$，为与加�
     \label{4_6}
 \end{equation}
 
-根据简化后的位置动力学模型\eqref{4_6}，可将动力学分量分为两部分：第一部分为外环虚拟控制输入$\boldsymbol{a}_u$，这部分分量与实际的外环控制输入$\Omega$有关，用于控制外环状态(无人机的位置、速度)，将通过下一小节的INDI位置控制器设计求解；第二部分为$\bar{\boldsymbol{A}}^e+g\boldsymbol{e}_3$，可以认为这部分分量是机体受到的扰动，会导致位置误差，将通过INDI位置控制器进行扰动补偿。
+根据简化后的位置动力学模型式\eqref{4_6}，可将动力学分量分为两部分：第一部分为外环虚拟控制输入$\boldsymbol{a}_u$，这部分分量与实际的外环控制输入$\Omega$有关，用于控制外环状态(无人机的位置、速度)，将通过\ref{基于INDI的位置控制器设计}节设计的INDI位置控制器求解；第二部分为${\boldsymbol{\bar A}}^e+g\boldsymbol{e}_3$，可以认为这部分分量是机体受到的扰动，会导致位置误差，将通过INDI位置控制器进行扰动补偿。
 
-\section{基于INDI的位置控制器设计}
+\section{基于INDI的位置控制器设计}\label{基于INDI的位置控制器设计}
 
 本节将INDI控制方法进一步应用于位置(外环)控制中，使用机载IMU中的加速度计来估计环境风速扰动，并通过INDI位置控制器根据扰动的大小实时补偿以提高DFUAV的抗风性能。这种外环-内环协同的扰动观测补偿机制具有显著的技术优势：一方面，加速度计对外力变化敏感，能够以1000Hz的频率检测环境风速扰动，相比于本章开篇时提到的风速计方案避免了安装复杂度和低速情况下的测量噪声问题；另一方面，内外环均采用基于传感器的扰动补偿策略，形成了从力矩扰动到力扰动的全链路扰动观测与补偿闭环控制框架，在阵风场景下可以抵消姿态震荡与位置偏移的耦合效应，可以有效地提高系统的稳定性和鲁棒性。
 
@@ -103,26 +103,26 @@ DFUAV位置子系统的控制输入为涵道风扇的转速$\Omega$，为与加�
 \begin{equation}
     \begin{aligned}
         \dot{\boldsymbol{V}}^e&=
-        \bar{\boldsymbol{A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)+\boldsymbol{a}_u+g\boldsymbol{e}_3
+        {\boldsymbol{\bar A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)+\boldsymbol{a}_u+g\boldsymbol{e}_3
     \end{aligned}
     \label{4_9}
 \end{equation}
 可以直接在式\eqref{4_9}的基础上应用INDI方法。根据第三章的INDI相关理论，为了得到$\boldsymbol{\dot{V}}^e$的增量表达式，对式\eqref{4_9}在工作点处作一阶泰勒展开：
 \begin{equation}
     \begin{aligned}
-        \boldsymbol{\dot{V}}^e&=\bar{\boldsymbol{A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0)+\boldsymbol{a}_{u0}+g\boldsymbol{e}_3\\
-        &+\left.\frac{\partial \bar{\boldsymbol{A}}^e}{\partial\boldsymbol{\eta}}+\right|_{\boldsymbol{\eta}=\boldsymbol{\eta}_0}
-        (\boldsymbol{\eta}-\boldsymbol{\eta}_0)+\left.\frac{\partial \bar{\boldsymbol{A}}^e}{\partial\boldsymbol{V}^e}\right|_{\boldsymbol{V}^e=\boldsymbol{V}^e_0}
+        \boldsymbol{\dot{V}}^e&={\boldsymbol{\bar A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0)+\boldsymbol{a}_{u0}+g\boldsymbol{e}_3\\
+        &+\left.\frac{\partial {\boldsymbol{\bar A}}^e}{\partial\boldsymbol{\eta}}+\right|_{\boldsymbol{\eta}=\boldsymbol{\eta}_0}
+        (\boldsymbol{\eta}-\boldsymbol{\eta}_0)+\left.\frac{\partial {\boldsymbol{\bar A}}^e}{\partial\boldsymbol{V}^e}\right|_{\boldsymbol{V}^e=\boldsymbol{V}^e_0}
         (\boldsymbol{V}^e-\boldsymbol{V}^e_0)\\
-        &+\left.\frac{\partial \bar{\boldsymbol{A}}^e}{\partial\boldsymbol{W}^e}\right|_{\boldsymbol{W}^e=\boldsymbol{W}^e_0}(\boldsymbol{W}^e-\boldsymbol{W}^e_0)+(\boldsymbol{a}_{u}-\boldsymbol{a}_{u0})
+        &+\left.\frac{\partial {\boldsymbol{\bar A}}^e}{\partial\boldsymbol{W}^e}\right|_{\boldsymbol{W}^e=\boldsymbol{W}^e_0}(\boldsymbol{W}^e-\boldsymbol{W}^e_0)+(\boldsymbol{a}_{u}-\boldsymbol{a}_{u0})
     \end{aligned}
     \label{4_10}
 \end{equation}
-在位置动力学模型简化小节中，定义了具有加速度量纲的$\boldsymbol{a}_u(\boldsymbol{\eta},\Omega)$，用来表示位置控制的虚拟控制输入，所以泰勒展开式中不对其细化求偏导数，而是将其看作一个整体来进行求解。
+在\ref{位置动力学模型简化}节中，定义了具有加速度量纲的$\boldsymbol{a}_u(\boldsymbol{\eta},\Omega)$，用于表示位置控制的虚拟控制输入，所以泰勒展开式中不对其细化求偏导数，而是将其看作一个整体来进行求解。
 
-展开式中的第一项$\bar{\boldsymbol{A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0)+\boldsymbol{a}_{u0}+g\boldsymbol{e}_3$等价于工作点处的加速度，这个值可以由机载IMU测量之后再转换到地面坐标系下并加上重力矢量得到，可以使用$\dot{\boldsymbol{V}}^e_0$表示：
+展开式中的第一项${\boldsymbol{\bar A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0)+\boldsymbol{a}_{u0}+g\boldsymbol{e}_3$等价于工作点处的加速度，这个值可以由机载IMU测量之后再转换到地面坐标系下并加上重力矢量得到，可以使用$\dot{\boldsymbol{V}}^e_0$表示：
 \begin{equation}
-        \dot{\boldsymbol{V}}^e_0=\bar{\boldsymbol{A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0)+\boldsymbol{a}_{u0}+g\boldsymbol{e}_3
+        \dot{\boldsymbol{V}}^e_0={\boldsymbol{\bar A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0)+\boldsymbol{a}_{u0}+g\boldsymbol{e}_3
     \label{4_11}
 \end{equation}
 
@@ -198,16 +198,16 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \label{4_18}
 \end{equation}
 
-文献\parencite{smeurCascadedIncrementalNonlinear2018b}中提供了另一种思路来寻找所需加速度输入的增量，该思路基于非线性方法。由于与动力学输入相关的非线性速度动态方程\eqref{4_9}是已知的，因此可以进行非线性反演。由于没有关于$\bar{\boldsymbol{A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)$的精确估计，所以保持增量结构仍然是适合的。对方程\eqref{4_9}两边同时减去同一公式的此前最近一个工作点的表达式可以得到：
+文献\parencite{smeurCascadedIncrementalNonlinear2018b}中提供了另一种思路来寻找所需加速度输入的增量，该思路基于非线性方法。由于与动力学输入相关的非线性速度动态方程\eqref{4_9}是已知的，因此可以进行非线性反演。由于没有关于${\boldsymbol{\bar A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)$的精确估计，所以保持增量结构仍然是适合的。对方程\eqref{4_9}两边同时减去同一公式的此前最近一个工作点的表达式可以得到：
 \begin{equation}
     \begin{aligned}
         \dot{\boldsymbol{V}}^e - \dot{\boldsymbol{V}}^e_0&=
-        \bar{\boldsymbol{A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e) - \bar{\boldsymbol{A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0) +\boldsymbol{a}_u - \boldsymbol{a}_{u0}+g\boldsymbol{e}_3 - g_0\boldsymbol{e}_3
+        {\boldsymbol{\bar A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e) - {\boldsymbol{\bar A}}^e(\boldsymbol{\eta}_0,\boldsymbol{V}^e_0,\boldsymbol{W}^e_0) +\boldsymbol{a}_u - \boldsymbol{a}_{u0}+g\boldsymbol{e}_3 - g_0\boldsymbol{e}_3
     \end{aligned}
     \label{4_19}
 \end{equation}
 
-假设在这个小的时间瞬间内，$\bar{\boldsymbol{A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)$和$g$的变化很小，所以有：
+假设在这个小的时间瞬间内，${\boldsymbol{\bar A}}^e(\boldsymbol{\eta},\boldsymbol{V}^e,\boldsymbol{W}^e)$和$g$的变化很小，所以有：
 \begin{equation}
     \begin{aligned}
         \dot{\boldsymbol{V}}^e - \dot{\boldsymbol{V}}^e_0&=\boldsymbol{a}_u - \boldsymbol{a}_{u0}
@@ -257,7 +257,7 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \psi_d=atan2(y_d^e-y_{d-1}^e,x_d^e-x_{d-1}^e)
     \label{4_25}
 \end{equation}
-其中$atan2$表示接收两个参数的反正切函数，返回的角度范围是$(-\pi,\pi]$。
+其中$atan2(y,x)$表示接收两个参数的反正切函数，返回的角度范围是$(-\pi,\pi]$。
 
 为了求解期望的滚转角$\varphi_d$和俯仰角$\theta_d$，本文采用几何解算方法，首先计算出期望的姿态旋转矩阵，再根据旋转矩阵求解出期望的滚转角和俯仰角。设期望的姿态旋转矩阵为$\boldsymbol{R}_d$，则有：
 \begin{equation}
@@ -314,13 +314,13 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \label{4_31}
 \end{equation}
 
-完整的基于INDI的位置控制系统框图如图\ref{INDI位置控制系统框图}所示。
+结合第三章介绍的抗扰姿态控制，可以得到完整的串级INDI抗扰控制系统框图如图\ref{INDI位置控制系统框图}所示。
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth}
         \centering
         \includegraphics[scale=1]{Fig/chapter4/位置控制实际框图.pdf}
-        \caption{\label{INDI位置控制系统框图}INDI位置控制系统框图}
+        \caption{\label{INDI位置控制系统框图}串级INDI抗扰控制系统框图}
         \end{minipage}
 \end{figure}
 
@@ -526,7 +526,7 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
 
 \section{本章小结}
 
-本章针对DFUAV的位置控制问题展开研究，实现了适用于DFUAV的基于INDI的位置控制器设计方案。首先对位置动力学模型简化处理，引入具有加速度量纲的位置控制的虚拟控制输入，便于与加速度计测量值统一。然后，基于加速度计测量值可以反映出系统的受力这一特点，拓展了第三章介绍的INDI方法，设计了基于INDI的位置控制器，形成了外环-内环协同的扰动观测补偿机制。进一步，根据虚拟控制输入计算涵道风扇转速并且通过几何方法解算期望的姿态角，实现了位置-姿态的协同控制。最后通过一系列MATLAB仿真与实际飞行试验验证了所设计的基于INDI的位置控制器的性能。结果表明，所设计的基于INDI的位置控制器具有较强的抗风性能和轨迹跟踪性能，能够满足DFUAV的位置控制需求。
+本章针对DFUAV的位置控制问题展开研究，实现了适用于DFUAV的基于INDI的位置控制器设计方案。首先对位置动力学模型简化处理，引入具有加速度量纲的位置控制的虚拟控制输入，便于与加速度计测量值统一。然后，基于加速度计测量值可以反映出系统的受力这一特点，拓展了第三章介绍的INDI方法，设计了基于INDI的位置控制器，形成了外环-内环协同的扰动观测补偿机制。进一步，根据虚拟控制输入计算涵道风扇转速并且通过几何方法解算期望的姿态角，实现了位置-姿态的协同控制。最后通过一系列MATLAB仿真与实际飞行试验验证了设计的位置控制器的性能。结果表明，设计的基于INDI的位置控制器具有较强的抗风性能和轨迹跟踪性能，能够满足DFUAV的位置控制需求。
 
 
 
