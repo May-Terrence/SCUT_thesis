@@ -68,7 +68,7 @@ INDI理论的一个核心假设是时间尺度分离法则\cite{pfeifle2021energ
     \boldsymbol{\nu}=\boldsymbol{K}(\boldsymbol{x},\boldsymbol{u})
     \label{3-8}
 \end{equation}
-由于实际控制输入的约束$\boldsymbol{U}$存在，将实际控制输入变换为虚拟控制输入后有$\boldsymbol{\nu}\in\boldsymbol{\Phi}\in\mathbb{R}^{m}$。容许控制集合$\boldsymbol{U}$通过映射$\boldsymbol{K}$从$\mathbb{R}^{p}$空间映射到$\mathbb{R}^{m}$空间得到可达控制集合$\boldsymbol{\Phi}$，如果$\boldsymbol{\nu}\in\boldsymbol{\Phi}$，则称虚拟控制输入为可达，否则为不可达。虚拟控制输入的物理意义一般为力或力矩。
+由于实际控制输入的约束$\boldsymbol{U}$存在，将实际控制输入变换为虚拟控制输入后有$\boldsymbol{\nu}\in\boldsymbol{\Phi}\in\mathbb{R}^{m}$。容许控制集合$\boldsymbol{U}$通过映射$\boldsymbol{K}$从$\mathbb{R}^{p}$空间映射到$\mathbb{R}^{m}$空间得到可达控制集合$\boldsymbol{\Phi}$，如果$\boldsymbol{\nu}\in\boldsymbol{\Phi}$，则称虚拟控制输入$\boldsymbol{\nu}$为可达，否则为不可达。虚拟控制输入的物理意义一般为力或力矩。
 
 对$\boldsymbol{\nu}$做一阶泰勒展开并且同样忽略关于系统状态的导数项，得到：
 \begin{equation}
@@ -285,7 +285,7 @@ $\boldsymbol{M}_{a}^b$可以描述为地面坐标系下的速度$\boldsymbol{V}^
     \boldsymbol{\dot{\omega}}^b=\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}^b)\Omega+\boldsymbol{L}(\boldsymbol{V}^e,\boldsymbol{\eta},\boldsymbol{W}^e,\boldsymbol{\omega}^b)
     \label{3-34}
 \end{equation}
-可以直接在该模型的基础上应用INDI，而无需考虑控制分配问题。根据\ref{增量非线性动态逆}节介绍的INDI理论，为了得到$\boldsymbol{\dot{\omega}}^b$的增量表达式，对公式\eqref{3-34}在其工作点处(使用下标$(.)_0$表示)作一阶泰勒展开：
+可以直接在该模型的基础上应用INDI，而无需考虑控制分配问题。根据\ref{增量非线性动态逆}节介绍的INDI理论，为了得到$\boldsymbol{\dot{\omega}}^b$的增量表达式，对公式\eqref{3-34}在工作点处(使用下标$(.)_0$表示)作一阶泰勒展开：
 \begin{equation}
     \begin{aligned}
     \boldsymbol{\dot{\omega}}^b&=\boldsymbol{H}_{vane}\boldsymbol{\nu}\Omega^2+\boldsymbol{H}_{gyro}(\boldsymbol{\omega}^b)\Omega+\boldsymbol{L}(\boldsymbol{V}^e,\boldsymbol{\eta},\boldsymbol{W}^e,\boldsymbol{\omega}^b)\\
@@ -432,11 +432,11 @@ INDI采用增量控制策略，将未建模动态力矩项$\boldsymbol{M}_{a}^b$
 
 在飞行控制系统的工程实现中，为了提高姿态控制器的响应速度和控制精度，$\Delta t$应该在条件允许的情况下尽可能小。但是传感器测量得到的角速度原始值会受到机体震动和外部扰动等因素的影响，难免会有噪声，对原始值进行差分运算后会放大这种噪声的影响，采样时间越小，噪声影响越大。因此在实际应用中，需要对角速度进行滤波处理。但是滤波处理就会在角加速度的计算中引入延迟，由于INDI是将角速度动力学方程在工作点处进行一阶泰勒展开，所以需要保证展开式\eqref{3-41}中所有下标为0的项都位于同一工作点。一种方法是对角加速度进行预测，如采用卡尔曼滤波器对其进行预测来补偿相位滞后，但是这种方法需要对角加速度进行额外的建模，并且角速度收到的的干扰也无法预测。或者采用多个加速度计数据融合来直接测量角加速度，但是这种方式会导致机载航电系统设计过于复杂，并且加速度计受机体震动影响也较大，多传感器数据融合的精度难以有效保证。
 
-因此，本文针对所有下标为0的项进行同步滤波处理，除了角加速度项外，还包括虚拟控制输入项和风扇转速输入项。文献\parencite{smeurAdaptiveIncrementalNonlinear2015,smeurCascadedIncrementalNonlinear2018b}通过四旋翼飞行试验表明这种处理方式的可行性。考虑到陀螺仪传感器的高频噪声影响，本文试验中使用的滤波器是二阶巴特沃斯(Butterworth)低通滤波器，滤波器截止频率的具体数值应该根据飞行过程中信号的频率成分、带宽和噪声水平来综合确定。对于本文使用的DFUAV，滤波器截止频率为30Hz。为加以区分，所有下标为0的项经过滤波器滤波后，使用下标$(.)_s$表示。
+因此，本文针对所有下标为0的项进行同步滤波处理，除了角加速度项外，还包括虚拟控制输入项和风扇转速输入项。文献\parencite{smeurAdaptiveIncrementalNonlinear2015,smeurCascadedIncrementalNonlinear2018b}通过四旋翼飞行试验表明这种处理方式的可行性。考虑到陀螺仪传感器的高频噪声影响，本文试验中使用的滤波器是二阶巴特沃斯低通滤波器，滤波器截止频率的具体数值应该根据飞行过程中信号的频率成分、带宽和噪声水平来综合确定。对于本文使用的DFUAV，滤波器截止频率为30Hz。为加以区分，所有下标为0的项经过滤波器滤波后，使用下标$(.)_s$表示。
 
 \subsection{陀螺力矩补偿}
 
-在基于INDI的控制架构中，陀螺力矩$\boldsymbol{M}_{gyro}^b$分量蕴含在了$\boldsymbol{T}(\Omega)$中(见式\eqref{3-40})，该力矩的存在会在姿态发生改变时影响姿态跟踪精度。因此，为了消除陀螺力矩对姿态控制的影响，需要在INDI输入$\boldsymbol{\nu}_i$中对其进行补偿。由于姿态子系统的控制输入为控制舵面的偏转角度，并且根据式\eqref{eq_38}可知陀螺力矩的机理已十分明确。所以可以将陀螺力矩对应的值等价转化为虚拟控制输入量，然后在$\boldsymbol{\nu}_i$中减去该分量，即可对陀螺力矩造成的负面影响进行补偿。
+在基于INDI的控制架构中，陀螺力矩$\boldsymbol{M}_{gyro}^b$分量蕴含在了$\boldsymbol{T}(\Omega)$中(见式\eqref{3-40})，该力矩的存在会在姿态发生改变时影响姿态跟踪精度。因此，为了消除陀螺力矩对姿态控制的影响，需要在INDI输入$\boldsymbol{\nu}_i$中对其进行补偿。由于姿态子系统的控制输入为舵面的偏转角度，并且根据式\eqref{eq_38}可知陀螺力矩的机理已十分明确。所以可以将陀螺力矩对应的值等价转化为虚拟控制输入量，然后在$\boldsymbol{\nu}_i$中减去该分量，即可对陀螺力矩造成的负面影响进行补偿。
 
 根据式\eqref{eq_35}、\eqref{eq_36}和式\eqref{3-14}，在现有条件下可用于计算的控制舵面力矩可表示为：
 \begin{gather}
@@ -523,7 +523,7 @@ INDI采用增量控制策略，将未建模动态力矩项$\boldsymbol{M}_{a}^b$
 
 使用伪逆方法的优点是计算简单，易于理解。但是在工作点的约束边界区，即使$\boldsymbol{\nu}_d$保持在可达集合内，伪逆法计算出的$\boldsymbol{\delta}_d$中的部分分量也可能会超出约束边界，即$\boldsymbol{\delta}\notin\boldsymbol{U}$。在这种情况下，伪逆法会计算出一个基于某种性能指标的次最优解，次最优解可能有多种选择，所以次最优解之间亦有优劣之分。伪逆法没有对这些解进行优先级排序，因此无法保证次最优解的唯一性。
 
-为了弥补伪逆方法的不足，采用优先级控制分配方法，将期望的虚拟控制输入进行矢量分解划分各自的优先级，优先满足高优先级的控制输入分量。式\eqref{3-46}已将期望的虚拟控制输入$\boldsymbol{\nu}_d$分为两部分，即$\boldsymbol{\nu}_i$和$\boldsymbol{\nu}_f$，其中$\boldsymbol{\nu}_i$是INDI输入，$\boldsymbol{\nu}_f$是反馈输入。根据本节开篇时的分析，为优先补偿系统的非线性未建模动态力矩，视$\boldsymbol{\nu}_i$为高优先级控制输入分量，而$\boldsymbol{\nu}_f$为低优先级控制输入分量。考虑到控制舵面的物理约束，期望的虚拟控制输入应该被限制在其可达集合内。在本文中，假设在适当的外部扰动下，无人机运动过程中总能满足高优先级分量的可达。即：
+为了弥补伪逆方法的不足，采用优先级控制分配方法，将期望的虚拟控制输入分解为多个维度的输入分量，并确定每个维度输入分量的优先级，优先满足高优先级的控制输入分量。式\eqref{3-46}已将期望的虚拟控制输入$\boldsymbol{\nu}_d$分为两部分，即$\boldsymbol{\nu}_i$和$\boldsymbol{\nu}_f$，其中$\boldsymbol{\nu}_i$是INDI输入，$\boldsymbol{\nu}_f$是反馈输入。根据本节开篇时的分析，为优先补偿系统的非线性未建模动态力矩，视$\boldsymbol{\nu}_i$为高优先级控制输入分量，而$\boldsymbol{\nu}_f$为低优先级控制输入分量。考虑到控制舵面的物理约束，期望的虚拟控制输入应该被限制在其可达集合内。在本文中，假设在适当的外部扰动下，无人机运动过程中总能满足高优先级分量的可达。即：
 \begin{equation}
     \boldsymbol{\nu}_i\in\boldsymbol\Phi
     \label{3-58}
@@ -638,7 +638,7 @@ INDI采用增量控制策略，将未建模动态力矩项$\boldsymbol{M}_{a}^b$
 
 本实验的目的是验证在MATLAB仿真环境中搭建的INDI控制器在有无干扰情况下的性能，采用PID姿态控制器作为实验对比。扰动的添加方式如图\ref{试验一扰动}所示，在1号控制舵面上添加$10^{\circ}$的固定偏置，这会在机体上产生额外的负滚转力矩和正偏航力矩，1号舵的偏转角度限幅被同时调整为$\pm30^{\circ}$。实验总时长为6s，仿真步长为0.01s。仅在滚转通道设置方波指令信号，俯仰和偏航通道的指令均设置为0。
 
-没有添加扰动时的实验对比结果如图\ref{INDI对比PID仿真无扰动}所示。根据实验结果可知，在滚转通道上，INDI控制和PID控制都可以及时地跟踪期望姿态指令，但是相比于PID控制，INDI控制器的超调量相对较小，并且收敛速度更快。对于俯仰和偏航通道，添加了陀螺力矩补偿的INDI控制器在滚转姿态变化时能够更好地抑制陀螺力矩的影响，从而提高了姿态控制的精度。
+没有添加扰动时的实验结果如图\ref{INDI对比PID仿真无扰动}所示。根据结果可知，在滚转通道上，INDI控制和PID控制都可以及时地跟踪期望姿态指令，但是相比于PID控制，INDI控制器的超调量相对较小，并且收敛速度更快。对于俯仰和偏航通道，添加了陀螺力矩补偿的INDI控制器在滚转姿态变化时能够更好地抑制陀螺力矩的影响，从而提高了姿态控制的精度。
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth}
