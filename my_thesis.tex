@@ -69,8 +69,8 @@
 	pdfsubject={华南理工大学硕士学位论文},
 %%	pdfsubject={华南理工大学博士学位论文},
 	pdfkeywords={PDF关键字1;PDF关键字2},
-%%		linkcolor=black, anchorcolor=black, citecolor=black, filecolor=black, menucolor=black, urlcolor=black, pdfstartview=FitH}% 黑白，提交版
-	linkcolor=blue, anchorcolor=black, citecolor=red, filecolor=magenta, menucolor=red, urlcolor=magenta, pdfstartview=FitH}% 彩色
+		linkcolor=black, anchorcolor=black, citecolor=black, filecolor=black, menucolor=black, urlcolor=black, pdfstartview=FitH}% 黑白，提交版
+	% linkcolor=blue, anchorcolor=black, citecolor=red, filecolor=magenta, menucolor=red, urlcolor=magenta, pdfstartview=FitH}% 彩色
 
 \makeatletter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
@@ -90,6 +90,7 @@
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\maketitle	
 	\frontmatter	%此后为罗马数字页码，页面类型为plain
+    \let\cleardoublepage\clearpage %新增此行，取消偶数页空白
 	\include{chapter/abstract} % 中英文摘要
 	
 	% 目录、表格目录、插图目录这几个字本身的大纲级别是一级的，即和章名有相同的字号字体。目录表的内容通过titletoc宏包在。cls文件设置了。
