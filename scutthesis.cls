@@ -431,7 +431,7 @@
        %% \includepdf[pages=-]{thesis_cover.pdf}%pdf文件路径为主文件tex或lyx的当前目录
         %   \includepdf[pages={1-5,{},7-8}]{cover_file/thesis_cover.pdf}
         %   \includepdf[pages={1-5,{},7-8}]{cover_file/master_cover.pdf}
-          \includepdf[pages={1}]{cover_file/master_cover_anonymous.pdf}
+          \includepdf[pages={1}]{cover_file/master_an.pdf}
    \else
 %%buildin coverpage
 \begin{titlepage}
