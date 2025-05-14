@@ -1,7 +1,6 @@
 \chapter{涵道风扇无人机系统构成及建模}
 
 为完成本文课题研究，自主搭建了一架DFUAV试验样机。本章首先简要介绍试验样机的结构组成和机载航电系统，然后对DFUAV进行系统建模，这是进行控制算法设计的基础。针对DFUAV空间运动分析需求，建模分析前需要先行确立坐标系描述方法及姿态表示方法。在建模分析中，基于DFUAV动力学特性研究需求，引入刚体假设以简化系统复杂度，然后采用牛顿-欧拉方法推导出DFUAV的刚体运动学模型和刚体动力学模型。针对DFUAV特殊的气动特性，最后分析了作用在涵道上的力与力矩产生机理，并总结出DFUAV完备的非线性系统动态方程。
-% DFUAV的系统建模中各变量定义标准主要参考文献\parencite{杨一栋2019直升机飞行控制}，并为了表示方便，避免混淆，对部分变量的表示作略微修改。
 
 \section{试验样机的系统组成}\label{DFUAV系统组成}
 
@@ -53,7 +52,7 @@
 
 \section{坐标系和姿态表示方法}
 
-物体的相对运动离不开其所处的参考系，考虑到无人机的位置变化与姿态变化，基于地面坐标系($\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $)和机体坐标系(${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$)的多坐标系表示法被广泛应用于无人机的运动分析与控制系统设计中。
+物体的相对运动离不开其所处的参考系，考虑到无人机的位置变化与姿态变化，基于地面坐标系($\boldsymbol{O}_e-\boldsymbol{X}_e\boldsymbol{Y}_e\boldsymbol{Z}_e $)和机体坐标系(${\boldsymbol{O}_b}-{\boldsymbol{X}_b}{\boldsymbol{Y}_b}{\boldsymbol{Z}_b}$)的表示方法被广泛应用于无人机的运动分析与控制系统设计中。
 
 % \begin{enumerate}[topsep = 0 pt, itemsep= 0 pt, parsep=0pt, partopsep=0pt, leftmargin=44pt, itemindent=0pt, labelsep=6pt, label=(\arabic*)]
 % \item 地面坐标系
@@ -270,7 +269,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 	\begin{minipage}[c]{1\textwidth}
 		\centering
 		\includegraphics[scale=1]{Fig/轴流管道模型.pdf}
-		\caption{\label{轴流管道模型}轴流状态的空气动力学}
+		\caption{\label{轴流管道模型}轴流状态的气动分析示意图}
 	\end{minipage}%
 \end{figure}
 
@@ -358,7 +357,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 	\begin{minipage}[c]{1\textwidth}
 		\centering
 		\includegraphics[scale=1]{Fig/非轴流状态.pdf}
-		\caption{\label{非轴流状态}非轴流状态(前飞时)的空气动力学}
+		\caption{\label{非轴流状态}非轴流状态(前飞时)的气动分析示意图}
 	\end{minipage}%
 \end{figure}
 
@@ -425,13 +424,13 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 综合\eqref{eq_31}、\eqref{eq_32}、\eqref{eq_33}，在涵道翼型上产生的力与力矩可以表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
 \begin{align}
-    \boldsymbol{F}_{duct}^b=
+    \boldsymbol{F}_{duct}^b&=
     \begin{bmatrix}
     L_x+D_x \\
     L_y+D_y \\
     L_z+D_z
     \end{bmatrix}+\boldsymbol{F} _{mdrag}\label{eq_33.5}\\
-    \boldsymbol{M}_{duct}^b=
+    \boldsymbol{M}_{duct}^b&=
     \begin{bmatrix}
     L_xl_d \\
     L_yl_d \\

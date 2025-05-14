@@ -93,14 +93,16 @@ INDI理论的一个核心假设是时间尺度分离法则\cite{pfeifle2021energ
     \boldsymbol{B}^\dagger=\boldsymbol{B}^T\left(\boldsymbol{B}\boldsymbol{B}^T\right)^{-1}    \label{3-12}
 \end{gather}
 
-公式\eqref{3-11}中直接表示虚拟控制输入$\boldsymbol{\nu}$与实际控制输入$\boldsymbol{u}$之间映射关系的方法就是伪逆法。在分层控制架构中，系统采用上层决策-底层执行的层级化设计模式：上层控制算法承担决策功能，专注于在线求解系统动力学方程生成期望控制指令，避免了执行机构物理约束对优化问题的干扰，降低了计算复杂度；底层控制分配算法则负责执行任务，采用优化计算方法将上层指令解析为各执行机构的物理控制量，实现控制指令在冗余执行机构中的最优分配。文献\parencite{harkegardResolvingActuatorRedundancy2005}中讨论了层级化设计方法和全阶最优控制设计的联系。采用独立的控制分配算法，优势之一是可以考虑执行机构的物理约束，比如当某个执行机构饱和时，在条件允许的情况下其余执行机构可以用于弥补因该执行机构饱和而损失的控制效能 。图\ref{姿态控制理论框图}展示了基于INDI的上层控制算法和基于伪逆法的底层控制分配算法的控制系统框图。
+公式\eqref{3-11}中直接表示虚拟控制输入$\boldsymbol{\nu}$与实际控制输入$\boldsymbol{u}$之间映射关系的方法就是伪逆法。在分层控制架构中，系统采用上层决策-底层执行的层级化设计模式：上层控制算法承担决策功能，专注于在线求解系统动力学方程生成期望控制指令，避免了执行机构物理约束对优化问题的干扰，降低了计算复杂度；底层控制分配算法则负责执行任务，采用优化计算方法将上层指令解析为各执行机构的物理控制量，实现控制指令在冗余执行机构中的最优分配。文献\parencite{harkegardResolvingActuatorRedundancy2005}中讨论了层级化设计方法和全阶最优控制设计的联系。采用独立的控制分配算法，优势之一是可以考虑执行机构的物理约束，比如当某个执行机构饱和时，在条件允许的情况下其余执行机构可以用于弥补因该执行机构饱和而损失的控制效能。
+图\ref{姿态控制理论框图}的示意框图展示了在分层控制架构中如何将INDI控制律的求逆操作视为增量控制分配问题。
+% 图\ref{姿态控制理论框图}展示了基于INDI的上层控制算法和基于伪逆法的底层控制分配算法的控制系统框图。
 
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth}
 		\centering
-		\includegraphics[scale=1]{Fig/chapter3/姿态控制理论框图.pdf}
-		\caption{\label{姿态控制理论框图}基于INDI和伪逆法的控制系统框图}
+		\includegraphics[scale=1]{Fig/chapter3/姿态控制理论框图_gai.pdf}
+		\caption{\label{姿态控制理论框图}INDI控制律的求逆操作表示为增量控制分配问题示意框图}
 	\end{minipage}%
 \end{figure}
 
