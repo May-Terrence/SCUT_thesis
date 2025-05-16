@@ -422,7 +422,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 \end{equation}
 其中，$C_{duct}$是常系数。该系数最初可根据iSTAR\cite{fleming2003improving}的实验数据估算，随后需要结合实际情况调整。
 
-综合\eqref{eq_31}、\eqref{eq_32}、\eqref{eq_33}，在涵道翼型上产生的力与力矩可以表示为\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}：
+涵道翼型上产生的力为三个轴上的气动升力、气动阻力和动量阻力的矢量和，涵道翼型上产生的力矩为机体$x$和$y$轴方向上的气动升力矩和侧风作用于涵道结构形成的力矩的矢量和\cite{johnsonModelingControlFlight2006b,choiStaticAnalysisSmall2012}。综上所述，在涵道翼型上产生的力与力矩可以表示为：
 \begin{align}
     \boldsymbol{F}_{duct}^b&=
     \begin{bmatrix}
@@ -465,15 +465,15 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 其中$k_\delta$是正的常数，表示控制舵面升力系数。${V_e}$为涵道出口风速，由式\eqref{eq_20}给出。
 
 因此，由控制舵面产生的合力与合力矩可以表示为\cite{pflimlinModelingAttitudeControl2010a,manzoorCompositeObserverbasedRobust2023}：
-    \begin{gather}
-    \boldsymbol{F}_{vane}^b=\begin{bmatrix}
+    \begin{align}
+    \boldsymbol{F}_{vane}^b&=\begin{bmatrix}
     F_4-F_2 \\ F_1-F_3 \\ 0 
     \end{bmatrix}     \label{eq_35.5}\\
-    \boldsymbol{M}_{vane}^b=\begin{bmatrix}
+    \boldsymbol{M}_{vane}^b&=\begin{bmatrix}
         -l_1(F_1-F_3) \\ l_1(F_4-F_2) \\ l_2(F_1+F_2+F_3+F_4) 
     \end{bmatrix}
     \label{eq_36}
-    \end{gather}
+    \end{align}
 式\eqref{eq_36}中的$l_1$和$l_2$分别为涵道的力臂，如图\ref{控制舵面}所示。事实上，控制舵面的偏转角仅在DFUAV的失速迎角的范围内才有效果\cite{9787121348440000}，超出该范围后，姿态将难以控制。因此需要对偏转角度进行限幅处理：
 \begin{equation}
     -\delta_m\leq\delta_{i}\leq\delta_m,\quad i=1,2,3,4
@@ -483,7 +483,7 @@ DFUAV的刚体动力学模型包括位置动力学模型和姿态动力学模型
 
 \subsection{陀螺力矩与固定气动面反扭矩}
 
-涵道风扇在高速旋转时，DFUAV整体会呈现出类似陀螺的特性。根据角动量守恒定律，当涵道风扇的旋转轴在外力影响下发生偏移时，为了维持整个系统角动量的守恒，涵道风扇会产生一个特殊的反作用力矩。该力矩垂直于旋转轴的偏移方向，试图将旋转轴拉回到原来的方向，从而抵抗外力对旋转状态的干扰。这种作用力矩即为陀螺力矩，其大小与风扇的转动惯量和旋转的角速度有关。转动惯量体现了涵道风扇抵抗转动状态改变的能力，它取决于风扇的质量分布以及形状等因素。角速度反映了风扇旋转的快慢程度。当风扇以较高的角速度旋转时，角动量也较大，为了维持角动量而产生的陀螺力矩也越大。所以有：
+涵道风扇在旋转时，DFUAV整体会呈现出类似陀螺的特性。根据角动量守恒定律，当涵道风扇的旋转轴在外力影响下发生偏移时，为了维持系统角动量守恒，涵道风扇会产生特殊的反作用力矩。该力矩垂直于旋转轴的偏移方向，试图将旋转轴拉回到原来的方向，从而抵抗外力对旋转状态的干扰。这种作用力矩即为陀螺力矩，其大小与风扇的转动惯量和旋转角速度有关。转动惯量体现了涵道风扇抵抗转动状态改变的能力，它取决于风扇的质量分布以及形状等因素。角速度反映了风扇旋转的快慢程度。当风扇以较高的角速度旋转时，角动量也较大，为了维持角动量而产生的陀螺力矩也越大。所以有：
 \begin{equation}
     \boldsymbol{M}_{gyro}^b=J_{fan}\Omega
     \begin{bmatrix}

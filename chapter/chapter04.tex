@@ -225,7 +225,7 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
 \end{equation}
 所以加速度计使用的滤波器也是二阶巴特沃斯低通滤波器，截止频率为30Hz。
 
-此外，为了保证所有下标为0的项都位于同一工作点，实践中还需要对虚拟控制输入和姿态进行同步滤波。为与内环滤波统一，同样使用下标$(.)_s$表示经过滤波器滤波后的项。
+此外，由于INDI是将速度动力学方程在工作点处进行一阶泰勒展开，所以需要保证展开式\eqref{4_18}中所有下标为 0的项都位于同一工作点，因此实践中还需要对工作点处的加速度$\boldsymbol{\dot{V}}^e_0$和位置虚拟控制输入$\boldsymbol{a}_{u0}$进行同步滤波处理。为与内环滤波统一，同样使用下标$(.)_s$表示经过滤波器滤波后的项。
 \begin{equation}
         \boldsymbol{a}_{ud}=\boldsymbol{K}_{V}(\boldsymbol{V}_d^e-\boldsymbol{V}^e)+\frac{d\boldsymbol{V}^e_d}{dt}-\boldsymbol{\dot{V}}^e_f+\boldsymbol{a}_{uf}
     \label{4_22}
@@ -233,7 +233,7 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
 
 除了滤波外，加速度计测量的原始值往往有固定偏置，加速度计偏置的存在意味着DFUAV在静止状态下会有一个非零的加速度测量值，这种系统性误差会导致惯性导航结算中的速度与位置出现积分漂移，增加误差。为了消除这个偏置，需要在使用之前对加速度计进行校准。一般情况下采用六面校准法即可，若对精度要求高，则可采用高精度转台进行动态校准。
 
-\subsection{期望姿态角与拉力解算}
+\subsection{期望姿态角与拉力解算}\label{期望姿态角与拉力解算}
 
 期望的加速度输入$\boldsymbol{a}_{ud}$是在地面坐标系下的，而DFUAV的拉力向量始终作用在机体坐标系的$\boldsymbol{O}_b-\boldsymbol{Z}_b$轴方向上。根据式\eqref{4_2}以及旋转矩阵不影响矢量大小的性质，可以得到期望的涵道风扇拉力大小$\|\boldsymbol{F}_{fan}\|$：
 \begin{equation}
@@ -272,13 +272,7 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \label{4_27}
 \end{equation}
 
-为了计算出$b_1$和$b_2$，引入中间坐标系$c$系，如图\ref{中间坐标系}所示。中间坐标系的$\boldsymbol{O}_c-\boldsymbol{Z}_c$轴与地面坐标系的$\boldsymbol{O}_e-\boldsymbol{Z}_e$轴重合，中间坐标系的$\boldsymbol{O}_c-\boldsymbol{X}_c$轴和$\boldsymbol{O}_c-\boldsymbol{Y}_c$轴分别与地面坐标系的$\boldsymbol{O}_e-\boldsymbol{X}_e$轴和$\boldsymbol{O}_e-\boldsymbol{Y}_e$轴成$\psi_d$的夹角。因此$\boldsymbol{O}_c-\boldsymbol{X}_c$轴在地面坐标系下的方向向量为：
-\begin{equation}
-    \begin{aligned}
-        c_1&=\begin{bmatrix}\cos(\psi_d) \\\sin(\psi_d) \\0\end{bmatrix}
-    \end{aligned}
-    \label{4_28}
-\end{equation}
+为了计算出$b_1$和$b_2$，引入中间坐标系$c$系，如图\ref{中间坐标系}所示。
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth}
@@ -287,6 +281,20 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
         \caption{\label{中间坐标系}中间坐标系示意图}
         \end{minipage}
 \end{figure}
+
+中间坐标系的$\boldsymbol{O}_c-\boldsymbol{Z}_c$轴与地面坐标系的$\boldsymbol{O}_e-\boldsymbol{Z}_e$轴重合，中间坐标系的$\boldsymbol{O}_c-\boldsymbol{X}_c$轴和$\boldsymbol{O}_c-\boldsymbol{Y}_c$轴分别与地面坐标系的$\boldsymbol{O}_e-\boldsymbol{X}_e$轴和$\boldsymbol{O}_e-\boldsymbol{Y}_e$轴成$\psi_d$的夹角。因此$\boldsymbol{O}_c-\boldsymbol{X}_c$轴在地面坐标系下的方向向量为：
+% \begin{equation}
+%     \begin{aligned}
+%         c_1&=\begin{bmatrix}\cos(\psi_d) \\\sin(\psi_d) \\0\end{bmatrix}
+%     \end{aligned}
+%     \label{4_28}
+% \end{equation}
+\begin{equation}
+    \begin{aligned}
+        c_1&=\begin{bmatrix}\cos(\psi_d) \quad \sin(\psi_d) \quad 0\end{bmatrix}^T
+    \end{aligned}
+    \label{4_28}
+\end{equation}
 
 显然，中间坐标系的$\boldsymbol{O}_c-\boldsymbol{X}_c$轴处于机体坐标系的$\boldsymbol{O}_b-\boldsymbol{X}_b-\boldsymbol{Z}_b$平面内，因此$\boldsymbol{O}_c-\boldsymbol{X}_c$轴垂直于$\boldsymbol{O}_b-\boldsymbol{Y}_b$轴，所以$b_2$在地面坐标系下的方向向量为：
 \begin{equation}
@@ -314,7 +322,7 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
     \label{4_31}
 \end{equation}
 
-结合第三章介绍的抗扰姿态控制，可以得到完整的串级INDI抗扰控制系统框图如图\ref{INDI位置控制系统框图}所示。
+结合第三章介绍的抗扰姿态控制，可以得到完整的串级INDI抗扰控制系统框图如图\ref{INDI位置控制系统框图}所示。其中方块“期望姿态角与拉力解算”对应\ref{期望姿态角与拉力解算}节，其功能是根据$\boldsymbol{a}_{ud}$计算出期望的$\varphi_d$、$\theta_d$和$\Omega_d$。方块“内环姿态控制”对应\ref{基于INDI和优先级控制分配的姿态控制}节，其功能是根据期望姿态指令和期望拉力计算出舵面角度指令$\boldsymbol{\delta}_d$给到执行器，结合实际拉力最终影响DFUAV的状态。
 \begin{figure}[htbp]
 	\centering
 	\begin{minipage}[c]{1\textwidth}
@@ -416,7 +424,9 @@ INDI通过对式\eqref{4_13}求逆，得到期望的位置控制虚拟控制输�
         \end{minipage}
 \end{figure}
 
-根据两组实验的结果可以看出，无论是INDI位置控制器还是PID位置控制器，DFUAV均能跟踪上期望的轨迹。但是INDI位置控制器的轨迹跟踪性能要明显优于PID位置控制器，一方面INDI位置控制器的轨迹跟踪响应曲线在X轴的最大跟踪误差为0.55m，而PID位置控制器的轨迹跟踪响应曲线在X轴的最大误差为1.44m，远大于INDI控制下的位置误差。另一方面，INDI控制下的位置曲线在第4s时就已基本无误差，但是在PID控制下的位置曲线在第6s时才跟踪上，并且由于积分的累计作用出现了超调，导致位置曲线在第6s后超过了期望轨迹。INDI位置控制的轨迹跟踪性能优势主要得益于采用了位置环和速度环的前馈控制，提前根据输入的变化趋势进行控制，从而提升了系统的响应速度和精度。
+根据两组实验的结果可以看出，无论是INDI位置控制器还是PID位置控制器，DFUAV均能跟踪上期望的轨迹。但是INDI位置控制器的轨迹跟踪性能要明显优于PID位置控制器，一方面INDI位置控制器的轨迹跟踪响应曲线在X轴的最大跟踪误差为0.55m，而PID位置控制器的轨迹跟踪响应曲线在X轴的最大误差为1.44m，远大于INDI控制下的位置误差。另一方面，INDI控制下的位置曲线在第4s时就已基本无误差，但是在PID控制下的位置曲线在第6s时才跟踪上，并且由于积分的累计作用出现了超调，导致位置曲线在第6s后超过了期望轨迹。
+从均方根误差的角度来看，INDI控制器下三轴位置的均方根误差为$[0.2305\quad0.0018\quad0.0029]$m，而PID控制器下三轴位置的均方根误差为$[0.7862\quad0.0022\quad0.0134]$m，这也体现了INDI位置控制器的轨迹跟踪精度更优。
+INDI位置控制的轨迹跟踪性能优势主要得益于采用了位置环和速度环的前馈控制，提前根据输入的变化趋势进行控制，从而提升了系统的响应速度和精度。
 
 通过上述两个仿真实验，证明了所设计的基于INDI的位置控制器具有较强的抗风性能和轨迹跟踪性能。
 
