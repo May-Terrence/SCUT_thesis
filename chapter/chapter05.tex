@@ -167,14 +167,11 @@ RRT-Connect算法的伪代码如算法\ref{RRT-Connect算法}所示：
     \caption{RemoveRedundantNodes}
     \label{冗余节点删除策略}
     \begin{algorithmic}[1]
-        \setlength{\baselineskip}{16pt}
+        \setlength{\baselineskip}{16pt} % 设置伪代码行间距
             \State  $\textbf{Input:}\text{ initPath}$
             \State  $\text{optiPath} \gets \text{initPath};$
             \State  $\text{index} \gets 1;$
             \While{$\text{index} <= \text{optiPath.size()}$-2}
-                % \State $\text{node1}\gets\text{optiPath[index]};$
-                % \State $\text{node2}\gets\text{optiPath[index+1]};$
-                % \State $\text{node3}\gets\text{optiPath[index+2]};$
                 \If{$\text{ObstacleFree}(\text{optiPath[index]},\text{optiPath[index+2]})$}
                     \State $\text{optiPath} \gets \text{optiPath.remove}(\text{index+1});$
                 \Else

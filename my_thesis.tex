@@ -89,7 +89,7 @@
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\maketitle	
 	\frontmatter	%此后为罗马数字页码，页面类型为plain
-    \let\cleardoublepage\clearpage %新增此行，取消偶数页空白
+    % \let\cleardoublepage\clearpage %新增此行，取消偶数页空白
 	\include{chapter/abstract} % 中英文摘要
 	
 	% 目录、表格目录、插图目录这几个字本身的大纲级别是一级的，即和章名有相同的字号字体。目录表的内容通过titletoc宏包在。cls文件设置了。
@@ -150,5 +150,5 @@
 	% \include{chapter/appendix1} %附录1
 	% \include{chapter/appendix2} %附录2
 	\include{chapter/pub} %成果
-	% \include{chapter/ack} %致谢
+	\include{chapter/ack} %致谢
 \end{document}
